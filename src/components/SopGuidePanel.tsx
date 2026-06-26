@@ -38,19 +38,19 @@ export default function SopGuidePanel({
       sopCode: 'SOP-WX-102',
       category: 'Physical Systems',
       icon: Wind,
-      summary: 'Atmospheric fluid dynamics and boundary thermal gradient projections. Simulates high-density pressure front propagation and moisture diffusion rates across discrete cell nodes.',
+      summary: 'Atmospheric fluid dynamics, boundary thermal gradients, and satellite-guided convective cyclogenesis modeling. Includes multi-modal EO data ingestion (Optical, Infrared, SAR, DEM) to simulate severe storm propagation.',
       steps: [
-        'Initialize spatial grid layout with a 1.5x default diffusion coefficient',
-        'Configure the atmospheric wind vector matrix (default Eastern drift)',
-        'Calibrate thermal gradient coefficients to simulate heat-island convective forces',
-        'Run secondary micro-climate simulation to predict localized flash-front boundaries'
+        'Ingest multi-modal sensor streams: Optical RGB, Infrared Convection, and Synthetic Aperture Radar (SAR) channels',
+        'Configure the geostationary temporal horizon window from baseline T0 down to T5 prediction bands',
+        'Inject sensor degradation challenges (e.g., cloud obscuration, GPS satellite drift, or geostationary outage)',
+        'Deploy targeted self-healing algorithms (temporal spline interpolations, SAR penetrative backups, and transponder hot-swaps)'
       ],
       parameters: [
-        { name: 'Diffusion Coefficient', value: '1.5x - 2.2x', desc: 'Determines the particulate scatter speed' },
-        { name: 'Thermal Gradient', value: '0.85 K/m', desc: 'Vertical heat variance governing updrafts' },
-        { name: 'Vorticity Bound', value: '10^-4 s^-1', desc: 'Rotational kinetic velocity limits' }
+        { name: 'Model ACC Target', value: '0.962', desc: 'Anomaly Correlation Coefficient threshold for severe weather systems' },
+        { name: 'Root Mean Square Error', value: '1.84 hPa', desc: 'Standard target for L2 spatial pressure field deviation' },
+        { name: 'CRPS Performance', value: '0.341', desc: 'Target probabilistic accuracy for spatial prediction vectors' }
       ],
-      blueprintPrompt: 'Analyze atmospheric front progression across micro-climatic coordinate boundaries. Set wind vector to (2.5, -0.5), configure thermal expansion factors to 1.8x, and model localized dew-point condensation spikes near coastal interfaces.',
+      blueprintPrompt: 'Initialize OMEGA Scientific Severe Convection Cyclone model. Set temporal horizon to T+5h, simulate sudden convective cloud obscuration, deploy multi-modal SAR backups for structural penetration, and verify predictive ACC scores exceed 0.95.',
       standardRef: 'WMO-No. 544 (Manual on Global Data-Processing and Forecasting Systems)'
     },
     {
@@ -164,19 +164,19 @@ export default function SopGuidePanel({
       sopCode: 'SOP-SAT-211',
       category: 'Physical Systems',
       icon: Radio,
-      summary: 'Geostationary orbital drift mechanics and SAR synthetic aperture radar imaging calibration. Compensates for signal attenuation through tropospheric thermal layers.',
+      summary: 'Geostationary and low earth orbit (LEO) synthetic aperture radar (SAR) calibration under physical telemetry degradation. Leverages cognitive tasks for atmospheric hazard detection.',
       steps: [
-        'Obtain Keplerian orbital elements and calculate drag coefficients at 350km LEO baseline',
-        'Analyze SAR radar backscatter signals across dense cloud-cover layers',
-        'Apply Doppler-shift phase corrections to align sequential radar pulses',
-        'Model antenna signal attenuation during localized high-moisture weather events'
+        'Map active orbit profiles and lock onto geostationary transponders for multi-spectral sensor retrieval',
+        'Select the target cognitive task: Scene Classification, Semantic Segmentation, Change Detection, or Object Detection',
+        'Analyze real-time sensor streams under high-moisture convective gradients or wildfire fronts',
+        'Calibrate continuous predictive reliability against verified ground-truth physical observation matrices'
       ],
       parameters: [
-        { name: 'Orbital Altitude', value: '350 km LEO', desc: 'Satellite low earth orbit baseline' },
-        { name: 'Radar Phase Error', value: '0.04 rad', desc: 'Atmosphere induced radar phase drift' },
-        { name: 'Signal Attenuation', value: '2.4 dB', desc: 'Atmospheric moisture absorption score' }
+        { name: 'Sensor Confidence', value: '99.4% Nominal', desc: 'Baseline satellite-to-earth transponder signal coherence' },
+        { name: 'Telemetry Error', value: '< 1.22 hPa MAE', desc: 'Acceptable deviation limit for geostationary spatial grids' },
+        { name: 'Recovery Speed', value: '< 150 ms', desc: 'Asynchronous buffer flush and Doppler-beacon realignment latency' }
       ],
-      blueprintPrompt: 'Calculate Doppler radar phase shift profiles for LEO synthetic aperture radar. Compensate for severe signal attenuation through high-moisture atmospheric fronts and model orbital drag degradation.',
+      blueprintPrompt: 'Establish a secure geostationary link with GOES-18. Enable Semantic Segmentation cognitive routing to map coastal supercell line parameters, trigger corrupted telemetry stressors, and apply Reed-Solomon ECC validation filters.',
       standardRef: 'CCSDS 131.0-B-3 (Consultative Committee for Space Data Systems)'
     },
     {

@@ -17,9 +17,10 @@ import StonedDashboard from './components/StonedDashboard';
 import HarnessConsole from './components/HarnessConsole';
 import SopGuidePanel from './components/SopGuidePanel';
 import ArchitecturePanel from './components/ArchitecturePanel';
+import StressTestDashboard from './components/StressTestDashboard';
 import { 
   Beaker, Globe, Sparkles, Map, Vote, Network, BarChart3, HelpCircle,
-  ExternalLink, Settings, Edit2, Check, X, Shield, Cpu, Zap, Wind, Layers, Terminal, BookOpen, GitBranch
+  ExternalLink, Settings, Edit2, Check, X, Shield, Cpu, Zap, Wind, Layers, Terminal, BookOpen, GitBranch, Activity
 } from 'lucide-react';
 
 export default function App() {
@@ -30,7 +31,7 @@ export default function App() {
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
 
   // Singularity Multi-Lab state
-  const [activeLab, setActiveLab] = useState<'world' | 'colony' | 'radiant' | 'aromea' | 'stoned' | 'harness' | 'sop' | 'architecture'>('world');
+  const [activeLab, setActiveLab] = useState<'world' | 'colony' | 'radiant' | 'aromea' | 'stoned' | 'harness' | 'sop' | 'architecture' | 'benchmark'>('world');
   const [showStackMap, setShowStackMap] = useState<boolean>(false);
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
   const [harnessPreloadedPrompt, setHarnessPreloadedPrompt] = useState<string>('');
@@ -278,7 +279,8 @@ export default function App() {
                   { id: 'stoned', name: '05. STONED.AI', layer: 'Substrate Layer' },
                   { id: 'harness', name: '06. HARNESS CHAT', layer: 'Actuator Chat Layer' },
                   { id: 'sop', name: '07. SOP GUIDES', layer: 'Operations Guide Layer' },
-                  { id: 'architecture', name: '08. LOOP DESIGN', layer: 'Causal Loop Layer' }
+                  { id: 'architecture', name: '08. LOOP DESIGN', layer: 'Causal Loop Layer' },
+                  { id: 'benchmark', name: '09. STRESS BENCHMARK', layer: 'Test Ingestion Layer' }
                 ].map(item => {
                   const isItemHarness = item.id === 'harness';
                   const isItemActive = isItemHarness ? isChatOpen : (activeLab === item.id && !isChatOpen);
@@ -318,7 +320,8 @@ export default function App() {
               { id: 'stoned', name: 'STONED.AI', icon: Cpu },
               { id: 'harness', name: 'HARNESS CHAT', icon: Terminal },
               { id: 'sop', name: 'SOP GUIDES', icon: BookOpen },
-              { id: 'architecture', name: 'LOOP DESIGN', icon: GitBranch }
+              { id: 'architecture', name: 'LOOP DESIGN', icon: GitBranch },
+              { id: 'benchmark', name: 'STRESS TEST', icon: Activity }
             ].map(lab => {
               const Icon = lab.icon;
               const isHarness = lab.id === 'harness';
@@ -736,6 +739,9 @@ export default function App() {
           )}
           {activeLab === 'architecture' && (
             <ArchitecturePanel onLogEvent={addTemporalEvent} />
+          )}
+          {activeLab === 'benchmark' && (
+            <StressTestDashboard onLogEvent={addTemporalEvent} />
           )}
         </div>
       )}
