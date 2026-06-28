@@ -339,7 +339,7 @@ app.post("/api/policies/:id/simulate", async (req, res) => {
   }
 
   try {
-    const systemPrompt = `You are the Spatial AI World Lab simulation engine for a digital twin policy laboratory called 'Democratic Lab'.
+    const systemPrompt = `You are the Spatial AI World Lab simulation engine for a digital twin policy laboratory called 'Billionaire.ai'.
 Your task is to model, calculate, and reason through the physical, spatial, structural, and social impacts of a user-submitted policy proposal.
 You must return your output strictly in JSON format.
 The JSON must adhere precisely to this schema structure:
@@ -825,7 +825,7 @@ async function startServer() {
 
   const PORT = 3000;
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`[Democratic Lab Server] running at http://0.0.0.0:${PORT}`);
+    console.log(`[Billionaire.ai Server] running at http://0.0.0.0:${PORT}`);
   });
 }
 

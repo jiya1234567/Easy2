@@ -272,7 +272,7 @@ export default function App() {
               </button>
               <div className="absolute left-0 mt-1 w-52 bg-[#1A1A1A] border border-neutral-800 shadow-2xl hidden group-hover:block z-50">
                 {[
-                  { id: 'world', name: '01. WORLD LAB', layer: 'Democratic Layer' },
+                  { id: 'world', name: '01. WORLD LAB', layer: 'Billionaire.ai Layer' },
                   { id: 'colony', name: '02. COLONY.AI', layer: 'Cognitive Layer' },
                   { id: 'radiant', name: '03. RADIANT LAB', layer: 'Physics Layer' },
                   { id: 'aromea', name: '04. AROMEA AI', layer: 'Sensory Layer' },
@@ -423,7 +423,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
           <div className="flex flex-col">
             <span className="text-[10px] uppercase tracking-[0.3em] font-bold opacity-60 mb-1">
-              Democratic Lab / Spatial Module v2.4
+              Billionaire.ai / Spatial Module v2.4
             </span>
             <h1 className="text-4xl sm:text-6xl lg:text-8xl font-black tracking-tighter leading-[0.8] font-serif uppercase">
               WORLD LAB
@@ -500,11 +500,11 @@ export default function App() {
                   <button 
                     onClick={() => {
                       setActiveLab('world');
-                      addTemporalEvent('Navigated to Democratic World Lab console via visual architecture model link', 'info');
+                      addTemporalEvent('Navigated to Billionaire.ai World Lab console via visual architecture model link', 'info');
                     }}
                     className="hover:text-amber-300 hover:underline transition cursor-pointer font-mono flex items-center gap-1.5 bg-transparent border-none text-left"
                   >
-                    • Democratic Lab (Policy Parameters & Feedback Loops) ↗
+                    • Billionaire.ai (Policy Parameters & Feedback Loops) ↗
                   </button>
                 </div>
               </div>
@@ -529,11 +529,11 @@ export default function App() {
                   <button 
                     onClick={() => {
                       setActiveLab('world');
-                      addTemporalEvent('Navigated to Democratic World Lab console via visual architecture model link', 'info');
+                      addTemporalEvent('Navigated to Billionaire.ai World Lab console via visual architecture model link', 'info');
                     }}
                     className="hover:text-blue-300 hover:underline transition cursor-pointer font-mono flex items-center gap-1.5 bg-transparent border-none text-left"
                   >
-                    • Democratic Lab (Spatial Coordinate Twin Grid X,Y,Z) ↗
+                    • Billionaire.ai (Spatial Coordinate Twin Grid X,Y,Z) ↗
                   </button>
                 </div>
               </div>
@@ -749,7 +749,7 @@ export default function App() {
         {/* BEAUTIFUL EDITORIAL FOOTER */}
         <footer className="mt-16 pt-6 border-t border-[#1A1A1A] flex flex-col md:flex-row justify-between items-start md:items-end gap-6 text-[#1A1A1A]">
           <div className="flex flex-wrap gap-12 text-[10px] font-bold uppercase tracking-widest font-mono">
-            <span>Ref: DEMO-LAB-SPATIAL-2024</span>
+            <span>Ref: BILLIONAIRE-AI-SPATIAL-2024</span>
             <span>Sensor Fusion: Unified State</span>
             <span>Agent: Colony-Stable</span>
           </div>
@@ -762,7 +762,7 @@ export default function App() {
       {/* FLOATING SIDE TAB TO CHAT */}
       <button
         onClick={() => setIsChatOpen(!isChatOpen)}
-        className="fixed right-0 top-1/2 -translate-y-1/2 z-40 bg-[#1A1A1A] hover:bg-neutral-800 text-emerald-400 border-l-2 border-y-2 border-emerald-500 hover:border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.25)] py-5 px-1.5 cursor-pointer transition-all rounded-l-md flex flex-col items-center gap-2 font-mono select-none"
+        className="hidden md:flex fixed right-0 top-1/2 -translate-y-1/2 z-40 bg-[#1A1A1A] hover:bg-neutral-800 text-emerald-400 border-l-2 border-y-2 border-emerald-500 hover:border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.25)] py-5 px-1.5 cursor-pointer transition-all rounded-l-md flex-col items-center gap-2 font-mono select-none"
         style={{ writingMode: 'vertical-lr' }}
         id="harness-side-chat-tab"
       >

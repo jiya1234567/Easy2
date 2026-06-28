@@ -1,5 +1,5 @@
 {
-  "name": "Democratic Lab",
+  "name": "Billionaire.ai",
   "description": "A real-time spatial simulation and policy feedback laboratory combining agent-based world modeling, physical constraints, and counterfactual testing.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
