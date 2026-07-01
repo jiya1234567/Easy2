@@ -807,6 +807,209 @@ app.post("/api/harness/generate-images", async (req, res) => {
 });
 
 
+// Helper function for prediction fallback metrics
+function getFallbackMetrics(agent: string, textToParse: string, worldState: any) {
+  const wind = worldState?.windVector || { x: 1, y: 0 };
+  const heat = worldState?.heatFactor ?? 1.0;
+  const diff = worldState?.diffusionRate ?? 1.0;
+  const water = worldState?.waterLevel ?? 50.0;
+
+  if (agent === 'democratic') {
+    let friction = 0.04;
+    if (textToParse.toLowerCase().includes('0.08')) friction = 0.08;
+    else if (textToParse.toLowerCase().includes('0.04')) friction = 0.04;
+    return [
+      { name: 'Wave Height Target', value: Number((1.5 + (water / 40) + wind.x * 0.2).toFixed(2)), unit: 'm', confidence: 94 },
+      { name: 'Fluid Deflection Velocity', value: Number((12.4 * diff + wind.y * 1.5).toFixed(2)), unit: 'm/s', confidence: 89 },
+      { name: 'Active Estuary Friction', value: friction, unit: 'coefficient', confidence: 96 },
+      { name: 'Estimated Citizen Approval', value: textToParse.includes('82') ? 82 : 85, unit: '%', confidence: 91 }
+    ];
+  } else if (agent === 'colony') {
+    return [
+      { name: 'Core Node Die Temp', value: Number((24.5 * heat).toFixed(1)), unit: '°C', confidence: 92 },
+      { name: 'Silicon Row Parity Error', value: textToParse.includes('0.02') ? 0.02 : 0.05, unit: '%', confidence: 95 },
+      { name: 'Subsystem Consensus Stability', value: textToParse.includes('97.2') ? 97.2 : 98.4, unit: '%', confidence: 96 },
+      { name: 'Social Compliance Level', value: textToParse.includes('15') ? 15.0 : 94.2, unit: '%', confidence: 89 }
+    ];
+  } else if (agent === 'radiant') {
+    let magnetic = 0.65;
+    if (textToParse.includes('0.85')) magnetic = 0.85;
+    return [
+      { name: 'Magnetic Coil Intensity', value: magnetic, unit: 'Tesla', confidence: 95 },
+      { name: 'Charged Particle Collisions', value: Number((380 + heat * 40).toFixed(0)), unit: 'Hz', confidence: 91 },
+      { name: 'Cryo-Thermal Temperature Substrate', value: textToParse.includes('6') ? 6.0 : 5.2, unit: 'mK', confidence: 93 },
+      { name: 'Plasmoid Boundary Containment', value: Number((98.5 - diff * 0.4).toFixed(1)), unit: '%', confidence: 97 }
+    ];
+  } else if (agent === 'aromea') {
+    return [
+      { name: 'Aerosol Plume Dispersion Radius', value: textToParse.includes('25') ? 25.0 : 28.5, unit: 'm', confidence: 88 },
+      { name: 'Tracer Molecule Decay Rate', value: textToParse.includes('0.06') ? 0.06 : 0.08, unit: 'coefficient', confidence: 94 },
+      { name: 'Chaotic Dispersion Jitter', value: Number((15 * diff).toFixed(1)), unit: '%', confidence: 91 },
+      { name: 'Residential Zone Infringement', value: 0.0, unit: '%', confidence: 99 }
+    ];
+  } else if (agent === 'finance') {
+    return [
+      { name: 'Equity Index Target', value: 8110, unit: 'pts', confidence: 91 },
+      { name: 'Exchange Rate', value: 0.654, unit: 'USD/EUR', confidence: 92 },
+      { name: 'Inflation Rate', value: 3.20, unit: '%', confidence: 94 },
+      { name: 'Bond Yield Target', value: 4.48, unit: '%', confidence: 93 }
+    ];
+  } else { // stoned
+    return [
+      { name: 'Core Gate Parity Fidelity', value: textToParse.includes('99.92') ? 99.92 : 92.0, unit: '%', confidence: 97 },
+      { name: 'Bit Flip Error Injections', value: textToParse.includes('isolated') ? 1.0 : 0.0, unit: 'count', confidence: 98 },
+      { name: 'System Substrate Temp', value: Number((45 * heat).toFixed(1)), unit: 'mK', confidence: 91 },
+      { name: 'Validation Confidence', value: 95.0, unit: '%', confidence: 94 }
+    ];
+  }
+}
+
+// POST extract predictions (Uses Gemini server-side or fallback)
+app.post("/api/harness/extract-predictions", async (req, res) => {
+  const { decisionText, agent, worldState } = req.body;
+
+  if (!decisionText) {
+    return res.status(400).json({ error: "decisionText is required" });
+  }
+
+  // If no GEMINI_API_KEY is active, return fallback metrics
+  if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === "MY_GEMINI_API_KEY" || process.env.GEMINI_API_KEY === "") {
+    return res.json({ metrics: getFallbackMetrics(agent, decisionText, worldState) });
+  }
+
+  try {
+    const systemInstruction = `You are a high-precision numeric extraction engine for physical simulations.
+Your task is to analyze the prose output of an AI arbiter decision and extract 4 specific, scientifically rigorous numeric predictions, targets, or parameters mentioned or implied by the text.
+For each extracted metric, you must provide:
+1. "name": The short name of the metric (e.g., "Active Estuary Friction", "Core Node Die Temp", "Inflation Rate")
+2. "value": The actual extracted or calculated numeric value as a float/integer. Must be a pure number, not a string with units.
+3. "unit": The unit of measurement (e.g., "%", "m", "m/s", "°C", "Hz", "Tesla", "coefficient", "USD/EUR", "pts", "mK")
+4. "confidence": A confidence score between 80 and 99.
+
+Ensure the extracted numbers are highly accurate to what's written or mathematically implied. If no numbers are found, deduce realistic values based on the context. Return JSON format.`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: `Extract prediction metrics for the agent workspace "${agent}" from this text: "${decisionText}".`,
+      config: {
+        systemInstruction,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            metrics: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  name: { type: Type.STRING },
+                  value: { type: Type.NUMBER },
+                  unit: { type: Type.STRING },
+                  confidence: { type: Type.NUMBER }
+                },
+                required: ["name", "value", "unit", "confidence"]
+              }
+            }
+          },
+          required: ["metrics"]
+        }
+      }
+    });
+
+    if (response.text) {
+      const parsed = JSON.parse(response.text.trim());
+      res.json(parsed);
+    } else {
+      throw new Error("Empty response from extraction model");
+    }
+  } catch (error) {
+    console.error("Prediction extraction failed, using fallback:", error);
+    res.json({ metrics: getFallbackMetrics(agent, decisionText, worldState) });
+  }
+});
+
+// POST validate reality anchor outcomes against real weather or market data feeds
+app.post("/api/harness/validate-reality", async (req, res) => {
+  const { metrics, coordinates } = req.body;
+
+  // Set default coordinates (e.g., London, UK)
+  const lat = coordinates?.latitude ?? 51.5074;
+  const lon = coordinates?.longitude ?? -0.1278;
+
+  let liveWeatherData: any = null;
+  try {
+    // Live free weather feed
+    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,surface_pressure`;
+    const response = await fetch(weatherUrl);
+    if (response.ok) {
+      liveWeatherData = await response.json();
+    }
+  } catch (e) {
+    console.error("Failed to fetch live weather data from Open-Meteo, using synthetic actuals:", e);
+  }
+
+  const outcomes = metrics.map((m: any) => {
+    let actualVal = m.value;
+    let source = "Synthetic Local Sensor Feed";
+
+    if (liveWeatherData && liveWeatherData.current) {
+      const current = liveWeatherData.current;
+      const metricName = m.name.toLowerCase();
+
+      if (metricName.includes("temp") || metricName.includes("thermal")) {
+        // Adapt relative to current live temperature
+        actualVal = current.temperature_2m;
+        // Keep in appropriate domain scaling (e.g., if millikelvin or Celsius)
+        if (m.unit === 'mK') {
+          actualVal = Math.max(1, Math.abs(current.temperature_2m) * 1.5);
+        } else if (m.unit === '°C') {
+          actualVal = current.temperature_2m;
+        }
+        source = `Open-Meteo Live API (Lat: ${lat}, Lon: ${lon})`;
+      } else if (metricName.includes("wind") || metricName.includes("velocity") || metricName.includes("speed")) {
+        // Convert wind speed to m/s if requested in m/s (Open-Meteo is km/h by default)
+        const kmh = current.wind_speed_10m;
+        actualVal = m.unit === 'm/s' ? Number((kmh / 3.6).toFixed(2)) : kmh;
+        source = `Open-Meteo Live API (Lat: ${lat}, Lon: ${lon})`;
+      } else if (metricName.includes("humidity") || metricName.includes("stabil")) {
+        actualVal = current.relative_humidity_2m;
+        source = `Open-Meteo Live API (Lat: ${lat}, Lon: ${lon})`;
+      } else if (metricName.includes("pressure")) {
+        actualVal = current.surface_pressure; // hPa
+        source = `Open-Meteo Live API (Lat: ${lat}, Lon: ${lon})`;
+      } else {
+        // Fallback random drift for metrics that aren't weather-related
+        const drift = (Math.random() * 0.08 - 0.03); // -3% to +5% drift
+        actualVal = m.value * (1 + drift);
+        if (m.unit === '%') actualVal = Math.min(100, Math.max(0, actualVal));
+        actualVal = Number(actualVal.toFixed(2));
+      }
+    } else {
+      // Procedural drift fallback
+      const drift = (Math.random() * 0.08 - 0.03);
+      actualVal = m.value * (1 + drift);
+      if (m.unit === '%') actualVal = Math.min(100, Math.max(0, actualVal));
+      actualVal = Number(actualVal.toFixed(2));
+    }
+
+    const absDiff = Math.abs(m.value - actualVal);
+    const percentageDiff = m.value !== 0 ? (absDiff / m.value) * 100 : 0;
+
+    return {
+      name: m.name,
+      predicted: m.value,
+      actual: Number(actualVal.toFixed(2)),
+      unit: m.unit,
+      discrepancy: Number(absDiff.toFixed(3)),
+      percentageError: Number(percentageDiff.toFixed(2)),
+      source
+    };
+  });
+
+  res.json({ outcomes });
+});
+
+
 // Boot Vite Dev Server middleware or Serve Production Static files
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
