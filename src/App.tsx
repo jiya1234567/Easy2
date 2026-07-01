@@ -20,7 +20,7 @@ import ArchitecturePanel from './components/ArchitecturePanel';
 import StressTestDashboard from './components/StressTestDashboard';
 import { 
   Beaker, Globe, Sparkles, Map, Vote, Network, BarChart3, HelpCircle,
-  ExternalLink, Settings, Edit2, Check, X, Shield, Cpu, Zap, Wind, Layers, Terminal, BookOpen, GitBranch, Activity
+  ExternalLink, Settings, Edit2, Check, X, Shield, Cpu, Zap, Wind, Layers, Terminal, BookOpen, GitBranch, Activity, Server
 } from 'lucide-react';
 
 export default function App() {
@@ -475,95 +475,136 @@ export default function App() {
         
         {/* INTERACTIVE ASCII STACK MAP */}
         {showStackMap && (
-          <div className="bg-[#1A1A1A] text-[#F5F2ED] border-2 border-[#1A1A1A] p-6 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] mb-8 font-mono text-[11px] overflow-x-auto relative animate-fade-in">
+          <div className="bg-[#1A1A1A] text-[#F5F2ED] border-2 border-[#1A1A1A] p-6 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] mb-8 font-mono text-[11px] relative animate-fade-in">
             <button 
               onClick={() => setShowStackMap(false)} 
               className="absolute top-4 right-4 text-neutral-400 hover:text-white cursor-pointer font-bold text-[10px]"
             >
               [CLOSE]
             </button>
-            <div className="max-w-2xl mx-auto flex flex-col items-center">
-              <span className="text-emerald-400 font-bold uppercase tracking-widest text-[9px] mb-4">SINGULARITY FULL-STACK INTERACTION LAYERS</span>
+            <div className="max-w-4xl mx-auto flex flex-col gap-6">
+              <div className="text-center">
+                <span className="text-emerald-400 font-bold uppercase tracking-widest text-[10px]">SINGULARITY FULL-STACK INTERACTION LAYERS</span>
+                <p className="text-neutral-400 text-[10px] mt-1 italic">Visual system topology mapping for global users and industrial partners.</p>
+              </div>
+
+              {/* THREE CORE SYSTEM ROLES: BRAIN, AGENT, MEMORY */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-b border-neutral-800 pb-6 mb-4">
+                <div className="bg-neutral-900/80 border border-amber-500/30 p-4 flex flex-col gap-1.5">
+                  <div className="text-amber-400 font-bold tracking-wider text-xs uppercase flex items-center gap-1.5">
+                    <Cpu className="w-4 h-4 text-amber-400" />
+                    <span>01. THE BRAIN (Kernel Daemon)</span>
+                  </div>
+                  <span className="text-[10px] text-neutral-400 font-bold font-mono">FILE: server.ts & App.tsx</span>
+                  <p className="text-neutral-300 text-[11px] font-serif italic leading-relaxed mt-1">
+                    Orchestrates the entire system routing, synchronizes physical state layers (heat, wind, density), and manages high-throughput Google GenAI API communication paths.
+                  </p>
+                </div>
+
+                <div className="bg-neutral-900/80 border border-blue-500/30 p-4 flex flex-col gap-1.5">
+                  <div className="text-blue-400 font-bold tracking-wider text-xs uppercase flex items-center gap-1.5">
+                    <Network className="w-4 h-4 text-blue-400" />
+                    <span>02. THE AGENT (Harness Console)</span>
+                  </div>
+                  <span className="text-[10px] text-neutral-400 font-bold font-mono">FILE: HarnessConsole.tsx</span>
+                  <p className="text-neutral-300 text-[11px] font-serif italic leading-relaxed mt-1">
+                    Deploys dynamic, domain-specific LLM prompts referencing industrial SOP benchmarks. Generates policy hypotheses, analyzes spatial structures, and proposes interventions.
+                  </p>
+                </div>
+
+                <div className="bg-neutral-900/80 border border-emerald-500/30 p-4 flex flex-col gap-1.5">
+                  <div className="text-emerald-400 font-bold tracking-wider text-xs uppercase flex items-center gap-1.5">
+                    <Server className="w-4 h-4 text-emerald-400" />
+                    <span>03. THE MEMORY (Ledger System)</span>
+                  </div>
+                  <span className="text-[10px] text-neutral-400 font-bold font-mono">FILE: SimulationControls.tsx</span>
+                  <p className="text-neutral-300 text-[11px] font-serif italic leading-relaxed mt-1">
+                    Retains a persistent, log-based ledger of all physical state shifts, counterfactual results, and experimental trials across 13 industrial benchmark domains.
+                  </p>
+                </div>
+              </div>
               
-              <div className="w-full border border-neutral-700 p-4 bg-neutral-900/60 text-center">
-                <div className="text-amber-400 font-bold tracking-wider mb-2">01. COGNITIVE & GOVERNANCE LAYER</div>
-                <div className="text-neutral-300 text-[11px] flex flex-col items-center gap-1.5">
-                  <button 
-                    onClick={() => {
-                      setActiveLab('colony');
-                      addTemporalEvent('Navigated to colony.ai console via visual architecture model link', 'info');
-                    }}
-                    className="hover:text-amber-300 hover:underline transition cursor-pointer font-mono flex items-center gap-1.5 bg-transparent border-none text-left"
-                  >
-                    • colony.ai (Agent Group Consensus & Social Dynamics) ↗
-                  </button>
-                  <button 
-                    onClick={() => {
-                      setActiveLab('world');
-                      addTemporalEvent('Navigated to Billionaire.ai World Lab console via visual architecture model link', 'info');
-                    }}
-                    className="hover:text-amber-300 hover:underline transition cursor-pointer font-mono flex items-center gap-1.5 bg-transparent border-none text-left"
-                  >
-                    • Billionaire.ai (Policy Parameters & Feedback Loops) ↗
-                  </button>
+              <div className="flex flex-col items-center">
+                <div className="w-full border border-neutral-700 p-4 bg-neutral-900/60 text-center">
+                  <div className="text-amber-400 font-bold tracking-wider mb-2">LAYER 01 • COGNITIVE & GOVERNANCE</div>
+                  <div className="text-neutral-300 text-[11px] flex flex-col items-center gap-1.5">
+                    <button 
+                      onClick={() => {
+                        setActiveLab('colony');
+                        addTemporalEvent('Navigated to colony.ai console via visual architecture model link', 'info');
+                      }}
+                      className="hover:text-amber-300 hover:underline transition cursor-pointer font-mono flex items-center gap-1.5 bg-transparent border-none text-left"
+                    >
+                      • colony.ai (Agent Group Consensus & Social Dynamics) ↗
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setActiveLab('world');
+                        addTemporalEvent('Navigated to Billionaire.ai World Lab console via visual architecture model link', 'info');
+                      }}
+                      className="hover:text-amber-300 hover:underline transition cursor-pointer font-mono flex items-center gap-1.5 bg-transparent border-none text-left"
+                    >
+                      • Billionaire.ai (Policy Parameters & Feedback Loops) ↗
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <div className="my-2 text-neutral-500 text-center flex flex-col items-center">
-                <span className="text-[8px] uppercase tracking-wider text-neutral-500 font-bold">Policy Vectors & Constraints</span>
-                <span>▼</span>
-              </div>
-
-              <div className="w-full border border-neutral-700 p-4 bg-neutral-900/60 text-center">
-                <div className="text-blue-400 font-bold tracking-wider mb-2">02. SPATIAL & PHYSICS LAYER</div>
-                <div className="text-neutral-300 text-[11px] flex flex-col items-center gap-1.5">
-                  <button 
-                    onClick={() => {
-                      setActiveLab('radiant');
-                      addTemporalEvent('Navigated to Radiant Lab console via visual architecture model link', 'info');
-                    }}
-                    className="hover:text-blue-300 hover:underline transition cursor-pointer font-mono flex items-center gap-1.5 bg-transparent border-none text-left"
-                  >
-                    • RADIANT LAB (Thermal, High-Energy & Particle Fields) ↗
-                  </button>
-                  <button 
-                    onClick={() => {
-                      setActiveLab('world');
-                      addTemporalEvent('Navigated to Billionaire.ai World Lab console via visual architecture model link', 'info');
-                    }}
-                    className="hover:text-blue-300 hover:underline transition cursor-pointer font-mono flex items-center gap-1.5 bg-transparent border-none text-left"
-                  >
-                    • Billionaire.ai (Spatial Coordinate Twin Grid X,Y,Z) ↗
-                  </button>
+                <div className="my-2 text-neutral-500 text-center flex flex-col items-center">
+                  <span className="text-[8px] uppercase tracking-wider text-neutral-500 font-bold">Policy Vectors & Constraints</span>
+                  <span>▼</span>
                 </div>
-              </div>
 
-              <div className="my-2 text-neutral-500 text-center flex flex-col items-center">
-                <span className="text-[8px] uppercase tracking-wider text-neutral-500 font-bold">Field Strengths & Gradients</span>
-                <span>▼</span>
-              </div>
+                <div className="w-full border border-neutral-700 p-4 bg-neutral-900/60 text-center">
+                  <div className="text-blue-400 font-bold tracking-wider mb-2">LAYER 02 • SPATIAL & PHYSICS</div>
+                  <div className="text-neutral-300 text-[11px] flex flex-col items-center gap-1.5">
+                    <button 
+                      onClick={() => {
+                        setActiveLab('radiant');
+                        addTemporalEvent('Navigated to Radiant Lab console via visual architecture model link', 'info');
+                      }}
+                      className="hover:text-blue-300 hover:underline transition cursor-pointer font-mono flex items-center gap-1.5 bg-transparent border-none text-left"
+                    >
+                      • RADIANT LAB (Thermal, High-Energy & Particle Fields) ↗
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setActiveLab('world');
+                        addTemporalEvent('Navigated to Billionaire.ai World Lab console via visual architecture model link', 'info');
+                      }}
+                      className="hover:text-blue-300 hover:underline transition cursor-pointer font-mono flex items-center gap-1.5 bg-transparent border-none text-left"
+                    >
+                      • Billionaire.ai (Spatial Coordinate Twin Grid X,Y,Z) ↗
+                    </button>
+                  </div>
+                </div>
 
-              <div className="w-full border border-neutral-700 p-4 bg-neutral-900/60 text-center">
-                <div className="text-emerald-400 font-bold tracking-wider mb-2">03. SENSORY & SUBSTRATE LAYER</div>
-                <div className="text-neutral-300 text-[11px] flex flex-col items-center gap-1.5">
-                  <button 
-                    onClick={() => {
-                      setActiveLab('aromea');
-                      addTemporalEvent('Navigated to Aromea AI console via visual architecture model link', 'info');
-                    }}
-                    className="hover:text-emerald-300 hover:underline transition cursor-pointer font-mono flex items-center gap-1.5 bg-transparent border-none text-left"
-                  >
-                    • Aromea AI (Chemical, Emission & Olfactory Gradients) ↗
-                  </button>
-                  <button 
-                    onClick={() => {
-                      setActiveLab('stoned');
-                      addTemporalEvent('Navigated to Stoned.ai console via visual architecture model link', 'info');
-                    }}
-                    className="hover:text-emerald-300 hover:underline transition cursor-pointer font-mono flex items-center gap-1.5 bg-transparent border-none text-left"
-                  >
-                    • STONED.AI (Hardware, Substrate & Material Boundaries) ↗
-                  </button>
+                <div className="my-2 text-neutral-500 text-center flex flex-col items-center">
+                  <span className="text-[8px] uppercase tracking-wider text-neutral-500 font-bold">Field Strengths & Gradients</span>
+                  <span>▼</span>
+                </div>
+
+                <div className="w-full border border-neutral-700 p-4 bg-neutral-900/60 text-center">
+                  <div className="text-emerald-400 font-bold tracking-wider mb-2">LAYER 03 • SENSORY & SUBSTRATE</div>
+                  <div className="text-neutral-300 text-[11px] flex flex-col items-center gap-1.5">
+                    <button 
+                      onClick={() => {
+                        setActiveLab('aromea');
+                        addTemporalEvent('Navigated to Aromea AI console via visual architecture model link', 'info');
+                      }}
+                      className="hover:text-emerald-300 hover:underline transition cursor-pointer font-mono flex items-center gap-1.5 bg-transparent border-none text-left"
+                    >
+                      • Aromea AI (Chemical, Emission & Olfactory Gradients) ↗
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setActiveLab('stoned');
+                        addTemporalEvent('Navigated to Stoned.ai console via visual architecture model link', 'info');
+                      }}
+                      className="hover:text-emerald-300 hover:underline transition cursor-pointer font-mono flex items-center gap-1.5 bg-transparent border-none text-left"
+                    >
+                      • STONED.AI (Hardware, Substrate & Material Boundaries) ↗
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -576,8 +617,9 @@ export default function App() {
           {/* COLUMN 1: POLICY WORKSPACE & CRITERIAS */}
           <div className="lg:col-span-4 flex flex-col gap-6">
             <div className="relative">
-              <span className="text-[11px] font-bold uppercase tracking-widest text-white bg-[#1A1A1A] px-2 py-0.5 absolute -top-3 left-3 z-10">
-                01. Policies
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-emerald-400 bg-[#1A1A1A] px-2.5 py-1 absolute -top-3.5 left-3 z-10 border border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(255,255,255,0.15)] flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+                <span>STEP 01 • PROBLEM WORKSPACE</span>
               </span>
               <PolicyList
                 policies={policies}
@@ -595,8 +637,9 @@ export default function App() {
           {/* COLUMN 2: SPATIAL CANVAS & TIME CONTROLS */}
           <div className="lg:col-span-5 flex flex-col gap-6">
             <div className="relative">
-              <span className="text-[11px] font-bold uppercase tracking-widest text-white bg-[#1A1A1A] px-2 py-0.5 absolute -top-3 left-3 z-10">
-                02. Spatial Field
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-blue-400 bg-[#1A1A1A] px-2.5 py-1 absolute -top-3.5 left-3 z-10 border border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(255,255,255,0.15)] flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" />
+                <span>STEP 02 • SENSORY DATA FIELD</span>
               </span>
               <SpatialCanvas
                 worldState={worldState}
@@ -613,8 +656,9 @@ export default function App() {
             </div>
 
             <div className="relative">
-              <span className="text-[11px] font-bold uppercase tracking-widest text-white bg-[#1A1A1A] px-2 py-0.5 absolute -top-3 left-3 z-10">
-                03. Temporal Control
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-amber-400 bg-[#1A1A1A] px-2.5 py-1 absolute -top-3.5 left-3 z-10 border border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(255,255,255,0.15)] flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
+                <span>STEP 04 • TEMPORAL SIMULATION</span>
               </span>
               <SimulationControls
                 isPlaying={isPlaying}
@@ -637,8 +681,9 @@ export default function App() {
             
             {/* Simulation Trigger HUD (Stage 3 & 4 Graph analysis launcher) */}
             <div className="bg-white border-2 border-[#1A1A1A] p-6 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] flex flex-col gap-3.5 relative">
-              <span className="text-[11px] font-bold uppercase tracking-widest text-white bg-[#1A1A1A] px-2 py-0.5 absolute -top-3 left-3 z-10">
-                04. Analysis
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-rose-400 bg-[#1A1A1A] px-2.5 py-1 absolute -top-3.5 left-3 z-10 border border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(255,255,255,0.15)] flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-rose-400 rounded-full animate-pulse" />
+                <span>STEP 03 • HYPOTHESIS & REASONING</span>
               </span>
               <div className="flex items-center gap-2 border-b border-[#1A1A1A] pb-2.5 mt-2">
                 <BarChart3 className="w-4.5 h-4.5 text-[#1A1A1A]" />
@@ -700,17 +745,29 @@ export default function App() {
               )}
             </div>
 
-            <CounterfactualPanel
-              worldState={worldState}
-              setWorldState={setWorldState}
-              selectedPolicy={selectedPolicy}
-              addTemporalEvent={addTemporalEvent}
-            />
+            <div className="relative">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-rose-400 bg-[#1A1A1A] px-2.5 py-1 absolute -top-3.5 left-3 z-10 border border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(255,255,255,0.15)] flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-rose-400 rounded-full animate-pulse" />
+                <span>STEP 05 • COUNTERFACTUAL VALIDATION</span>
+              </span>
+              <CounterfactualPanel
+                worldState={worldState}
+                setWorldState={setWorldState}
+                selectedPolicy={selectedPolicy}
+                addTemporalEvent={addTemporalEvent}
+              />
+            </div>
 
-            <DiscoveryPlannerPanel
-              selectedPolicy={selectedPolicy}
-              addTemporalEvent={addTemporalEvent}
-            />
+            <div className="relative">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-emerald-400 bg-[#1A1A1A] px-2.5 py-1 absolute -top-3.5 left-3 z-10 border border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(255,255,255,0.15)] flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+                <span>STEP 06 • EXPERIMENTAL BENCHMARK</span>
+              </span>
+              <DiscoveryPlannerPanel
+                selectedPolicy={selectedPolicy}
+                addTemporalEvent={addTemporalEvent}
+              />
+            </div>
           </div>
 
         </div>

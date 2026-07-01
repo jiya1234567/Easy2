@@ -93,8 +93,8 @@ export default function SimulationControls({
       <div className="flex flex-col gap-2 bg-[#FCFAF7] border border-[#1A1A1A] rounded-none p-3.5">
         <div className="flex items-center justify-between border-b border-[#1A1A1A] pb-2">
           <div className="flex items-center gap-1.5 text-black text-xs font-mono font-bold">
-            <Terminal className="w-3.5 h-3.5 text-black" />
-            <span>Temporal Object Memory</span>
+            <Terminal className="w-3.5 h-3.5 text-[#1A1A1A]" />
+            <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 border border-emerald-300 text-[9px] uppercase font-bold tracking-wider rounded-none">STEP 07 • PERSISTENT MEMORY LEDGER</span>
           </div>
 
           <div className="flex gap-1">
