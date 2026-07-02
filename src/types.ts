@@ -107,3 +107,19 @@ export interface Experiment {
   outcome: string;
   status: 'queued' | 'running' | 'completed';
 }
+
+export interface ScientificSweep {
+  id: string;
+  timestamp: string;
+  domain: string;
+  totalRuns: number;
+  meanError: string;
+  confidence: string;
+  failureRate: string;
+  hashSignature: string;
+  calibratedHeat: number;
+  calibratedDiffusion: number;
+  calibratedWindX: number;
+  calibratedWindY: number;
+  verifier: string;
+}

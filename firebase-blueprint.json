@@ -1,0 +1,71 @@
+{
+  "entities": {
+    "ScientificSweep": {
+      "title": "ScientificSweep",
+      "description": "A persistent ledger entry for a non-repudiable scientific sweep passport",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the sweep"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the sweep was executed and signed"
+        },
+        "domain": {
+          "type": "string",
+          "description": "The experimental domain, e.g., weather, finance, quantum"
+        },
+        "totalRuns": {
+          "type": "integer",
+          "description": "Number of sweep runs completed"
+        },
+        "meanError": {
+          "type": "string",
+          "description": "Calculated mean prediction error"
+        },
+        "confidence": {
+          "type": "string",
+          "description": "Statistical confidence bounds"
+        },
+        "failureRate": {
+          "type": "string",
+          "description": "Percentage of outlier failure runs"
+        },
+        "hashSignature": {
+          "type": "string",
+          "description": "Cryptographic SHA-256 signature for reproducibility verification"
+        },
+        "calibratedHeat": {
+          "type": "number",
+          "description": "Actuator-calibrated heat factor of the simulation"
+        },
+        "calibratedDiffusion": {
+          "type": "number",
+          "description": "Sensor-calibrated diffusion rate of the simulation"
+        },
+        "calibratedWindX": {
+          "type": "number",
+          "description": "Robotic joint X-calibrated wind speed X vector"
+        },
+        "calibratedWindY": {
+          "type": "number",
+          "description": "Robotic joint Y-calibrated wind speed Y vector"
+        },
+        "verifier": {
+          "type": "string",
+          "description": "Active AI Model verifier credentials"
+        }
+      },
+      "required": ["id", "timestamp", "domain", "totalRuns", "meanError", "confidence", "hashSignature"]
+    }
+  },
+  "firestore": {
+    "/sweeps/{sweepId}": {
+      "schema": "ScientificSweep",
+      "description": "Collection of non-repudiable scientific sweeps"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 1. Global Safety Net - Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    
+    // 3. Path Variable & ID Hardening
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+    
+    // 2. Validation Blueprints (Anti-Update-Gap)
+    function isValidSweep(data) {
+      return data.keys().hasAll(['id', 'timestamp', 'domain', 'totalRuns', 'meanError', 'confidence', 'hashSignature'])
+        && data.keys().size() <= 13
+        && data.id is string && data.id.size() <= 128
+        && data.domain is string && data.domain.size() <= 64
+        && data.totalRuns is int
+        && data.meanError is string && data.meanError.size() <= 32
+        && data.confidence is string && data.confidence.size() <= 64
+        && data.hashSignature is string && data.hashSignature.size() <= 128;
+    }
+    
+    // Sweeps Ledger: Public read-only, append-only with strict shape validation. Immutable after write.
+    match /sweeps/{sweepId} {
+      allow read: if true;
+      allow create: if isValidId(sweepId) && isValidSweep(request.resource.data);
+      allow update, delete: if false;
+    }
+  }
+}
