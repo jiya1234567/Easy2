@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw, FastForward, Terminal, Filter, Cpu } from 'lucide-react';
+import { HardwareState } from '../types';
 
 interface SimulationControlsProps {
   isPlaying: boolean;
@@ -13,6 +14,7 @@ interface SimulationControlsProps {
   setSpeed: (speed: number) => void;
   temporalEvents: { time: number; details: string; type: 'info' | 'physics' | 'interaction' }[];
   onResetSimulation: () => void;
+  hardwareState?: HardwareState;
 }
 
 export default function SimulationControls({
@@ -21,7 +23,8 @@ export default function SimulationControls({
   speed,
   setSpeed,
   temporalEvents,
-  onResetSimulation
+  onResetSimulation,
+  hardwareState
 }: SimulationControlsProps) {
   const [filter, setFilter] = useState<'all' | 'info' | 'physics' | 'interaction'>('all');
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);

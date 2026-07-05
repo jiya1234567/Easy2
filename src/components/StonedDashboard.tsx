@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Cpu, HardDrive, RefreshCw, AlertTriangle, ShieldCheck, Snowflake } from 'lucide-react';
+import { HardwareState } from '../types';
 
 interface StonedDashboardProps {
   onLogEvent: (details: string, type: 'info' | 'physics' | 'interaction') => void;
+  hardwareState?: HardwareState;
+  bitErrorRate?: number;
 }
 
 interface RegisterNode {
@@ -14,7 +17,7 @@ interface RegisterNode {
   temperature: number; // mK
 }
 
-export default function StonedDashboard({ onLogEvent }: StonedDashboardProps) {
+export default function StonedDashboard({ onLogEvent, hardwareState, bitErrorRate }: StonedDashboardProps) {
   const [nodes, setNodes] = useState<RegisterNode[]>([]);
   const [gateFidelity, setGateFidelity] = useState<number>(0.9992);
   const [temperature, setTemperature] = useState<number>(12); // mK

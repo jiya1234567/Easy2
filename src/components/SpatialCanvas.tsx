@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { SpatialObject, WorldState, PolicyProposal, GraphNode, GraphEdge } from '../types';
+import { SpatialObject, WorldState, PolicyProposal, GraphNode, GraphEdge, HardwareState } from '../types';
 import { Play, Pause, RotateCcw, Wind, Sparkles, Map, Network, Eye } from 'lucide-react';
 
 interface SpatialCanvasProps {
@@ -18,6 +18,7 @@ interface SpatialCanvasProps {
   speed: number;
   temporalEvents: { time: number; details: string; type: string }[];
   addTemporalEvent: (details: string, type: 'info' | 'physics' | 'interaction') => void;
+  hardwareState?: HardwareState;
 }
 
 export default function SpatialCanvas({
@@ -30,7 +31,8 @@ export default function SpatialCanvas({
   setIsPlaying,
   speed,
   temporalEvents,
-  addTemporalEvent
+  addTemporalEvent,
+  hardwareState
 }: SpatialCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);

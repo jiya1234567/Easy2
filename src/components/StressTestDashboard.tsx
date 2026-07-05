@@ -6,7 +6,7 @@ import {
   Activity, TrendingUp, Landmark, Award, Shield, Globe, Terminal, Check, Info, FileCode
 } from 'lucide-react';
 import { isFirestoreLive, getSweeps, publishSweep } from '../firebase';
-import { WorldState, ScientificSweep } from '../types';
+import { WorldState, ScientificSweep, BenchmarkResult } from '../types';
 
 interface WeatherFrame {
   time: string;
@@ -44,11 +44,15 @@ interface MemoryNode {
 export default function StressTestDashboard({
   onLogEvent,
   worldState,
-  setWorldState
+  setWorldState,
+  benchmarkResults,
+  runBenchmark
 }: {
   onLogEvent: (details: string, type: 'info' | 'physics' | 'interaction') => void;
   worldState?: WorldState;
   setWorldState?: React.Dispatch<React.SetStateAction<WorldState>>;
+  benchmarkResults?: BenchmarkResult[];
+  runBenchmark?: (policyId: string) => Promise<void>;
 }) {
   // Scenario selector
   const [selectedSource, setSelectedSource] = useState<'GOES' | 'SatCORPS' | 'EarthNet'>('GOES');

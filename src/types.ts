@@ -123,3 +123,23 @@ export interface ScientificSweep {
   calibratedWindY: number;
   verifier: string;
 }
+
+export interface StateTensor {
+  spatial: { x: number; y: number; z?: number };
+  temporal: { t: number; dt: number };
+  features: Record<string, number>;
+}
+
+export interface HardwareState {
+  gpu: { temp: number; memoryUsage: number; clockSpeed: number };
+  cpu: { load: number; temp: number };
+  bitErrors: number;
+}
+
+export interface BenchmarkResult {
+  model: string;
+  mae: number;
+  rSquared: number;
+  latencyMs: number;
+}
+

@@ -4,12 +4,13 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { PolicyProposal, Experiment } from '../types';
+import { PolicyProposal, Experiment, BenchmarkResult } from '../types';
 import { Compass, Beaker, CheckCircle2, Award, ArrowUpRight, Loader2 } from 'lucide-react';
 
 interface DiscoveryPlannerPanelProps {
   selectedPolicy: PolicyProposal | null;
   addTemporalEvent: (details: string, type: 'info' | 'physics' | 'interaction') => void;
+  benchmarkResults?: BenchmarkResult[];
 }
 
 interface DiscoveryTabConfig {
@@ -238,7 +239,8 @@ const DISCOVERY_TABS: DiscoveryTabConfig[] = [
 
 export default function DiscoveryPlannerPanel({
   selectedPolicy,
-  addTemporalEvent
+  addTemporalEvent,
+  benchmarkResults
 }: DiscoveryPlannerPanelProps) {
   const [activeTabId, setActiveTabId] = useState<string>('weather');
   const [isRunning, setIsRunning] = useState(false);

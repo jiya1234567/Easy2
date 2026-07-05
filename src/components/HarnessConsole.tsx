@@ -4,6 +4,7 @@ import {
   Sparkles, BookOpen, Layers, Settings, ChevronDown, ChevronUp, RefreshCw, 
   Lightbulb, Radio, CheckCircle, Flame, Eye, Save, Trash2, Globe, Activity
 } from 'lucide-react';
+import { HardwareState } from '../types';
 
 interface HarnessConsoleProps {
   onLogEvent: (details: string, type: 'info' | 'physics' | 'interaction') => void;
@@ -16,6 +17,7 @@ interface HarnessConsoleProps {
   };
   preloadedPrompt?: string;
   onClearPreloadedPrompt?: () => void;
+  hardwareState?: HardwareState;
 }
 
 interface HarnessMemory {
@@ -30,7 +32,8 @@ export default function HarnessConsole({
   onLogEvent, 
   worldState, 
   preloadedPrompt, 
-  onClearPreloadedPrompt 
+  onClearPreloadedPrompt,
+  hardwareState
 }: HarnessConsoleProps) {
   const [activeAgent, setActiveAgent] = useState<string>('democratic');
   const [query, setQuery] = useState<string>('Analyze the thermodynamic friction of high-velocity mass transfer under 1.5x diffusion coefficient.');

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { WorldState, PolicyProposal } from '../types';
+import { WorldState, PolicyProposal, HardwareState } from '../types';
 import { ShieldAlert, Flame, Sliders, Wind, HelpCircle, ArrowRight } from 'lucide-react';
 
 interface CounterfactualPanelProps {
@@ -12,13 +12,15 @@ interface CounterfactualPanelProps {
   setWorldState: React.Dispatch<React.SetStateAction<WorldState>>;
   selectedPolicy: PolicyProposal | null;
   addTemporalEvent: (details: string, type: 'info' | 'physics' | 'interaction') => void;
+  hardwareState?: HardwareState;
 }
 
 export default function CounterfactualPanel({
   worldState,
   setWorldState,
   selectedPolicy,
-  addTemporalEvent
+  addTemporalEvent,
+  hardwareState
 }: CounterfactualPanelProps) {
   const handleWindXChange = (val: number) => {
     setWorldState((prev) => ({
