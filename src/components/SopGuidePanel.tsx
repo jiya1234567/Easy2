@@ -409,6 +409,28 @@ export default function SopGuidePanel({
       ],
       blueprintPrompt: 'Tune high-frequency PID controller loops for a dual-drive robotics carrier. Simulate sudden payload mass additions (25kg), analyze wheel encoder tracking precision, and balance Kalman position filters.',
       standardRef: 'IEEE 1872-2015 (Standard Ontologies for Robotics and Automation)'
+    },
+    {
+      id: 'rba_metacognition',
+      name: 'RBA Meta-Cognition',
+      sopCode: 'SOP-RBA-999',
+      category: 'Macro Economics',
+      icon: Cpu,
+      summary: 'Autonomous meta-cognitive testing of central bank monetary policies. Evaluates traditional macro inputs paired with high-frequency underrepresented causal variables (freight, energy, supply chain delays) under black-swan stress tests.',
+      steps: [
+        'Feed official Central Bank variables: Cash Rate, Headline CPI, Core Trimmed Mean, Unemployment rate, and GDP growth',
+        'Map high-frequency non-traditional inputs including Port congestion, Shipping costs, Electricity prices, and Credit card stress',
+        'Deploy dual-agent dialogue sweep: Generator (proposes inflation driver forecasts) and Critic (detects ignored variables and bias)',
+        'Arbiter compiles consensus causal graph models and evaluates performance metrics against baseline historic indicators',
+        'Record structured outcome tensors with confidence, main drivers, ignored variables, and recommended observations'
+      ],
+      parameters: [
+        { name: 'Baseline Cash Rate', value: '4.35%', desc: 'Nominal RBA benchmark discount rate' },
+        { name: 'Model Calibration Index', value: '94.2%', desc: 'Scorecard accuracy with high-frequency variable inclusions' },
+        { name: 'Coverage Bounds', value: '15 indicators', desc: 'Underrepresented proxy variables catalog size' }
+      ],
+      blueprintPrompt: 'Execute RBA Meta-Cognitive stress sweep under Energy Shock scenario (+120 USD Oil). Incorporate Shipping costs and Electricity index variables, prompt multi-agent critic layers, and verify prediction calibration exceeds 90%.',
+      standardRef: 'IMF Monetary Policy Analysis Guidelines'
     }
   ];
 
