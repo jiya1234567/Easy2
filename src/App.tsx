@@ -10,7 +10,7 @@
  * - Benchmarking & falsifiability
  */
 
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { PolicyProposal, WorldState, StateTensor, HardwareState, BenchmarkResult } from './types';
 import SpatialCanvas from './components/SpatialCanvas';
 import PolicyList from './components/PolicyList';
@@ -26,9 +26,16 @@ import SopGuidePanel from './components/SopGuidePanel';
 import ArchitecturePanel from './components/ArchitecturePanel';
 import StressTestDashboard from './components/StressTestDashboard';
 import QuantumDashboard from './components/QuantumDashboard';
+import FinanceDashboard from './components/FinanceDashboard';
+import WeatherDashboard from './components/WeatherDashboard';
+import MaterialScienceDashboard from './components/MaterialScienceDashboard';
+import DrugTherapyDashboard from './components/DrugTherapyDashboard';
+import NeuroscienceDashboard from './components/NeuroscienceDashboard';
+import MentalIllnessDashboard from './components/MentalIllnessDashboard';
 import {
   Beaker, Globe, Sparkles, Map, Vote, Network, BarChart3, HelpCircle,
-  ExternalLink, Settings, Edit2, Check, X, Shield, Cpu, Zap, Wind, Layers, Terminal, BookOpen, GitBranch, Activity, Server, AlertTriangle, Atom
+  ExternalLink, Settings, Edit2, Check, X, Shield, Cpu, Zap, Wind, Layers, Terminal, BookOpen, GitBranch, Activity, Server, AlertTriangle, Atom,
+  DollarSign, Pill, Brain, Heart
 } from 'lucide-react';
 import { z } from 'zod';
 import seedrandom from 'seedrandom';
@@ -186,7 +193,24 @@ export default function App() {
   const [probeCoords, setProbeCoords] = useState<{ x: number; y: number } | null>(null);
   const [showSpatialGraph, setShowSpatialGraph] = useState<boolean>(true);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [activeLab, setActiveLab] = useState<'world' | 'colony' | 'radiant' | 'aromea' | 'stoned' | 'harness' | 'sop' | 'architecture' | 'benchmark' | 'quantum'>('world');
+  const [activeLab, setActiveLab] = useState<
+    | 'world'
+    | 'colony'
+    | 'radiant'
+    | 'aromea'
+    | 'stoned'
+    | 'harness'
+    | 'sop'
+    | 'architecture'
+    | 'benchmark'
+    | 'quantum'
+    | 'finance'
+    | 'weather'
+    | 'materials'
+    | 'drugs'
+    | 'neuroscience'
+    | 'mental'
+  >('world');
   const [showStackMap, setShowStackMap] = useState<boolean>(false);
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
   const [harnessPreloadedPrompt, setHarnessPreloadedPrompt] = useState<string>('');
@@ -197,7 +221,13 @@ export default function App() {
     aromea: '',
     stoned: '',
     harness: '',
-    quantum: ''
+    quantum: '',
+    finance: '',
+    weather: '',
+    materials: '',
+    drugs: '',
+    neuroscience: '',
+    mental: ''
   });
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editingValue, setEditingValue] = useState<string>('');
@@ -233,7 +263,7 @@ export default function App() {
   usePolicyOptimizer(worldState, setWorldState, addTemporalEvent);
 
   // --- Deterministic RNG ---
-  const rng = seedrandom('smc_v2_seed_123'); // Fixed seed for reproducibility
+  const rng = useMemo(() => seedrandom('smc_v2_seed_123'), []); // Stable ref
 
   // --- Physics Validation ---
   useEffect(() => {
@@ -276,9 +306,12 @@ export default function App() {
     return () => clearInterval(interval);
   }, [isPlaying, speed]);
 
+  const lastLoggedTimeRef = useRef(-1);
+
   // --- Auto-Generate Physics/Agent Logs ---
   useEffect(() => {
-    if (simTime > 0 && simTime % 15 === 0) {
+    if (simTime > 0 && simTime % 15 === 0 && lastLoggedTimeRef.current !== simTime) {
+      lastLoggedTimeRef.current = simTime;
       const physicsLogs = [
         `Atmospheric particles drift at vector (${worldState.windVector.x * worldState.diffusionRate}, ${worldState.windVector.y * worldState.diffusionRate})`,
         `Gravity compression factors pull particulate matter to the Z-axis surface`,
@@ -430,265 +463,159 @@ export default function App() {
 
   // --- Render ---
   return (
-    <div className="min-h-screen bg-[#F5F2ED] text-[#1A1A1A] font-sans selection:bg-[#1A1A1A]/10 selection:text-[#1A1A1A]">
-      {/* SINGULARITY BUS */}
-      <div className="bg-[#1A1A1A] text-[#F5F2ED] font-mono text-[10px] py-2 px-4 border-b border-[#1A1A1A] sticky top-0 z-50 shadow-md">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-            <span className="font-bold tracking-wider text-emerald-400 uppercase">SMC v2.0 • BIT-LEVEL OBSERVABLE</span>
-            <span className="text-neutral-600">|</span>
-            <div className="relative group">
-              <button className="bg-neutral-800 hover:bg-neutral-700 text-white px-2 py-0.5 border border-neutral-700 rounded-none flex items-center gap-1 cursor-pointer font-bold">
-                <span>PORTAL: {isChatOpen ? 'HARNESS' : activeLab.toUpperCase()}</span>
-                <span className="text-[7px]">▼</span>
-              </button>
-              <div className="absolute left-0 mt-1 w-52 bg-[#1A1A1A] border border-neutral-800 shadow-2xl hidden group-hover:block z-50">
-                {[
-                  { id: 'world', name: '01. WORLD LAB', layer: 'Bit-Level Observable' },
-                  { id: 'colony', name: '02. COLONY.AI', layer: 'Causal Layer' },
-                  { id: 'radiant', name: '03. RADIANT LAB', layer: 'Physics-Aware' },
-                  { id: 'aromea', name: '04. AROMEA AI', layer: 'Sensory Layer' },
-                  { id: 'stoned', name: '05. STONED.AI', layer: 'Hardware Telemetry' },
-                  { id: 'harness', name: '06. HARNESS CHAT', layer: 'Actuator Console' },
-                  { id: 'sop', name: '07. SOP GUIDES', layer: 'Operations' },
-                  { id: 'architecture', name: '08. LOOP DESIGN', layer: 'Causal Graphs' },
-                  { id: 'benchmark', name: '09. STRESS TEST', layer: 'Falsifiability' },
-                  { id: 'quantum', name: '10. QUANTUM SPIN', layer: 'Thermodynamics' }
-                ].map(item => {
-                  const isItemHarness = item.id === 'harness';
-                  const isItemActive = isItemHarness ? isChatOpen : (activeLab === item.id && !isChatOpen);
-                  return (
+    <div className="min-h-screen bg-[#F5F2ED] text-[#1A1A1A] font-sans selection:bg-[#1A1A1A]/10 selection:text-[#1A1A1A] p-4 md:p-6">
+      <div className="max-w-[1600px] mx-auto flex flex-col gap-6">
+
+        {/* TOP BAR & SINGULARITY BUS CONSOLE */}
+        <div className="border-2 border-[#1A1A1A] bg-white p-4 font-mono text-xs uppercase shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b-2 border-[#1A1A1A] pb-3 mb-3 gap-3">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse border border-black" />
+              <span className="font-bold tracking-wider text-[#1A1A1A]">BILLIONAIRE.AI / SMC V2.0 (BIT-LEVEL OBSERVABLE)</span>
+            </div>
+            <div className="flex items-center gap-4 text-[11px] font-bold text-neutral-700">
+              <span className="flex items-center gap-1">
+                <Cpu className="w-3.5 h-3.5 text-emerald-600" />
+                STATUS: <span className="text-emerald-600">GPU {hardwareState?.gpu?.temp?.toFixed(1) || '41.7'}°C</span>
+              </span>
+              <span className="text-neutral-300">|</span>
+              <span className="opacity-70">Citizens: <strong className="text-black">35</strong></span>
+              <span className="text-neutral-300">|</span>
+              <span className="opacity-70">Assessments: <strong className="text-black">{totalVotesCount}</strong></span>
+            </div>
+          </div>
+
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 text-[11px]">
+            <div className="flex items-center gap-2 font-bold text-[#1A1A1A]">
+              <Network className="w-3.5 h-3.5 text-[#1A1A1A]" />
+              <span>SINGULARITY BUS v4.0</span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-1 bg-[#F5F2ED] px-3 py-1.5 border border-[#1A1A1A] rounded-none">
+              <span className="font-bold text-[#1A1A1A] mr-1">PORTAL: [</span>
+              {[
+                { id: 'world', label: 'WORLD' },
+                { id: 'quantum', label: 'QUANTUM' },
+                { id: 'finance', label: 'FINANCE' },
+                { id: 'weather', label: 'WEATHER' },
+                { id: 'materials', label: 'MATERIALS' },
+                { id: 'drugs', label: 'DRUGS' },
+                { id: 'neuroscience', label: 'NEURO' },
+                { id: 'mental', label: 'MENTAL' },
+              ].map((item, idx) => (
+                <React.Fragment key={item.id}>
+                  {idx > 0 && <span className="text-neutral-400 mx-1">|</span>}
+                  <button
+                    onClick={() => {
+                      setActiveLab(item.id as any);
+                      setIsChatOpen(false);
+                      addTemporalEvent(`Switched to ${item.label} Lab.`, 'info');
+                    }}
+                    className={`font-mono font-bold tracking-tight transition cursor-pointer hover:text-emerald-600 ${
+                      activeLab === item.id ? 'text-emerald-600 underline underline-offset-2' : 'text-[#1A1A1A]'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                </React.Fragment>
+              ))}
+              <span className="font-bold text-[#1A1A1A] ml-1">]</span>
+
+              {/* Lab select dropdown for the other labs */}
+              <div className="relative group ml-3 border-l border-[#1A1A1A]/30 pl-3">
+                <button className="bg-[#1A1A1A] hover:bg-neutral-800 text-white px-2 py-0.5 border border-[#1A1A1A] rounded-none flex items-center gap-1 cursor-pointer font-bold text-[9px]">
+                  <span>OTHER LABS</span>
+                  <span className="text-[7px]">▼</span>
+                </button>
+                <div className="absolute right-0 mt-1 w-52 bg-[#1A1A1A] border-2 border-[#1A1A1A] shadow-2xl hidden group-hover:block z-50">
+                  {[
+                    { id: 'colony', name: '02. COLONY.AI', layer: 'Causal Layer' },
+                    { id: 'radiant', name: '03. RADIANT LAB', layer: 'Physics-Aware' },
+                    { id: 'aromea', name: '04. AROMEA AI', layer: 'Sensory Layer' },
+                    { id: 'stoned', name: '05. STONED.AI', layer: 'Hardware Telemetry' },
+                    { id: 'sop', name: '07. SOP GUIDES', layer: 'Operations' },
+                    { id: 'architecture', name: '08. LOOP DESIGN', layer: 'Causal Graphs' },
+                    { id: 'benchmark', name: '09. STRESS TEST', layer: 'Falsifiability' }
+                  ].map(item => (
                     <button
                       key={item.id}
                       onClick={() => {
-                        if (isItemHarness) {
-                          setIsChatOpen(!isChatOpen);
-                          addTemporalEvent(`Toggled Harness Chat via portal.`, 'info');
-                        } else {
-                          setActiveLab(item.id as any);
-                          setIsChatOpen(false);
-                          addTemporalEvent(`Switched to ${item.name}.`, 'info');
-                        }
+                        setActiveLab(item.id as any);
+                        setIsChatOpen(false);
+                        addTemporalEvent(`Switched to ${item.name}.`, 'info');
                       }}
                       className={`w-full text-left px-3 py-2 text-[10px] border-b border-neutral-900 transition flex flex-col justify-center cursor-pointer ${
-                        isItemActive ? 'bg-[#F5F2ED] text-[#1A1A1A]' : 'text-neutral-300 hover:bg-neutral-800 hover:text-white'
+                        activeLab === item.id ? 'bg-[#F5F2ED] text-[#1A1A1A]' : 'text-neutral-300 hover:bg-neutral-800 hover:text-white'
                       }`}
                     >
                       <span className="font-bold">{item.name}</span>
-                      <span className={`text-[8px] opacity-60 ${isItemActive ? 'text-slate-600' : 'text-neutral-400'}`}>{item.layer}</span>
+                      <span className="text-[8px] opacity-60">{item.layer}</span>
                     </button>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Lab Tabs */}
-          <div className="flex flex-wrap items-center gap-1">
-            {[
-              { id: 'world', name: 'WORLD LAB', icon: Globe },
-              { id: 'colony', name: 'COLONY.AI', icon: Shield },
-              { id: 'radiant', name: 'RADIANT LAB', icon: Zap },
-              { id: 'aromea', name: 'AROMEA AI', icon: Wind },
-              { id: 'stoned', name: 'STONED.AI', icon: Cpu },
-              { id: 'harness', name: 'HARNESS', icon: Terminal },
-              { id: 'sop', name: 'SOP', icon: BookOpen },
-              { id: 'architecture', name: 'ARCHITECTURE', icon: GitBranch },
-              { id: 'benchmark', name: 'BENCHMARK', icon: Activity },
-              { id: 'quantum', name: 'QUANTUM', icon: Atom }
-            ].map(lab => {
-              const Icon = lab.icon;
-              const isHarness = lab.id === 'harness';
-              const isActive = isHarness ? isChatOpen : (activeLab === lab.id && !isChatOpen);
-              return (
-                <button
-                  key={lab.id}
-                  onClick={() => {
-                    if (isHarness) {
-                      setIsChatOpen(!isChatOpen);
-                      addTemporalEvent(`Toggled Harness Chat.`, 'info');
-                    } else {
-                      setActiveLab(lab.id as any);
-                      setIsChatOpen(false);
-                      addTemporalEvent(`Switched to ${lab.name}.`, 'info');
-                    }
-                  }}
-                  className={`px-3 py-1 text-[10px] font-bold tracking-tight transition cursor-pointer flex items-center gap-1.5 border ${
-                    isActive
-                      ? isHarness
-                        ? 'bg-emerald-950 text-emerald-400 border-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]'
-                        : 'bg-[#F5F2ED] text-[#1A1A1A] border-[#F5F2ED]'
-                      : 'bg-transparent text-neutral-400 border-neutral-800 hover:text-white hover:border-neutral-700'
-                  }`}
-                >
-                  <Icon className={`w-3 h-3 ${isHarness && isChatOpen ? 'animate-pulse text-emerald-400' : ''}`} />
-                  <span>{lab.name}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* URL Config */}
-          <div className="flex items-center gap-2">
-            {editingKey === activeLab ? (
-              <div className="flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 px-2 py-0.5">
-                <input
-                  type="text"
-                  value={editingValue}
-                  onChange={(e) => setEditingValue(e.target.value)}
-                  placeholder="Paste app link..."
-                  className="bg-transparent border-none text-[10px] text-white focus:outline-none w-44 font-mono"
-                  autoFocus
-                />
-                <button onClick={() => handleSaveUrl(activeLab)} className="text-emerald-400 hover:text-white cursor-pointer">
-                  <Check className="w-3 h-3" />
-                </button>
-                <button onClick={() => setEditingKey(null)} className="text-red-400 hover:text-white cursor-pointer">
-                  <X className="w-3 h-3" />
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <span className="text-neutral-500 text-[9px] max-w-[120px] truncate">
-                  {labUrls[activeLab] ? labUrls[activeLab].replace('https://', '') : 'No link'}
-                </span>
-                <button
-                  onClick={() => {
-                    setEditingKey(activeLab);
-                    setEditingValue(labUrls[activeLab] || '');
-                  }}
-                  className="text-neutral-400 hover:text-white cursor-pointer"
-                >
-                  <Edit2 className="w-3 h-3" />
-                </button>
-                {labUrls[activeLab] && (
-                  <a
-                    href={labUrls[activeLab]}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-neutral-800 hover:bg-neutral-700 text-[#F5F2ED] border border-neutral-700 px-2.5 py-1 text-[9px] font-bold tracking-wider flex items-center gap-1 cursor-pointer"
+            {/* URL Config */}
+            <div className="flex items-center gap-2 font-mono text-[10px]">
+              {editingKey === activeLab ? (
+                <div className="flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 px-2 py-0.5 text-white">
+                  <input
+                    type="text"
+                    value={editingValue}
+                    onChange={(e) => setEditingValue(e.target.value)}
+                    placeholder="Paste app link..."
+                    className="bg-transparent border-none text-[10px] text-white focus:outline-none w-40 font-mono"
+                    autoFocus
+                  />
+                  <button onClick={() => handleSaveUrl(activeLab)} className="text-emerald-400 hover:text-white cursor-pointer">
+                    <Check className="w-3 h-3" />
+                  </button>
+                  <button onClick={() => setEditingKey(null)} className="text-red-400 hover:text-white cursor-pointer">
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 bg-white border border-[#1A1A1A] px-2.5 py-1 shadow-[1px_1px_0px_0px_rgba(26,26,26,1)]">
+                  <span className="text-neutral-500 max-w-[100px] truncate">
+                    {labUrls[activeLab] ? labUrls[activeLab].replace('https://', '') : 'No link'}
+                  </span>
+                  <button
+                    onClick={() => {
+                      setEditingKey(activeLab);
+                      setEditingValue(labUrls[activeLab] || '');
+                    }}
+                    className="text-neutral-500 hover:text-[#1A1A1A] cursor-pointer"
                   >
-                    <span>LAUNCH</span>
-                    <ExternalLink className="w-2.5 h-2.5" />
-                  </a>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Header */}
-      <header className="border-b border-[#1A1A1A] bg-[#FCFAF7]/80 relative px-4 py-6">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-          <div className="flex flex-col">
-            <span className="text-[10px] uppercase tracking-[0.3em] font-bold opacity-60 mb-1">
-              Billionaire.ai / SMC v2.0 (Bit-Level Observable)
-            </span>
-            <h1 className="text-4xl sm:text-6xl lg:text-8xl font-black tracking-tighter leading-[0.8] font-serif uppercase">
-              WORLD LAB
-            </h1>
-          </div>
-          <div className="flex flex-col md:flex-row md:items-center gap-6 lg:text-right">
-            <div className="flex flex-wrap items-center gap-4 text-[11px] font-mono border border-[#1A1A1A] bg-white px-4 py-2 shadow-[2px_2px_0px_0px_rgba(26,26,26,1)]">
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 bg-emerald-600 rounded-full animate-pulse" />
-                <span className="opacity-70">Citizens: <strong className="text-black">35</strong></span>
-              </div>
-              <div className="h-3 w-px bg-[#1A1A1A]/20" />
-              <div className="flex items-center gap-1.5">
-                <Vote className="w-3.5 h-3.5 text-[#1A1A1A]" />
-                <span className="opacity-70">Assessments: <strong className="text-black">{totalVotesCount}</strong></span>
-              </div>
-              <div className="h-3 w-px bg-[#1A1A1A]/20" />
-              <div className="flex items-center gap-1.5">
-                <Network className="w-3.5 h-3.5 text-[#1A1A1A]" />
-                <span className="opacity-70">Engine: <strong className="text-black">gemini-3.5 + SMC v2.0</strong></span>
-              </div>
-              <div className="h-3 w-px bg-[#1A1A1A]/20" />
-              <div className="flex items-center gap-1.5">
-                <Cpu className="w-3.5 h-3.5 text-[#1A1A1A]" />
-                <span className="opacity-70">Hardware: <strong className="text-black">GPU {hardwareState.gpu.temp.toFixed(1)}°C</strong></span>
-              </div>
-            </div>
-            <div className="text-left flex flex-col md:items-end gap-2.5">
-              <div>
-                <span className="text-[10px] uppercase tracking-[0.3em] font-bold opacity-60 block">Status</span>
-                <p className="text-xl font-light italic font-serif text-[#1A1A1A]">Bit-Level Observable</p>
-              </div>
-              <button
-                onClick={() => {
-                  setShowStackMap(!showStackMap);
-                  addTemporalEvent(`Toggled architecture map: ${!showStackMap ? 'VISIBLE' : 'HIDDEN'}`, 'info');
-                }}
-                className={`px-3 py-1 text-[9px] font-mono font-bold tracking-widest border border-[#1A1A1A] cursor-pointer transition-all ${
-                  showStackMap ? 'bg-[#1A1A1A] text-white' : 'bg-transparent text-[#1A1A1A] hover:bg-[#1A1A1A]/5'
-                }`}
-              >
-                {showStackMap ? 'HIDE ARCHITECTURE ▲' : 'VIEW ARCHITECTURE ▼'}
-              </button>
+                    <Edit2 className="w-3 h-3" />
+                  </button>
+                  {labUrls[activeLab] && (
+                    <a
+                      href={labUrls[activeLab]}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-[#1A1A1A] hover:bg-neutral-800 text-white px-2 py-0.5 text-[9px] font-bold tracking-wider flex items-center gap-1 cursor-pointer ml-1"
+                    >
+                      <span>LAUNCH</span>
+                      <ExternalLink className="w-2.5 h-2.5" />
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        {showStackMap && (
-          <div className="bg-[#1A1A1A] text-[#F5F2ED] border-2 border-[#1A1A1A] p-6 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] mb-8 font-mono text-[11px] relative animate-fade-in">
-            <button onClick={() => setShowStackMap(false)} className="absolute top-4 right-4 text-neutral-400 hover:text-white cursor-pointer font-bold text-[10px]">
-              [CLOSE]
-            </button>
-            <div className="max-w-4xl mx-auto flex flex-col gap-6">
-              <div className="text-center">
-                <span className="text-emerald-400 font-bold uppercase tracking-widest text-[10px]">SMC v2.0 FULL-STACK</span>
-                <p className="text-neutral-400 text-[10px] mt-1 italic">Bit-Level Observable + Causal Interventions + Hardware Telemetry</p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-b border-neutral-800 pb-6 mb-4">
-                <div className="bg-neutral-900/80 border border-amber-500/30 p-4 flex flex-col gap-1.5">
-                  <div className="text-amber-400 font-bold tracking-wider text-xs uppercase flex items-center gap-1.5">
-                    <Cpu className="w-4 h-4 text-amber-400" />
-                    <span>01. BIT-LEVEL OBSERVABILITY</span>
-                  </div>
-                  <span className="text-[10px] text-neutral-400 font-bold font-mono">FILE: useHardwareTelemetry()</span>
-                  <p className="text-neutral-300 text-[11px] font-serif italic leading-relaxed mt-1">
-                    Tracks GPU/CPU telemetry, bit errors, and hardware constraints in real-time.
-                  </p>
-                </div>
-                <div className="bg-neutral-900/80 border border-blue-500/30 p-4 flex flex-col gap-1.5">
-                  <div className="text-blue-400 font-bold tracking-wider text-xs uppercase flex items-center gap-1.5">
-                    <Network className="w-4 h-4 text-blue-400" />
-                    <span>02. CAUSAL INTERVENTION ENGINE</span>
-                  </div>
-                  <span className="text-[10px] text-neutral-400 font-bold font-mono">FILE: useCausalInterventionEngine()</span>
-                  <p className="text-neutral-300 text-[11px] font-serif italic leading-relaxed mt-1">
-                    Autonomously detects anomalies and triggers counterfactuals (e.g., adjusts diffusionRate).
-                  </p>
-                </div>
-                <div className="bg-neutral-900/80 border border-emerald-500/30 p-4 flex flex-col gap-1.5">
-                  <div className="text-emerald-400 font-bold tracking-wider text-xs uppercase flex items-center gap-1.5">
-                    <Server className="w-4 h-4 text-emerald-400" />
-                    <span>03. STATE TENSOR & BENCHMARKING</span>
-                  </div>
-                  <span className="text-[10px] text-neutral-400 font-bold font-mono">FILE: worldStateToTensor()</span>
-                  <p className="text-neutral-300 text-[11px] font-serif italic leading-relaxed mt-1">
-                    Unified tensor format for cross-domain mapping + falsifiability benchmarks.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
+        {/* MAIN LAB SCREEN */}
         {activeLab === 'world' ? (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* Policy Workspace */}
-            <div className="lg:col-span-4 flex flex-col gap-6">
-              <div className="relative">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-emerald-400 bg-[#1A1A1A] px-2.5 py-1 absolute -top-3.5 left-3 z-10 border border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(26,26,26,1)] flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
-                  <span>STEP 01 • PROBLEM WORKSPACE</span>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            {/* COLUMN 1: STEPS 01, 03, 05 */}
+            <div className="flex flex-col gap-6">
+              {/* STEP 01: PROBLEM WORKSPACE */}
+              <div className="relative pt-4">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-emerald-600 bg-[#F5F2ED] px-2.5 py-1 absolute -top-1.5 left-3 z-10 border-2 border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(26,26,26,1)] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse border border-black" />
+                  <span>[STEP 01 • PROBLEM WORKSPACE]</span>
                 </span>
                 <PolicyList
                   policies={policies}
@@ -701,14 +628,122 @@ export default function App() {
                   isGenerating={isGenerating}
                 />
               </div>
+
+              {/* STEP 03: HYPOTHESIS & REASONING */}
+              <div className="relative pt-4">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-rose-600 bg-[#F5F2ED] px-2.5 py-1 absolute -top-1.5 left-3 z-10 border-2 border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(26,26,26,1)] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse border border-black" />
+                  <span>[STEP 03 • HYPOTHESIS & REASONING]</span>
+                </span>
+                <div className="bg-white border-2 border-[#1A1A1A] p-6 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] flex flex-col gap-3.5">
+                  <div className="flex items-center gap-2 border-b border-[#1A1A1A] pb-2.5">
+                    <BarChart3 className="w-4.5 h-4.5 text-[#1A1A1A]" />
+                    <h2 className="font-bold text-[#1A1A1A] text-xs uppercase tracking-wider font-sans">Spatial Reasoning</h2>
+                  </div>
+                  {selectedPolicy ? (
+                    <div className="flex flex-col gap-3">
+                      <button
+                        onClick={() => handleRunSimulation()}
+                        disabled={isGenerating}
+                        className="w-full bg-[#1A1A1A] hover:bg-neutral-800 disabled:bg-slate-300 disabled:text-slate-600 text-white font-mono uppercase tracking-wider text-xs py-2.5 transition border border-[#1A1A1A] flex items-center justify-center gap-1.5 cursor-pointer font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                      >
+                        {isGenerating ? (
+                          <>
+                            <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            Analyzing...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4 text-amber-500 animate-pulse" />
+                            Generate AI Impact (Bit-Level)
+                          </>
+                        )}
+                      </button>
+                      <div className="flex items-center justify-between text-xs font-mono bg-[#EBE8E3] p-2.5 border border-[#1A1A1A]">
+                        <span className="text-[#1A1A1A] flex items-center gap-1.5 font-bold">
+                          <Network className="w-3.5 h-3.5 text-[#1A1A1A]" />
+                          State Tensor
+                        </span>
+                        <button
+                          onClick={() => {
+                            const tensor = worldStateToTensor(worldState, simTime);
+                            addTemporalEvent(`State tensor generated: ${JSON.stringify(tensor)}`, 'info');
+                          }}
+                          className="px-2 py-0.5 text-[10px] font-bold transition border border-[#1A1A1A] cursor-pointer bg-[#1A1A1A] text-white"
+                        >
+                          LOG TENSOR
+                        </button>
+                      </div>
+                      {selectedPolicy.simulationData && (
+                        <div className="bg-[#EBE8E3]/30 border border-[#1A1A1A] p-4 flex flex-col gap-2">
+                          <span className="text-[10px] font-mono text-black font-bold uppercase tracking-wide border-b border-[#1A1A1A] pb-1">Predictions</span>
+                          <ul className="space-y-1.5">
+                            {selectedPolicy.simulationData.predictions.map((pred, i) => (
+                              <li key={i} className="text-xs text-[#1A1A1A] flex items-start gap-1.5 leading-normal font-serif italic">
+                                <span className="text-[#1A1A1A] font-bold shrink-0">•</span>
+                                <span>{pred}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {benchmarkResults.length > 0 && (
+                        <div className="bg-[#EBE8E3]/30 border border-[#1A1A1A] p-4 flex flex-col gap-2">
+                          <span className="text-[10px] font-mono text-black font-bold uppercase tracking-wide border-b border-[#1A1A1A] pb-1">Benchmark Results</span>
+                          <table className="text-xs w-full">
+                            <thead>
+                              <tr className="border-b border-[#1A1A1A]">
+                                <th className="text-left p-1">Model</th>
+                                <th className="text-left p-1">MAE</th>
+                                <th className="text-left p-1">R²</th>
+                                <th className="text-left p-1">Latency (ms)</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {benchmarkResults.map((result, i) => (
+                                <tr key={i} className="border-b border-[#1A1A1A]/20">
+                                  <td className="p-1">{result.model}</td>
+                                  <td className="p-1">{result.mae.toFixed(2)}</td>
+                                  <td className="p-1">{result.rSquared.toFixed(2)}</td>
+                                  <td className="p-1">{result.latencyMs}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-slate-600 italic text-center py-4 bg-[#EBE8E3]/40 border border-[#1A1A1A]">
+                      Select a policy to enable reasoning.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* STEP 05: COUNTERFACTUAL VALIDATION */}
+              <div className="relative pt-4">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-blue-600 bg-[#F5F2ED] px-2.5 py-1 absolute -top-1.5 left-3 z-10 border-2 border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(26,26,26,1)] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse border border-black" />
+                  <span>[STEP 05 • COUNTERFACTUAL VALIDATION]</span>
+                </span>
+                <CounterfactualPanel
+                  worldState={worldState}
+                  setWorldState={setWorldState}
+                  selectedPolicy={selectedPolicy}
+                  addTemporalEvent={addTemporalEvent}
+                  hardwareState={hardwareState}
+                />
+              </div>
             </div>
 
-            {/* Spatial Canvas */}
-            <div className="lg:col-span-5 flex flex-col gap-6">
-              <div className="relative">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-blue-400 bg-[#1A1A1A] px-2.5 py-1 absolute -top-3.5 left-3 z-10 border border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(255,255,255,0.15)] flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" />
-                  <span>STEP 02 • SENSORY DATA FIELD</span>
+            {/* COLUMN 2: STEPS 02, 04, 06 */}
+            <div className="flex flex-col gap-6">
+              {/* STEP 02: SENSORY DATA FIELD */}
+              <div className="relative pt-4">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-purple-600 bg-[#F5F2ED] px-2.5 py-1 absolute -top-1.5 left-3 z-10 border-2 border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(26,26,26,1)] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse border border-black" />
+                  <span>[STEP 02 • SENSORY DATA FIELD]</span>
                 </span>
                 <SpatialCanvas
                   worldState={worldState}
@@ -721,13 +756,15 @@ export default function App() {
                   speed={speed}
                   temporalEvents={temporalEvents}
                   addTemporalEvent={addTemporalEvent}
-                  hardwareState={hardwareState} // Pass hardware telemetry
+                  hardwareState={hardwareState}
                 />
               </div>
-              <div className="relative">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-amber-400 bg-[#1A1A1A] px-2.5 py-1 absolute -top-3.5 left-3 z-10 border border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(255,255,255,0.15)] flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
-                  <span>STEP 04 • TEMPORAL SIMULATION</span>
+
+              {/* STEP 04: TEMPORAL SIMULATION */}
+              <div className="relative pt-4">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-amber-600 bg-[#F5F2ED] px-2.5 py-1 absolute -top-1.5 left-3 z-10 border-2 border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(26,26,26,1)] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse border border-black" />
+                  <span>[STEP 04 • TEMPORAL SIMULATION]</span>
                 </span>
                 <SimulationControls
                   isPlaying={isPlaying}
@@ -744,117 +781,12 @@ export default function App() {
                   hardwareState={hardwareState}
                 />
               </div>
-            </div>
 
-            {/* Analytical HUD */}
-            <div className="lg:col-span-3 flex flex-col gap-6">
-              <div className="bg-white border-2 border-[#1A1A1A] p-6 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] flex flex-col gap-3.5 relative">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-rose-400 bg-[#1A1A1A] px-2.5 py-1 absolute -top-3.5 left-3 z-10 border border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(255,255,255,0.15)] flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 bg-rose-400 rounded-full animate-pulse" />
-                  <span>STEP 03 • HYPOTHESIS & REASONING</span>
-                </span>
-                <div className="flex items-center gap-2 border-b border-[#1A1A1A] pb-2.5 mt-2">
-                  <BarChart3 className="w-4.5 h-4.5 text-[#1A1A1A]" />
-                  <h2 className="font-bold text-[#1A1A1A] text-xs uppercase tracking-wider font-sans">Spatial Reasoning</h2>
-                </div>
-                {selectedPolicy ? (
-                  <div className="flex flex-col gap-3">
-                    <button
-                      onClick={() => handleRunSimulation()}
-                      disabled={isGenerating}
-                      className="w-full bg-[#1A1A1A] hover:bg-[#333333] disabled:bg-slate-300 disabled:text-slate-600 text-white font-mono uppercase tracking-wider text-xs py-2.5 transition border border-[#1A1A1A] flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      {isGenerating ? (
-                        <>
-                          <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          Analyzing...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-4 h-4 text-amber-500 animate-pulse" />
-                          Generate AI Impact (Bit-Level)
-                        </>
-                      )}
-                    </button>
-                    <div className="flex items-center justify-between text-xs font-mono bg-[#EBE8E3] p-2.5 border border-[#1A1A1A]">
-                      <span className="text-[#1A1A1A] flex items-center gap-1.5 font-bold">
-                        <Network className="w-3.5 h-3.5 text-[#1A1A1A]" />
-                        State Tensor
-                      </span>
-                      <button
-                        onClick={() => {
-                          const tensor = worldStateToTensor(worldState, simTime);
-                          addTemporalEvent(`State tensor generated: ${JSON.stringify(tensor)}`, 'info');
-                        }}
-                        className="px-2 py-0.5 text-[10px] font-bold transition border border-[#1A1A1A] cursor-pointer bg-[#1A1A1A] text-white"
-                      >
-                        LOG TENSOR
-                      </button>
-                    </div>
-                    {selectedPolicy.simulationData && (
-                      <div className="bg-[#EBE8E3]/30 border border-[#1A1A1A] p-4 flex flex-col gap-2">
-                        <span className="text-[10px] font-mono text-black font-bold uppercase tracking-wide border-b border-[#1A1A1A] pb-1">Predictions</span>
-                        <ul className="space-y-1.5">
-                          {selectedPolicy.simulationData.predictions.map((pred, i) => (
-                            <li key={i} className="text-xs text-[#1A1A1A] flex items-start gap-1.5 leading-normal font-serif italic">
-                              <span className="text-[#1A1A1A] font-bold shrink-0">•</span>
-                              <span>{pred}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {benchmarkResults.length > 0 && (
-                      <div className="bg-[#EBE8E3]/30 border border-[#1A1A1A] p-4 flex flex-col gap-2">
-                        <span className="text-[10px] font-mono text-black font-bold uppercase tracking-wide border-b border-[#1A1A1A] pb-1">Benchmark Results</span>
-                        <table className="text-xs w-full">
-                          <thead>
-                            <tr className="border-b border-[#1A1A1A]">
-                              <th className="text-left p-1">Model</th>
-                              <th className="text-left p-1">MAE</th>
-                              <th className="text-left p-1">R²</th>
-                              <th className="text-left p-1">Latency (ms)</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {benchmarkResults.map((result, i) => (
-                              <tr key={i} className="border-b border-[#1A1A1A]/20">
-                                <td className="p-1">{result.model}</td>
-                                <td className="p-1">{result.mae.toFixed(2)}</td>
-                                <td className="p-1">{result.rSquared.toFixed(2)}</td>
-                                <td className="p-1">{result.latencyMs}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-xs text-slate-600 italic text-center py-4 bg-[#EBE8E3]/40 border border-[#1A1A1A]">
-                    Select a policy to enable reasoning.
-                  </div>
-                )}
-              </div>
-
-              <div className="relative">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-rose-400 bg-[#1A1A1A] px-2.5 py-1 absolute -top-3.5 left-3 z-10 border border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(255,255,255,0.15)] flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 bg-rose-400 rounded-full animate-pulse" />
-                  <span>STEP 05 • COUNTERFACTUAL VALIDATION</span>
-                </span>
-                <CounterfactualPanel
-                  worldState={worldState}
-                  setWorldState={setWorldState}
-                  selectedPolicy={selectedPolicy}
-                  addTemporalEvent={addTemporalEvent}
-                  hardwareState={hardwareState}
-                />
-              </div>
-
-              <div className="relative">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-emerald-400 bg-[#1A1A1A] px-2.5 py-1 absolute -top-3.5 left-3 z-10 border border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(255,255,255,0.15)] flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
-                  <span>STEP 06 • EXPERIMENTAL BENCHMARK</span>
+              {/* STEP 06: EXPERIMENTAL BENCHMARK */}
+              <div className="relative pt-4">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-cyan-600 bg-[#F5F2ED] px-2.5 py-1 absolute -top-1.5 left-3 z-10 border-2 border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(26,26,26,1)] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse border border-black" />
+                  <span>[STEP 06 • EXPERIMENTAL BENCHMARK]</span>
                 </span>
                 <DiscoveryPlannerPanel
                   selectedPolicy={selectedPolicy}
@@ -865,109 +797,209 @@ export default function App() {
             </div>
           </div>
         ) : (
-          <div className="space-y-8 animate-fade-in">
-            {activeLab === 'colony' && <ColonyDashboard onLogEvent={addTemporalEvent} />}
-            {activeLab === 'radiant' && <RadiantDashboard onLogEvent={addTemporalEvent} heatFactor={worldState.heatFactor} />}
-            {activeLab === 'aromea' && <AromeaDashboard onLogEvent={addTemporalEvent} windVector={worldState.windVector} diffusionRate={worldState.diffusionRate} />}
-            {activeLab === 'stoned' && (
-              <StonedDashboard
-                onLogEvent={addTemporalEvent}
-                hardwareState={hardwareState}
-                bitErrorRate={simTime > 0 ? hardwareState.bitErrors / simTime : 0} // Avoid division by zero
-              />
-            )}
-            {activeLab === 'sop' && (
-              <SopGuidePanel
-                onLogEvent={addTemporalEvent}
-                onLoadHarnessPrompt={(prompt) => {
-                  setHarnessPreloadedPrompt(prompt);
-                  setIsChatOpen(true);
-                }}
-              />
-            )}
-            {activeLab === 'architecture' && <ArchitecturePanel onLogEvent={addTemporalEvent} />}
-            {activeLab === 'benchmark' && (
-              <StressTestDashboard
-                onLogEvent={addTemporalEvent}
-                benchmarkResults={benchmarkResults}
-                runBenchmark={runBenchmark}
-                worldState={worldState}
-                setWorldState={setWorldState}
-              />
-            )}
-            {activeLab === 'quantum' && (
-              <QuantumDashboard
-                onLogEvent={addTemporalEvent}
-                worldState={worldState}
-                hardwareState={hardwareState}
-                onCreatePolicy={handleCreatePolicy}
-              />
-            )}
+          /* Render other active labs */
+          <div className="bg-white border-2 border-[#1A1A1A] p-6 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] relative pt-8">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-emerald-600 bg-[#F5F2ED] px-2.5 py-1 absolute -top-3 left-3 z-10 border-2 border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(26,26,26,1)] flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse border border-black" />
+              <span>ACTIVE LAB: {activeLab.toUpperCase()}</span>
+            </span>
+            <div className="space-y-8 animate-fade-in">
+              {activeLab === 'colony' && <ColonyDashboard onLogEvent={addTemporalEvent} />}
+              {activeLab === 'radiant' && <RadiantDashboard onLogEvent={addTemporalEvent} heatFactor={worldState.heatFactor} />}
+              {activeLab === 'aromea' && <AromeaDashboard onLogEvent={addTemporalEvent} windVector={worldState.windVector} diffusionRate={worldState.diffusionRate} />}
+              {activeLab === 'stoned' && (
+                <StonedDashboard
+                  onLogEvent={addTemporalEvent}
+                  hardwareState={hardwareState}
+                  bitErrorRate={simTime > 0 ? hardwareState.bitErrors / simTime : 0}
+                />
+              )}
+              {activeLab === 'sop' && (
+                <SopGuidePanel
+                  onLogEvent={addTemporalEvent}
+                  onLoadHarnessPrompt={(prompt) => {
+                    setHarnessPreloadedPrompt(prompt);
+                    setIsChatOpen(true);
+                  }}
+                />
+              )}
+              {activeLab === 'architecture' && <ArchitecturePanel onLogEvent={addTemporalEvent} />}
+              {activeLab === 'benchmark' && (
+                <StressTestDashboard
+                  onLogEvent={addTemporalEvent}
+                  benchmarkResults={benchmarkResults}
+                  runBenchmark={runBenchmark}
+                  worldState={worldState}
+                  setWorldState={setWorldState}
+                />
+              )}
+              {activeLab === 'quantum' && (
+                <QuantumDashboard
+                  onLogEvent={addTemporalEvent}
+                  worldState={worldState}
+                  hardwareState={hardwareState}
+                  onCreatePolicy={handleCreatePolicy}
+                />
+              )}
+              {activeLab === 'finance' && (
+                <FinanceDashboard
+                  onLogEvent={addTemporalEvent}
+                  worldState={worldState}
+                  hardwareState={hardwareState}
+                />
+              )}
+              {activeLab === 'weather' && (
+                <WeatherDashboard
+                  onLogEvent={addTemporalEvent}
+                  worldState={worldState}
+                  hardwareState={hardwareState}
+                />
+              )}
+              {activeLab === 'materials' && (
+                <MaterialScienceDashboard
+                  onLogEvent={addTemporalEvent}
+                  worldState={worldState}
+                  hardwareState={hardwareState}
+                />
+              )}
+              {activeLab === 'drugs' && (
+                <DrugTherapyDashboard
+                  onLogEvent={addTemporalEvent}
+                  worldState={worldState}
+                  hardwareState={hardwareState}
+                />
+              )}
+              {activeLab === 'neuroscience' && (
+                <NeuroscienceDashboard
+                  onLogEvent={addTemporalEvent}
+                  worldState={worldState}
+                  hardwareState={hardwareState}
+                />
+              )}
+              {activeLab === 'mental' && (
+                <MentalIllnessDashboard
+                  onLogEvent={addTemporalEvent}
+                  worldState={worldState}
+                  hardwareState={hardwareState}
+                />
+              )}
+            </div>
           </div>
         )}
 
-        <footer className="mt-16 pt-6 border-t border-[#1A1A1A] flex flex-col md:flex-row justify-between items-start md:items-end gap-6 text-[#1A1A1A]">
-          <div className="flex flex-wrap gap-12 text-[10px] font-bold uppercase tracking-widest font-mono">
-            <span>Ref: SMC-V2-BIT-LEVEL-2026</span>
+        {/* BOTTOM LAYERS: HARNESS CHAT & ARCHITECTURE VIEW */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          {/* HARNESS CHAT CONSOLE */}
+          <div className="lg:col-span-5 relative pt-4">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-emerald-600 bg-[#F5F2ED] px-2.5 py-1 absolute -top-1.5 left-3 z-10 border-2 border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(26,26,26,1)] flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse border border-black" />
+              <span>HARNESS CHAT CONSOLE</span>
+            </span>
+            <div className="bg-white border-2 border-[#1A1A1A] p-4 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] h-[540px] flex flex-col">
+              <div className="flex-1 overflow-y-auto pr-1">
+                <HarnessConsole
+                  onLogEvent={addTemporalEvent}
+                  worldState={worldState}
+                  preloadedPrompt={harnessPreloadedPrompt}
+                  onClearPreloadedPrompt={() => setHarnessPreloadedPrompt('')}
+                  hardwareState={hardwareState}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* ARCHITECTURE VIEW */}
+          <div className="lg:col-span-7 relative pt-4">
+            <div className="absolute -top-1.5 left-3 right-3 z-10 flex justify-between items-center">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-amber-600 bg-[#F5F2ED] px-2.5 py-1 border-2 border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(26,26,26,1)] flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse border border-black" />
+                <span>ARCHITECTURE VIEW (TOGGLEABLE)</span>
+              </span>
+              <button
+                onClick={() => setShowStackMap(!showStackMap)}
+                className="text-[9px] font-mono font-bold uppercase tracking-wider bg-[#1A1A1A] hover:bg-neutral-800 text-white px-3 py-1 border-2 border-[#1A1A1A] shadow-[1.5px_1.5px_0px_0px_rgba(0,0,0,1)] cursor-pointer transition-all"
+              >
+                {showStackMap ? 'COLLAPSE LAYER' : 'EXPAND FULL'}
+              </button>
+            </div>
+            <div className="bg-white border-2 border-[#1A1A1A] p-6 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] h-[540px] flex flex-col justify-start">
+              <div className="flex-1 overflow-y-auto mt-2">
+                {showStackMap ? (
+                  <div className="animate-fade-in space-y-4 font-mono text-[11px] h-full">
+                    <div className="border-2 border-[#1A1A1A] p-4 bg-[#F5F2ED] relative">
+                      <div className="text-amber-600 font-bold tracking-wider text-xs uppercase flex items-center gap-1.5 border-b border-[#1A1A1A] pb-1.5 mb-2">
+                        <Cpu className="w-4 h-4" />
+                        <span>01. BIT-LEVEL OBSERVABILITY (HardwareState)</span>
+                      </div>
+                      <p className="text-neutral-700 text-[11px] font-serif italic leading-relaxed">
+                        Tracks hardware performance, processor clock-ticks, random cosmic bit-flips, thermal constraints, and memory state changes dynamically.
+                      </p>
+                      <div className="mt-3 bg-white p-2 border border-[#1A1A1A]/30 text-[10px] grid grid-cols-2 gap-2">
+                        <div>CPU Temp: {hardwareState.cpu.temp.toFixed(1)}°C</div>
+                        <div>GPU Temp: {hardwareState.gpu.temp.toFixed(1)}°C</div>
+                        <div>Total Bit Errors: {hardwareState.bitErrors}</div>
+                        <div>Observability Level: 100% (Real-time)</div>
+                      </div>
+                    </div>
+
+                    <div className="border-2 border-[#1A1A1A] p-4 bg-[#F5F2ED] relative">
+                      <div className="text-blue-600 font-bold tracking-wider text-xs uppercase flex items-center gap-1.5 border-b border-[#1A1A1A] pb-1.5 mb-2">
+                        <Network className="w-4 h-4" />
+                        <span>02. CAUSAL INTERVENTION ENGINE (Autonomous)</span>
+                      </div>
+                      <p className="text-neutral-700 text-[11px] font-serif italic leading-relaxed">
+                        Autonomously triggers state actions or parameter sweeps when microstructural bounds are violated, executing counterfactual simulations to optimize system states.
+                      </p>
+                      <div className="mt-3 bg-white p-2 border border-[#1A1A1A]/30 text-[10px]">
+                        Active Controller: Autonomous Policy Optimizer (RL-based)
+                      </div>
+                    </div>
+
+                    <div className="border-2 border-[#1A1A1A] p-4 bg-[#F5F2ED] relative">
+                      <div className="text-emerald-600 font-bold tracking-wider text-xs uppercase flex items-center gap-1.5 border-b border-[#1A1A1A] pb-1.5 mb-2">
+                        <Server className="w-4 h-4" />
+                        <span>03. STATE TENSOR & BENCHMARKING (Cross-Domain)</span>
+                      </div>
+                      <p className="text-neutral-700 text-[11px] font-serif italic leading-relaxed">
+                        Compiles environment variables into standard mathematical tensors, establishing comparative testing benchmarks against baseline XGBoost models and pure physics calculations.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="h-full flex flex-col justify-center items-center text-center p-6 border-2 border-dashed border-[#1A1A1A] bg-[#FCFAF7]">
+                    <Layers className="w-12 h-12 text-[#1A1A1A] mb-3 animate-pulse" />
+                    <p className="font-bold text-[#1A1A1A] uppercase tracking-wider text-xs mb-1.5 font-mono">SINGULARITY FULL-STACK INTERACTION LAYERS</p>
+                    <div className="text-left font-mono text-[10px] space-y-2 text-neutral-600 border border-[#1A1A1A] p-4 bg-white shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] max-w-md w-full">
+                      <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-[#1A1A1A] rounded-full" /> <span>01. BIT-LEVEL OBSERVABILITY (HardwareState)</span></div>
+                      <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-[#1A1A1A] rounded-full" /> <span>02. CAUSAL INTERVENTION ENGINE (Autonomous)</span></div>
+                      <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-[#1A1A1A] rounded-full" /> <span>03. STATE TENSOR & BENCHMARKING (Cross-Domain)</span></div>
+                    </div>
+                    <p className="text-neutral-500 text-[11px] font-serif italic mt-3 max-w-sm">
+                      Click "EXPAND FULL" to audit precise diagnostic registries and review active telemetry states.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* BOTTOM WIREFRAME FOOTER STATUS */}
+        <div className="bg-[#1A1A1A] text-[#F5F2ED] font-mono text-[10px] py-3.5 px-4 border-2 border-[#1A1A1A] flex flex-col md:flex-row justify-between items-center gap-3 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]">
+          <div className="flex flex-wrap justify-center md:justify-start gap-4 md:gap-6 font-bold uppercase tracking-wider">
+            <span>STATUS: Bit-Level Observable</span>
+            <span className="text-neutral-600 hidden md:inline">|</span>
             <span>State Tensor: Unified</span>
+            <span className="text-neutral-600 hidden md:inline">|</span>
             <span>Hardware: GPU/CPU Telemetry Active</span>
-            <span>Causal Engine: Autonomous</span>
           </div>
-          <div className="text-[10px] italic opacity-75 font-serif max-w-xl text-left md:text-right leading-relaxed">
-            SMC v2.0 now includes bit-level observability, autonomous causal interventions, and cross-domain state tensors.
-            Transitions from simulation to real-world deployment are 85% complete.
+          <div className="text-emerald-400 font-bold uppercase tracking-widest flex items-center gap-2">
+            <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+            <span>SMC V2.0 ENGINE ACTIVE</span>
           </div>
-        </footer>
-      </main>
-
-      {/* Side Chat Tab */}
-      <button
-        onClick={() => setIsChatOpen(!isChatOpen)}
-        className="hidden md:flex fixed right-0 top-1/2 -translate-y-1/2 z-40 bg-[#1A1A1A] hover:bg-neutral-800 text-emerald-400 border-l-2 border-y-2 border-emerald-500 hover:border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.25)] py-5 px-1.5 cursor-pointer transition-all rounded-l-md flex-col items-center gap-2 font-mono select-none"
-        style={{ writingMode: 'vertical-lr' }}
-      >
-        <span className="flex items-center gap-1 font-bold text-[9px] tracking-widest uppercase">
-          <Terminal className="w-3.5 h-3.5 rotate-90 inline-block text-emerald-400 animate-pulse" />
-          ACTUATOR CHAT
-        </span>
-      </button>
-
-      {/* Chat Drawer */}
-      <div
-        className={`fixed inset-y-0 right-0 z-50 w-full sm:w-[500px] md:w-[650px] bg-[#0A0A0F] border-l-2 border-[#1A1A1A] shadow-[0_0_50px_rgba(0,0,0,0.8)] transition-transform duration-300 transform flex flex-col ${
-          isChatOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
-      >
-        <div className="bg-[#1A1A1A] text-[#F5F2ED] font-mono text-[11px] p-4 flex items-center justify-between border-b border-neutral-800">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-            <span className="font-bold tracking-widest uppercase text-emerald-400">HARNESS CONSOLE (SMC v2.0)</span>
-          </div>
-          <button
-            onClick={() => setIsChatOpen(false)}
-            className="bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 px-3 py-1 text-[10px] font-bold cursor-pointer transition-colors flex items-center gap-1"
-          >
-            <X className="w-3.5 h-3.5" />
-            <span>CLOSE</span>
-          </button>
         </div>
-        <div className="flex-1 overflow-y-auto p-4 bg-[#0A0A0F]">
-          <HarnessConsole
-            onLogEvent={addTemporalEvent}
-            worldState={worldState}
-            preloadedPrompt={harnessPreloadedPrompt}
-            onClearPreloadedPrompt={() => setHarnessPreloadedPrompt('')}
-            hardwareState={hardwareState}
-          />
-        </div>
+
       </div>
-
-      {isChatOpen && (
-        <div
-          onClick={() => setIsChatOpen(false)}
-          className="fixed inset-0 z-30 bg-black/70 backdrop-blur-xs transition-opacity duration-300"
-        />
-      )}
     </div>
   );
 }
