@@ -1,10 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Terminal, Play, Cpu, Database, HelpCircle, ChevronRight, AlertCircle, 
   Sparkles, BookOpen, Layers, Settings, ChevronDown, ChevronUp, RefreshCw, 
   Lightbulb, Radio, CheckCircle, Flame, Eye, Save, Trash2, Globe, Activity
 } from 'lucide-react';
 import { HardwareState } from '../types';
+import { OpenClawAdapter } from '../utils/openClawAdapter';
+import { ArbiterEngine } from '../utils/arbiterEngine';
+import { RealityAnchor } from '../utils/realityAnchor';
+import { ScientificPassport } from '../utils/scientificPassport';
 
 interface HarnessConsoleProps {
   onLogEvent: (details: string, type: 'info' | 'physics' | 'interaction') => void;
@@ -104,6 +108,11 @@ export default function HarnessConsole({
   const terminalEndRef = useRef<HTMLDivElement | null>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Initialize Scientific OS Components
+  const openClaw = useMemo(() => new OpenClawAdapter(), []);
+  const arbiter = useMemo(() => new ArbiterEngine(openClaw), [openClaw]);
+  const realityAnchor = useMemo(() => new RealityAnchor(openClaw), [openClaw]);
 
   // Presets & Planner Experiments matching each agent
   const agentExperiments: { [key: string]: { title: string; query: string }[] } = {
@@ -396,6 +405,31 @@ export default function HarnessConsole({
       saveMemories(newMems);
 
       addLog(`[ACT] Persistent storage updated. Write successfully committed.`);
+
+      // Log directly to the non-repudiable Scientific Passport ledger
+      try {
+        const passportRecord = await ScientificPassport.logExperiment({
+          domain: activeAgent.toUpperCase(),
+          hypothesis: data.primaryReasoning ? data.primaryReasoning.slice(0, 400) : query,
+          input: { query, sensorSummary },
+          prediction: data.arbiterDecision || data.primaryReasoning,
+          stateTensor: {
+            spatial: { x: activeWind.x, y: activeWind.y, z: activeWater },
+            temporal: { t: Date.now(), dt: 1.0 },
+            features: { diffusionRate: activeDiff, heatFactor: activeHeat, gravityFactor: activeGravity }
+          },
+          hardwareState: hardwareState || {
+            gpu: { temp: 58, memoryUsage: 45, clockSpeed: 1450 },
+            cpu: { load: 12, temp: 42 },
+            bitErrors: 0
+          },
+          modelsUsed: [primaryModel, challengerModel]
+        });
+        addLog(`[PASSPORT] Signed experiment ${passportRecord.id} directly to non-repudiable ledger.`);
+      } catch (passportErr) {
+        console.error("[PASSPORT] Logging failed:", passportErr);
+      }
+
       addLog(`[ACT] Actuating physics change log triggers...`);
       onLogEvent(`Harness complete: ${data.arbiterDecision.slice(0, 100)}...`, 'physics');
 
@@ -442,6 +476,30 @@ export default function HarnessConsole({
       setChallengerOpposition(`[SANDBOX CHALLENGER] Review parameters.`);
       setSynthesizedDecision(backupDecision);
       addLog(`[SYSTEM] Client-side sandbox fallback completed.`);
+
+      // Log directly to the non-repudiable Scientific Passport ledger for Sandbox fallback
+      try {
+        const passportRecord = await ScientificPassport.logExperiment({
+          domain: activeAgent.toUpperCase(),
+          hypothesis: `Sandbox analysis: ${query}`,
+          input: { query, sensorSummary },
+          prediction: backupDecision,
+          stateTensor: {
+            spatial: { x: activeWind.x, y: activeWind.y, z: activeWater },
+            temporal: { t: Date.now(), dt: 1.0 },
+            features: { diffusionRate: activeDiff, heatFactor: activeHeat, gravityFactor: activeGravity }
+          },
+          hardwareState: hardwareState || {
+            gpu: { temp: 45, memoryUsage: 12, clockSpeed: 1200 },
+            cpu: { load: 5, temp: 38 },
+            bitErrors: 0
+          },
+          modelsUsed: ['client-sandbox-fallback']
+        });
+        addLog(`[PASSPORT] Signed sandbox experiment ${passportRecord.id} directly to ledger.`);
+      } catch (passportErr) {
+        console.error("[PASSPORT] Fallback logging failed:", passportErr);
+      }
 
       // Generate fallback procedural schematics for Sandbox
       setIsGeneratingImages(true);
@@ -554,6 +612,18 @@ export default function HarnessConsole({
       });
       const averageError = Number((combinedErrorSum / Math.max(1, outcomes.length)).toFixed(2));
       setRealityError(averageError);
+
+      // Perform validation audits on each parameter using our RealityAnchor utility
+      try {
+        const validationPromises = outcomes.map(async (o: any) => {
+          return realityAnchor.validate(o.predicted, o.actual, activeAgent, hardwareState);
+        });
+        const validations = await Promise.all(validationPromises);
+        const passCount = validations.filter(v => v.isValid).length;
+        addLog(`[REALITY ANCHOR] Evaluated ${outcomes.length} parameters. Passed physical bounds: ${passCount}/${outcomes.length}.`);
+      } catch (anchorErr) {
+        console.error("[REALITY ANCHOR] Verification error:", anchorErr);
+      }
 
       // Compute statistics based on outcomes
       let sumSqDiff = 0;

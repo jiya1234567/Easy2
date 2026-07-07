@@ -1,0 +1,70 @@
+# =====================================================================
+#  OMEGA SCIENTIFIC OPERATING SYSTEM — DOCKER ORCHESTRATION COMPASS
+# =====================================================================
+# This file orchestrates the local full-stack execution of your research
+# laboratory on your desktop. It binds OMEGA, OpenClaw, Ollama, and
+# required microservices in high-performance isolated boundaries.
+#
+# Requirements:
+#   1. Install Docker Desktop with WSL2 or native Linux Docker engine.
+#   2. For GPU Acceleration, ensure NVIDIA Container Toolkit is installed.
+#
+# To boot the ecosystem:
+#   $ docker compose up -d --build
+# =====================================================================
+
+version: '3.8'
+
+services:
+  # 🧠 OMEGA Scientific OS Application Core
+  omega-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: omega-core-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - OLLAMA_HOST=http://ollama:11434
+      - OPENCLAW_HOST=http://openclaw:8000
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - ollama
+      - openclaw
+    restart: unless-stopped
+
+  # 🦞 OpenClaw Agent Orchestrator & Manager
+  openclaw:
+    image: openclaw/openclaw:latest
+    container_name: openclaw-orchestrator
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+  # 🦙 Ollama Local Foundation Model Server
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-model-server
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    # Enable NVIDIA GPU access inside the Ollama container for low-latency inference
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
+    driver: local
