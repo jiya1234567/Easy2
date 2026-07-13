@@ -1,15 +1,108 @@
-import { HardwareState, BenchmarkResult } from '../types';
+import { HardwareState, BenchmarkResult, FailureThresholds, DEFAULT_FAILURE_THRESHOLDS } from '../types';
 import { OpenClawAdapter } from './openClawAdapter';
 
 export class RealityAnchor {
   private openClaw: OpenClawAdapter;
+  private failureThresholds: FailureThresholds;
   private benchmarkResults: BenchmarkResult[] = [];
 
-  constructor(openClaw: OpenClawAdapter) {
+  constructor(openClaw: OpenClawAdapter, failureThresholds: FailureThresholds = DEFAULT_FAILURE_THRESHOLDS) {
     this.openClaw = openClaw;
+    this.failureThresholds = failureThresholds;
   }
 
-  // Validate a prediction against ground truth or benchmarks
+  // Detect failure based on domain-specific thresholds
+  detectFailure(
+    domain: string,
+    prediction: any,
+    groundTruth: any,
+    hardwareState?: HardwareState
+  ): { isFailure: boolean; failureType: string; severity: number } {
+    const d = domain.toLowerCase();
+    const thresholds = this.failureThresholds.economics || this.failureThresholds.default;
+    let isFailure = false;
+    let failureType = '';
+    let severity = 0;
+
+    // Economics / Banking
+    if (d.includes('economics') || d.includes('finance') || d.includes('banking')) {
+      const econThresholds = this.failureThresholds.economics;
+      if (prediction.mae && prediction.mae > econThresholds.mae) {
+        isFailure = true;
+        failureType = 'high_mae';
+        severity = (prediction.mae - econThresholds.mae) / econThresholds.mae;
+      }
+      if (prediction.rSquared && prediction.rSquared < econThresholds.rSquared) {
+        isFailure = true;
+        failureType = 'low_r_squared';
+        severity = Math.max(severity, (econThresholds.rSquared - prediction.rSquared) / econThresholds.rSquared);
+      }
+      if (prediction.ciWidth && prediction.ciWidth > econThresholds.ciWidth) {
+        isFailure = true;
+        failureType = 'wide_ci';
+        severity = Math.max(severity, (prediction.ciWidth - econThresholds.ciWidth) / econThresholds.ciWidth);
+      }
+    }
+    // Quantum
+    else if (d.includes('quantum') || d.includes('spin')) {
+      const qThresholds = this.failureThresholds.quantum;
+      if (prediction.energyError && prediction.energyError > qThresholds.energyError) {
+        isFailure = true;
+        failureType = 'high_energy_error';
+        severity = (prediction.energyError - qThresholds.energyError) / qThresholds.energyError;
+      }
+      if (prediction.magnetizationError && prediction.magnetizationError > qThresholds.magnetizationError) {
+        isFailure = true;
+        failureType = 'high_magnetization_error';
+        severity = Math.max(severity, (qThresholds.magnetizationError - prediction.magnetizationError) / qThresholds.magnetizationError);
+      }
+    }
+    // Weather
+    else if (d.includes('weather') || d.includes('climate') || d.includes('observation')) {
+      const wThresholds = this.failureThresholds.weather;
+      if (prediction.pathErrorKm && prediction.pathErrorKm > wThresholds.pathErrorKm) {
+        isFailure = true;
+        failureType = 'high_path_error';
+        severity = (prediction.pathErrorKm - wThresholds.pathErrorKm) / wThresholds.pathErrorKm;
+      }
+      if (prediction.tempError && prediction.tempError > wThresholds.tempError) {
+        isFailure = true;
+        failureType = 'high_temp_error';
+        severity = Math.max(severity, (prediction.tempError - wThresholds.tempError) / wThresholds.tempError);
+      }
+    }
+    // Materials
+    else if (d.includes('materials') || d.includes('fab')) {
+      const mThresholds = this.failureThresholds.materials;
+      if (prediction.stressError && prediction.stressError > mThresholds.stressError) {
+        isFailure = true;
+        failureType = 'high_stress_error';
+        severity = (prediction.stressError - mThresholds.stressError) / mThresholds.stressError;
+      }
+      if (prediction.defectRate && prediction.defectRate > mThresholds.defectRate) {
+        isFailure = true;
+        failureType = 'high_defect_rate';
+        severity = Math.max(severity, (prediction.defectRate - mThresholds.defectRate) / mThresholds.defectRate);
+      }
+    }
+    // Default fallback
+    else {
+      if (prediction.mae && prediction.mae > thresholds.mae) {
+        isFailure = true;
+        failureType = 'high_mae';
+        severity = (prediction.mae - thresholds.mae) / thresholds.mae;
+      }
+      if (prediction.rSquared && prediction.rSquared < thresholds.rSquared) {
+        isFailure = true;
+        failureType = 'low_r_squared';
+        severity = Math.max(severity, (thresholds.rSquared - prediction.rSquared) / thresholds.rSquared);
+      }
+    }
+
+    return { isFailure, failureType, severity };
+  }
+
+  // Validate prediction (extended to include failure detection)
   async validate(
     prediction: any,
     groundTruth: any,
@@ -20,7 +113,12 @@ export class RealityAnchor {
     error: number;
     confidence: number;
     feedback: string;
+    isFailure: boolean;
+    failureType?: string;
+    severity?: number;
   }> {
+    const { isFailure, failureType, severity } = this.detectFailure(domain, prediction, groundTruth, hardwareState);
+    
     // Use Phi-3 to critique the prediction
     const critique = await this.openClaw.assignTask(
       'validation',
@@ -52,7 +150,6 @@ export class RealityAnchor {
       error = 0.02; // general default
     }
 
-    // Confidence: Inverse of error (normalized)
     const confidence = Number((1 / (1 + error)).toFixed(3));
 
     return {
@@ -60,6 +157,9 @@ export class RealityAnchor {
       error: Number(error.toFixed(4)),
       confidence,
       feedback: critique.critique || critique.hypothesis || 'Prediction matches nominal physical drift boundary limits perfectly.',
+      isFailure,
+      failureType,
+      severity,
     };
   }
 
@@ -69,7 +169,6 @@ export class RealityAnchor {
     input: any,
     hardwareState?: HardwareState
   ): Promise<BenchmarkResult[]> {
-    // Run against baselines
     const baselines: BenchmarkResult[] = [
       { model: 'XGBoost', mae: 6.2, rSquared: 0.85, latencyMs: 120 },
       { model: 'Pure Physics', mae: 4.1, rSquared: 0.92, latencyMs: 80 },

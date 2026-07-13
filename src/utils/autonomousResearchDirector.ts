@@ -227,6 +227,43 @@ export class AutonomousResearchDirector {
     return `${header}\n${rows}\n${footer}`;
   }
 
+  // Check if autonomous termination conditions are met (RSD v1 Target Limit Checkers)
+  checkTermination(
+    domain: string,
+    currentCycle: number,
+    improvements: number[],
+    runtimeMs: number,
+    hardwareState?: HardwareState
+  ): { terminate: boolean; reason: string } {
+    const conditions = {
+      maxCycles: 8,
+      minImprovement: 0.01,
+      maxRuntimeMs: 600000, // 10 mins
+      maxGpuTemp: 82, // 82°C safety threshold
+    };
+
+    if (currentCycle >= conditions.maxCycles) {
+      return { terminate: true, reason: `Max cycle limit of ${conditions.maxCycles} reached.` };
+    }
+
+    if (improvements.length > 1) {
+      const lastImprovement = improvements[improvements.length - 1];
+      if (lastImprovement < conditions.minImprovement) {
+        return { terminate: true, reason: `Convergence achieved. Cycle improvement (${lastImprovement.toFixed(4)}) is below threshold (${conditions.minImprovement}).` };
+      }
+    }
+
+    if (runtimeMs >= conditions.maxRuntimeMs) {
+      return { terminate: true, reason: `Max runtime of ${(conditions.maxRuntimeMs / 1000).toFixed(0)}s exceeded.` };
+    }
+
+    if (hardwareState && hardwareState.gpu.temp >= conditions.maxGpuTemp) {
+      return { terminate: true, reason: `Safety thermal cutoff triggered: GPU temperature (${hardwareState.gpu.temp}°C) exceeds limit (${conditions.maxGpuTemp}°C).` };
+    }
+
+    return { terminate: false, reason: 'System operating within safe margins.' };
+  }
+
   // Convert data to StateTensor
   private dataToStateTensor(data: any, domain: string): StateTensor {
     return {

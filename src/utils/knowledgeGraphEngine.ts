@@ -1,5 +1,6 @@
-import { StateTensor, HardwareState } from '../types';
+import { StateTensor, HardwareState, CausalGraph } from '../types';
 import { OpenClawAdapter } from './openClawAdapter';
+import { ScientificPassport } from './scientificPassport';
 
 export interface TheoryVersion {
   id: string;
@@ -17,6 +18,7 @@ export interface TheoryVersion {
 export class KnowledgeGraphEngine {
   private openClaw: OpenClawAdapter;
   private theoryVersions: TheoryVersion[] = [];
+  private causalGraphs: CausalGraph[] = [];
 
   constructor(openClaw: OpenClawAdapter) {
     this.openClaw = openClaw;
@@ -86,6 +88,88 @@ export class KnowledgeGraphEngine {
         theory.evidence.push(experimentId);
       }
     }
+  }
+
+  // Create or update a causal graph
+  async updateCausalGraph(
+    domain: string,
+    nodes: string[],
+    edges: { from: string; to: string; confidence: number; evidence: string[] }[],
+    stateTensor: StateTensor,
+    hardwareState?: HardwareState
+  ): Promise<CausalGraph> {
+    let graph = this.causalGraphs.find(g => g.domain === domain);
+    const version = graph ? graph.version + 1 : 1;
+
+    const newGraph: CausalGraph = {
+      nodes: Array.from(new Set([...(graph?.nodes || []), ...nodes])),
+      edges: [...(graph?.edges || []), ...edges],
+      version,
+      lastUpdated: new Date(),
+      domain,
+    };
+
+    // Remove duplicate edges
+    newGraph.edges = this.deduplicateEdges(newGraph.edges);
+
+    // Log to Scientific Passport
+    await ScientificPassport.logExperiment({
+      domain,
+      hypothesis: `Updated Causal Graph v${version} for ${domain}`,
+      input: { nodes, edges },
+      stateTensor,
+      hardwareState,
+      modelsUsed: ['harness'],
+      prediction: `Stabilized causal graph under v${version} updates.`
+    });
+
+    if (!graph) {
+      this.causalGraphs.push(newGraph);
+    } else {
+      const idx = this.causalGraphs.findIndex(g => g.domain === domain);
+      this.causalGraphs[idx] = newGraph;
+    }
+
+    return newGraph;
+  }
+
+  // Deduplicate edges
+  private deduplicateEdges(edges: { from: string; to: string; confidence: number; evidence: string[] }[]): {
+    from: string;
+    to: string;
+    confidence: number;
+    evidence: string[];
+  }[] {
+    const uniqueEdges = new Map<string, { from: string; to: string; confidence: number; evidence: string[] }>();
+    edges.forEach(edge => {
+      const key = `${edge.from}->${edge.to}`;
+      if (!uniqueEdges.has(key) || uniqueEdges.get(key)!.confidence < edge.confidence) {
+        uniqueEdges.set(key, edge);
+      }
+    });
+    return Array.from(uniqueEdges.values());
+  }
+
+  // Get causal graph for a domain
+  getCausalGraph(domain: string): CausalGraph | undefined {
+    return this.causalGraphs.find(g => g.domain === domain);
+  }
+
+  // Visualize causal graph as Mermaid
+  visualizeCausalGraph(domain: string): string {
+    const graph = this.getCausalGraph(domain);
+    if (!graph) return `No causal graph found for ${domain}.`;
+
+    return `
+## Causal Graph: ${domain} (v${graph.version})
+\`\`\`mermaid
+graph TD
+  ${graph.edges.map(edge => `  ${edge.from} -->|${edge.confidence.toFixed(2)}| ${edge.to}`).join('\n  ')}
+\`\`\`
+**Last Updated**: ${graph.lastUpdated.toISOString()}
+**Nodes**: ${graph.nodes.length}
+**Edges**: ${graph.edges.length}
+    `;
   }
 
   // Generate a knowledge graph report

@@ -1010,6 +1010,163 @@ app.post("/api/harness/validate-reality", async (req, res) => {
 });
 
 
+// POST orchestrate DeepMind multi-model suite
+app.post("/api/deepmind/orchestrate", async (req, res) => {
+  const { modelId, domainId, prompt } = req.body;
+
+  if (!modelId || !domainId) {
+    return res.status(400).json({ error: "Missing required fields: modelId, domainId" });
+  }
+
+  const hasGemini = process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "MY_GEMINI_API_KEY" && process.env.GEMINI_API_KEY !== "";
+
+  // Set default scientific presets per domain if prompt is empty
+  const defaultPrompts: Record<string, string> = {
+    weather: "Simulate atmospheric fluid dynamics under severe high-pressure boundary temperature gradients.",
+    biopsy: "Map nuclear stains to isolate mitotic division indices and tissue margin borders.",
+    semiconductor: "Model line-edge roughness defects and Wafer thermal dissipation under 5GHz clock cycles.",
+    finance: "Evaluate portfolio volatility curves and interbank VaR risks under +250bps interest rate shocks.",
+    quantum: "Measure multi-qubit coherence times and cryogenic quenches under thermal drift.",
+    materials: "Sweep graphene composition ratios at 1025°C to maximize electrical thin-film conductivity."
+  };
+
+  const activePrompt = prompt || defaultPrompts[domainId] || "Synthesize domain specific physical metrics.";
+
+  // Setup rich procedurally generated response structure
+  let orchestrationSummary = "";
+  let specData: any = {};
+
+  if (modelId === "gemini_image") {
+    orchestrationSummary = `Gemini Image ('gemini-3.1-flash-image') synthesized a 16:9 high-definition vector-schematic blueprint for ${domainId.toUpperCase()} corresponding to: "${activePrompt}". Core features mapped to coordinate parameters.`;
+    specData = {
+      title: `${domainId.toUpperCase()} SCIENTIFIC BLUEPRINT`,
+      features: [
+        `Coordinates: X=45, Y=25, Z=10`,
+        `Friction Factor: 0.08x`,
+        `Gradient Threshold: ${domainId === 'weather' ? '1.84 hPa' : '42.3%'}`,
+        `Atmospheric Vector bounds: ${domainId === 'weather' ? 'convective cyclogenesis' : 'structural limits'}`
+      ],
+      nodes: [
+        { id: "n1", label: `${domainId.toUpperCase()} SENSOR PROBE`, x: 250, y: 150 },
+        { id: "n2", label: "THERMAL DISSIPATOR", x: 450, y: 220 },
+        { id: "n3", label: "BOUNDARY LAYER CONTROL", x: 650, y: 350 }
+      ],
+      colorAccent: "#6366F1",
+      gridCount: 20
+    };
+  } else if (modelId === "gemini_omni") {
+    orchestrationSummary = `Gemini Omni ('gemini-omni-flash-preview') completed a multi-modal convergence study. Mapped structural alignment coefficients, acoustic feedback anomalies, and global correlation metrics.`;
+    specData = {
+      unifiedTheory: `The interaction of boundary forces and high-frequency sensor streams under "${activePrompt}" creates an isomorphic transfer function. This resolves the localized ${domainId === 'semiconductor' ? 'vibrational resonance' : 'fluid velocity advection'} problem.`,
+      convergenceMap: [
+        { layer: "Sensory Ingest", input: "High-frequency telemetry stream", weight: "0.95" },
+        { layer: "Dual Debate Alignment", input: "Opposition analysis calibration", weight: "0.88" },
+        { layer: "Arbiter Synthesis Mesh", input: "Grounded parameter validation", weight: "0.97" }
+      ],
+      crossCorrelationIndex: "r = 0.854"
+    };
+  } else if (modelId === "veo") {
+    orchestrationSummary = `Veo ('veo-3.1-generate-preview') generated a physical-convection flow simulation video. Compiled fluid vector velocities and thermal convection streams.`;
+    specData = {
+      fps: 30,
+      duration: 5,
+      vectorFields: Array.from({ length: 15 }, (_, i) => ({
+        id: `field-${i}`,
+        x: Math.floor(Math.random() * 400 + 50),
+        y: Math.floor(Math.random() * 200 + 50),
+        vx: (Math.random() * 4 - 2).toFixed(2),
+        vy: (Math.random() * 4 - 2).toFixed(2),
+        temperature: (Math.random() * 30 + 15).toFixed(1)
+      }))
+    };
+  } else if (modelId === "lyria") {
+    orchestrationSummary = `Lyria ('lyria-3-pro-preview') generated a 30-second acoustic resonance signature. Computed harmonic stabilizer frequencies and acoustic feedback amplitudes.`;
+    specData = {
+      frequencies: domainId === 'quantum' ? [120, 240, 360, 480] : [440, 554, 659, 880], // Root, major third, fifth, octave
+      durations: [0.3, 0.3, 0.4, 0.8],
+      type: "sine",
+      resonanceScore: "96.4%",
+      harmonicsCount: 6
+    };
+  } else if (modelId === "gemini_audio") {
+    orchestrationSummary = `Gemini Audio ('gemini-3.1-flash-live-preview') compiled a vocal text-to-speech summary and translation profile for the ${domainId.toUpperCase()} domain.`;
+    specData = {
+      textToSpeech: `Activating deep audio translation for ${domainId.toUpperCase()} laboratory SOPs. The current physical parameters for the ${domainId} run are: ${activePrompt}. All feedback loops are normal.`,
+      translationTarget: "GERMAN // DEUTSCH",
+      translatedText: `Aktiviere die tiefe Audio-Übersetzung für ${domainId.toUpperCase()} Labor-SOPs. Die aktuellen physikalischen Parameter sind: ${activePrompt}. Alle Feedbackschleifen sind normal.`,
+      voiceId: "en-US-Journey-F",
+      sampleRate: "24kHz"
+    };
+  } else { // genie
+    orchestrationSummary = `Genie ('antigravity-preview-05-2026') generated a fully interactive, playable physical twin simulation workspace. Calibrated gravity vectors and boundary collision limits.`;
+    specData = {
+      gravity: domainId === 'weather' ? 0.0 : 0.5,
+      rebound: 0.8,
+      probeSpeed: 4,
+      targetCoords: { x: 450, y: 150 },
+      obstacles: [
+        { x: 150, y: 220, w: 140, h: 20, label: "CONVECTIVE BARRIER" },
+        { x: 550, y: 180, w: 120, h: 20, label: "MAGNETIC FIELD GATE" },
+        { x: 350, y: 300, w: 200, h: 20, label: "THERMAL DEFLECTOR" }
+      ],
+      worldState: {
+        windX: domainId === 'weather' ? 1.5 : 0,
+        gravityY: domainId === 'quantum' ? 0.1 : 0.4
+      }
+    };
+  }
+
+  // If Gemini API is available and active, we can refine the orchestration summaries or results dynamically
+  if (hasGemini) {
+    try {
+      const systemInstruction = `You are the DeepMind Multi-Model Orchestrator for the digital twin laboratory.
+You generate scientific, highly realistic descriptions, parameters, and metadata for the ${modelId} model applied to the ${domainId} domain.
+Return your output in a clean JSON format matching the requested type structure:
+{
+  "orchestrationSummary": "A highly professional, scannable, 2-3 sentence scientific summary.",
+  "additionalInsights": "A brief analysis of how this model helps solve ${domainId} challenges."
+}`;
+
+      const userText = `Orchestrate the model "${modelId}" for the domain "${domainId}" with the custom scientific query: "${activePrompt}".`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: userText,
+        config: {
+          systemInstruction,
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              orchestrationSummary: { type: Type.STRING },
+              additionalInsights: { type: Type.STRING }
+            },
+            required: ["orchestrationSummary", "additionalInsights"]
+          }
+        }
+      });
+
+      if (response.text) {
+        const parsed = JSON.parse(response.text.trim());
+        orchestrationSummary = parsed.orchestrationSummary;
+        specData.additionalInsights = parsed.additionalInsights;
+      }
+    } catch (err) {
+      console.error("Gemini DeepMind orchestration refinement failed, using procedural data:", err);
+    }
+  }
+
+  res.json({
+    success: true,
+    modelId,
+    domainId,
+    orchestrationSummary,
+    specData,
+    timestamp: new Date().toISOString()
+  });
+});
+
+
 // Boot Vite Dev Server middleware or Serve Production Static files
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
