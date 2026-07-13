@@ -458,7 +458,7 @@ Ensure the coordinates play a heavy part. Place nodes of the spatial graph nearb
     
     res.json(policy);
   } catch (error) {
-    console.error("Gemini simulation failed, using fallback metrics:", error);
+    console.warn("Gemini simulation failed, using fallback metrics:", error);
     policy.simulationData = fallbackSimulation;
     res.json(policy);
   }
@@ -597,7 +597,7 @@ Make the debate highly professional, filled with scientific rigor, coordinate-sp
       throw new Error("Empty response from Gemini");
     }
   } catch (error) {
-    console.error("Gemini harness run failed, using fallback:", error);
+    console.warn("Gemini harness run failed, using fallback:", error);
     const fallback = getFallbackDebate();
     res.json({
       agent,
@@ -757,7 +757,7 @@ app.post("/api/harness/generate-images", async (req, res) => {
         }
         return "";
       }).catch((err) => {
-        console.error("Gemini proposal image generation failed:", err);
+        console.warn("Gemini proposal image generation failed:", err);
         return "";
       });
 
@@ -780,7 +780,7 @@ app.post("/api/harness/generate-images", async (req, res) => {
         }
         return "";
       }).catch((err) => {
-        console.error("Gemini final image generation failed:", err);
+        console.warn("Gemini final image generation failed:", err);
         return "";
       });
 
@@ -789,7 +789,7 @@ app.post("/api/harness/generate-images", async (req, res) => {
       finalImage = fImg;
     }
   } catch (error) {
-    console.error("Error generating comparison images via Gemini, triggering blueprint generator:", error);
+    console.warn("Error generating comparison images via Gemini, triggering blueprint generator:", error);
   }
 
   // Fallbacks if generation returned empty or failed
@@ -923,7 +923,7 @@ Ensure the extracted numbers are highly accurate to what's written or mathematic
       throw new Error("Empty response from extraction model");
     }
   } catch (error) {
-    console.error("Prediction extraction failed, using fallback:", error);
+    console.warn("Prediction extraction failed, using fallback:", error);
     res.json({ metrics: getFallbackMetrics(agent, decisionText, worldState) });
   }
 });
@@ -1152,7 +1152,7 @@ Return your output in a clean JSON format matching the requested type structure:
         specData.additionalInsights = parsed.additionalInsights;
       }
     } catch (err) {
-      console.error("Gemini DeepMind orchestration refinement failed, using procedural data:", err);
+      console.warn("Gemini DeepMind orchestration refinement failed, using procedural data:", err);
     }
   }
 
