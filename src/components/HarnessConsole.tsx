@@ -305,6 +305,7 @@ interface HarnessConsoleProps {
   preloadedPrompt?: string;
   onClearPreloadedPrompt?: () => void;
   hardwareState?: HardwareState;
+  initialTab?: 'console' | 'memory' | 'architecture' | 'reality' | 'roadtests' | 'scientist_interface' | 'deepmind_synthesis';
 }
 
 interface HarnessMemory {
@@ -320,10 +321,13 @@ export default function HarnessConsole({
   worldState, 
   preloadedPrompt, 
   onClearPreloadedPrompt,
-  hardwareState
+  hardwareState,
+  initialTab
 }: HarnessConsoleProps) {
   const [activeAgent, setActiveAgent] = useState<string>('democratic');
   const [query, setQuery] = useState<string>('Analyze the thermodynamic friction of high-velocity mass transfer under 1.5x diffusion coefficient.');
+  const [contextData, setContextData] = useState<string>('');
+  const [showContextData, setShowContextData] = useState<boolean>(false);
   
   // Watch for preloaded prompt from SOP Cheat Sheets
   useEffect(() => {
@@ -341,7 +345,14 @@ export default function HarnessConsole({
   const [harnessLogs, setHarnessLogs] = useState<string[]>([]);
   const [memories, setMemories] = useState<HarnessMemory[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'console' | 'memory' | 'architecture' | 'reality' | 'roadtests' | 'scientist_interface' | 'deepmind_synthesis'>('console');
+  const [activeTab, setActiveTab] = useState<'console' | 'memory' | 'architecture' | 'reality' | 'roadtests' | 'scientist_interface' | 'deepmind_synthesis'>(initialTab || 'console');
+
+  // Watch for initialTab changes to switch tab dynamically
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
 
   // DeepMind Orchestrator State Variables
   const [selectedDeepMindModel, setSelectedDeepMindModel] = useState<'gemini_image' | 'gemini_omni' | 'veo' | 'lyria' | 'gemini_audio' | 'genie'>('gemini_omni');
@@ -671,7 +682,8 @@ export default function HarnessConsole({
           primaryModel,
           challengerModel,
           useDebate,
-          worldState
+          worldState,
+          contextData
         })
       });
 
@@ -1498,6 +1510,53 @@ Instead of a random sweep, the **Curiosity Engine** evaluated entropy and inform
       {activeTab === 'console' && (
         <div className="space-y-6">
 
+          {/* HYPOTHESIS ENGINE ACROSS MULTI-ASSET NETWORKS (MATCHES PIC 2) */}
+          <div className="border-2 border-[#1A1A1A] bg-[#FCFAF7] p-5 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] flex flex-col gap-4 text-left">
+            <div className="flex items-center gap-2 border-b border-[#1A1A1A]/30 pb-2">
+              <Sparkles className="w-5 h-5 text-indigo-600 animate-pulse" />
+              <h3 className="font-serif font-black text-sm uppercase tracking-wider text-[#1A1A1A]">
+                Hypothesis Engine across Multi-Asset Networks
+              </h3>
+            </div>
+            
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-600">
+                Enter Hypothesis:
+              </label>
+              <textarea
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Enter formal scientific hypothesis or physical relation..."
+                className="w-full h-20 p-3 text-xs font-mono border-2 border-[#1A1A1A] bg-white leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold"
+              />
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={executeHarnessLoop}
+                disabled={isRunning}
+                className="bg-[#1A1A1A] hover:bg-neutral-800 disabled:bg-neutral-300 text-white font-mono text-xs uppercase tracking-wider py-2.5 px-4 flex items-center gap-2 cursor-pointer border border-[#1A1A1A] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 transition font-bold"
+              >
+                <Play className={`w-3.5 h-3.5 text-emerald-400 ${isRunning ? 'animate-spin' : ''}`} />
+                {isRunning ? 'RUNNING VALIDATION...' : 'RUN SCIENTIFIC VALIDATION'}
+              </button>
+
+              <button
+                onClick={async () => {
+                  if (isRunning) return;
+                  setIsRunning(true);
+                  onLogEvent("Autonomous Research Director initiated next experiment plan loop. Running multi-modal parameter tuning...", "physics");
+                  executeHarnessLoop();
+                }}
+                disabled={isRunning}
+                className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-neutral-300 text-white font-mono text-xs uppercase tracking-wider py-2.5 px-4 flex items-center gap-2 cursor-pointer border border-emerald-800 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 transition font-bold"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 text-white ${isRunning ? 'animate-spin' : ''}`} />
+                <span>START DISCOVERY LOOP</span>
+              </button>
+            </div>
+          </div>
+
           {/* INFERENCE STACK - MATCHING SCREENSHOT */}
           <div className="bg-white border-2 border-[#1A1A1A] overflow-hidden">
             <button 
@@ -1703,7 +1762,7 @@ Instead of a random sweep, the **Curiosity Engine** evaluated entropy and inform
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Enter dynamic testing guidelines or physical queries..."
-                    className="w-full h-28 p-3 text-xs font-mono bg-transparent focus:outline-none leading-relaxed border-none resize-none"
+                    className="w-full h-28 p-3 text-xs font-mono bg-transparent focus:outline-none leading-relaxed border-none resize-none font-bold"
                   />
                   <div className="flex justify-between items-center px-3 py-2 bg-neutral-50 border-t border-[#1A1A1A] gap-2">
                     <span className="text-[9px] text-neutral-500 font-mono">
@@ -1719,6 +1778,59 @@ Instead of a random sweep, the **Curiosity Engine** evaluated entropy and inform
                     </button>
                   </div>
                 </div>
+              </div>
+
+              {/* Context Data (JSON, optional) Toggle & Area */}
+              <div className="border-2 border-[#1A1A1A] p-3 bg-indigo-50/50">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono font-bold text-indigo-950 flex items-center gap-1.5">
+                    <Database className="w-3.5 h-3.5 text-indigo-700" />
+                    Context Data (JSON, optional)
+                  </span>
+                  <button
+                    onClick={() => setShowContextData(!showContextData)}
+                    className="bg-[#1A1A1A] hover:bg-neutral-800 text-white font-mono text-[9px] font-bold uppercase px-2 py-0.5 border border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] cursor-pointer"
+                  >
+                    {showContextData ? "HIDE INPUT" : "SHOW INPUT"}
+                  </button>
+                </div>
+                
+                {showContextData && (
+                  <div className="mt-2.5 space-y-2">
+                    <textarea
+                      value={contextData}
+                      onChange={(e) => setContextData(e.target.value)}
+                      placeholder='e.g., {"fed_rate": [5.25, 5.0, ...], "yield_2y": [4.95, 4.88, ...]}'
+                      className="w-full h-32 p-2.5 text-xs font-mono border-2 border-[#1A1A1A] bg-white leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold"
+                    />
+                    <div className="flex justify-between items-center text-[9px] font-mono text-indigo-700">
+                      <span>Ingest custom multi-asset metrics for debate-level calibration</span>
+                      <button
+                        onClick={() => {
+                          setContextData(JSON.stringify({
+                            "fed_rate": [5.25, 5.25, 5.25, 5.0, 4.75, 4.5, 4.25, 4.0, 3.75, 3.5, 3.5, 3.25],
+                            "yield_2y": [4.95, 4.88, 4.72, 4.55, 4.38, 4.2, 4.05, 3.92, 3.88, 3.82, 3.75, 3.68],
+                            "yield_10y": [4.82, 4.75, 4.68, 4.55, 4.42, 4.35, 4.28, 4.22, 4.18, 4.15, 4.12, 4.1],
+                            "yield_curve": [-13, -13, -4, 0, 4, 15, 23, 30, 30, 33, 37, 42],
+                            "dxy": [106.2, 105.8, 104.9, 103.8, 102.5, 101.2, 100.8, 100.2, 99.8, 99.2, 98.8, 98.2],
+                            "gold": [2050, 2080, 2150, 2280, 2350, 2420, 2380, 2450, 2510, 2580, 2620, 2680],
+                            "oil_wti": [72, 75, 78, 82, 79, 76, 74, 71, 68, 65, 63, 61],
+                            "credit_hy": [320, 335, 355, 380, 395, 415, 430, 445, 460, 480, 505, 530],
+                            "spx": [108, 106, 104, 102, 105, 107, 103, 100, 98, 96, 94, 92],
+                            "gdp_growth": [2.8, 2.6, 2.4, 2.2, 2.0, 1.8, 1.6, 1.4, 1.2, 1.0, 0.8, 0.6],
+                            "core_pce": [3.2, 3.0, 2.8, 2.6, 2.5, 2.4, 2.3, 2.2, 2.2, 2.1, 2.1, 2.0],
+                            "unemployment": [3.9, 4.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5.0]
+                          }, null, 2));
+                          setQuery("Analyze the causal transmission network of Fed policy across bonds, currency, gold, oil, credit and equity. Where is the Fed's model breaking down? What does the lag structure reveal about what the Fed is getting wrong? Is there evidence of a regime change where rate hikes are no longer transmitting to inflation as the model predicts?");
+                          setActiveAgent("finance");
+                        }}
+                        className="underline text-indigo-900 font-bold hover:text-indigo-600 cursor-pointer"
+                      >
+                        Load Fed Policy Ingress
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Quick Preset Selector */}

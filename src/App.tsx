@@ -215,6 +215,8 @@ export default function App() {
   const [showStackMap, setShowStackMap] = useState<boolean>(false);
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
   const [harnessPreloadedPrompt, setHarnessPreloadedPrompt] = useState<string>('');
+  const [harnessInitialTab, setHarnessInitialTab] = useState<'console' | 'memory' | 'architecture' | 'reality' | 'roadtests' | 'scientist_interface' | 'deepmind_synthesis'>('console');
+  const [showCommandDeck, setShowCommandDeck] = useState<boolean>(true);
   const [labUrls, setLabUrls] = useState<{ [key: string]: string }>({
     world: 'https://ai.studio/apps/08c79c7e-4cbb-4a89-9a63-6d177ea6775c',
     colony: '',
@@ -486,14 +488,12 @@ export default function App() {
     }
   }, []);
 
-  // --- Auto-Redirect Harness ---
-  useEffect(() => {
-    if (activeLab === 'harness') {
-      setActiveLab('world');
-      setIsChatOpen(true);
-      addTemporalEvent(`Redirected to Harness Chat (Actuator Console).`, 'info');
-    }
-  }, [activeLab, addTemporalEvent]);
+  // --- Open Harness Tab Helper ---
+  const openHarnessTab = (tab: 'console' | 'memory' | 'architecture' | 'reality' | 'roadtests' | 'scientist_interface' | 'deepmind_synthesis') => {
+    setHarnessInitialTab(tab);
+    setActiveLab('harness');
+    addTemporalEvent(`Opened OMEGA Harness Console tab: ${tab.toUpperCase()}`, 'interaction');
+  };
 
   // --- Selected Policy ---
   const selectedPolicy = policies.find(p => p.id === selectedPolicyId) || null;
@@ -646,6 +646,97 @@ export default function App() {
               )}
             </div>
           </div>
+        </div>
+
+        {/* OMEGA-CORE OS COMMAND DECK GRID (39 LABS) */}
+        <div className="border-2 border-[#1A1A1A] bg-white p-4 font-mono shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] flex flex-col gap-3">
+          <div className="flex justify-between items-center border-b border-[#1A1A1A]/30 pb-2">
+            <div className="flex items-center gap-2 text-xs font-bold text-[#1A1A1A]">
+              <Layers className="w-4 h-4 text-emerald-600" />
+              <span>OMEGA-CORE SYSTEM COMMAND DECK [39 LABS CONNECTED]</span>
+            </div>
+            <button
+              onClick={() => setShowCommandDeck(!showCommandDeck)}
+              className="text-[9px] font-bold border border-[#1A1A1A] px-2 py-0.5 bg-[#F5F2ED] hover:bg-neutral-100 transition cursor-pointer"
+            >
+              {showCommandDeck ? "COLLAPSE DECK" : "EXPAND DECK"}
+            </button>
+          </div>
+
+          {showCommandDeck && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 gap-1.5 text-[9px] font-bold tracking-tight">
+              {[
+                { label: "HOW TO USE", action: "sop", tab: null },
+                { label: "UNIFIED BENCHMARK", action: "benchmark", tab: null },
+                { label: "ASI CORE", action: "world", tab: null },
+                { label: "COMMAND CENTER", action: "world", tab: null },
+                { label: "FACTORY", action: "colony", tab: null },
+                { label: "ASSET RADAR", action: "finance", tab: null },
+                { label: "BACKTEST", action: "finance", tab: null },
+                { label: "WORLD MODEL", action: "world", tab: null },
+                { label: "HIERARCHY", action: "architecture", tab: null },
+                { label: "DNA EDITOR", action: "drugs", tab: null },
+                { label: "MOLECULAR DOCKING", action: "materials", tab: null },
+                { label: "DIGITAL TWIN", action: "world", tab: null },
+                { label: "HEALTH PROTOCOL", action: "neuroscience", tab: null },
+                { label: "RESEARCH DEVICE", action: "stoned", tab: null },
+                { label: "EVOLUTION", action: "colony", tab: null },
+                { label: "VISUAL MANIFOLD", action: "aromea", tab: null },
+                { label: "SINGULARITY FEED", action: "world", tab: null },
+                { label: "SCIENTIFIC DISCOVERY", action: "harness", tab: "console" },
+                { label: "DISCOVERY DASHBOARD", action: "harness", tab: "reality" },
+                { label: "ADVERSARIAL LAB", action: "harness", tab: "roadtests" },
+                { label: "SMART CITY TWIN", action: "weather", tab: null },
+                { label: "QUANTUM FEEDBACK", action: "quantum", tab: null },
+                { label: "AGRICULTURE ASI", action: "weather", tab: null },
+                { label: "WEATHER MANIFOLD", action: "weather", tab: null },
+                { label: "GLOBAL MONITORING", action: "world", tab: null },
+                { label: "ROBOTICS COMMAND", action: "harness", tab: "roadtests" },
+                { label: "REPORTS ENGINE", action: "harness", tab: "scientist_interface" },
+                { label: "HEALTH INSURANCE", action: "mental", tab: null },
+                { label: "INFERENCE DOMAIN", action: "harness", tab: "deepmind_synthesis" },
+                { label: "COMMUNITY HUB", action: "world", tab: null },
+                { label: "ASI PREDICTION KERNEL", action: "harness", tab: "console" },
+                { label: "SOP / MANUAL", action: "sop", tab: null },
+                { label: "OMEGA CORE SYNC", action: "logs", tab: null },
+                { label: "ASSI RESEARCH LAB", action: "harness", tab: "console" },
+                { label: "MECHANISTIC REPRODUCIBILITY", action: "harness", tab: "scientist_interface" },
+                { label: "25 OMEGA TESTS", action: "benchmark", tab: null },
+                { label: "REDUCIBILITY SANDBOX", action: "harness", tab: "scientist_interface" },
+                { label: "CLINICAL STRESS TEST", action: "benchmark", tab: null },
+                { label: "GAPS AUDIT", action: "harness", tab: "reality" }
+              ].map((btn, idx) => {
+                const isSelected = activeLab === btn.action && (btn.tab === null || harnessInitialTab === btn.tab);
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      if (btn.action === "harness" && btn.tab) {
+                        openHarnessTab(btn.tab as any);
+                      } else {
+                        setActiveLab(btn.action as any);
+                        setIsChatOpen(false);
+                        addTemporalEvent(`Switched to ${btn.label} Panel.`, 'info');
+                      }
+                    }}
+                    className={`border px-2.5 py-2 text-left uppercase transition cursor-pointer font-mono font-bold flex items-center justify-between gap-1 group truncate ${
+                      isSelected
+                        ? "bg-[#1A1A1A] text-white border-[#1A1A1A]"
+                        : "bg-[#FCFAF7] hover:bg-[#1A1A1A] hover:text-white border-neutral-300 hover:border-[#1A1A1A]"
+                    }`}
+                    title={btn.label}
+                  >
+                    <span className="truncate">{btn.label}</span>
+                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                      isSelected
+                        ? "bg-emerald-400 animate-pulse"
+                        : "bg-neutral-300 group-hover:bg-emerald-400"
+                    }`} />
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* MAIN LAB SCREEN */}
@@ -851,6 +942,18 @@ export default function App() {
               <span>ACTIVE LAB: {activeLab.toUpperCase()}</span>
             </span>
             <div className="space-y-8 animate-fade-in">
+              {activeLab === 'harness' && (
+                <div className="text-left">
+                  <HarnessConsole
+                    onLogEvent={addTemporalEvent}
+                    worldState={worldState}
+                    preloadedPrompt={harnessPreloadedPrompt}
+                    onClearPreloadedPrompt={() => setHarnessPreloadedPrompt('')}
+                    hardwareState={hardwareState}
+                    initialTab={harnessInitialTab}
+                  />
+                </div>
+              )}
               {activeLab === 'colony' && <ColonyDashboard onLogEvent={addTemporalEvent} />}
               {activeLab === 'radiant' && <RadiantDashboard onLogEvent={addTemporalEvent} heatFactor={worldState.heatFactor} />}
               {activeLab === 'aromea' && <AromeaDashboard onLogEvent={addTemporalEvent} windVector={worldState.windVector} diffusionRate={worldState.diffusionRate} />}
