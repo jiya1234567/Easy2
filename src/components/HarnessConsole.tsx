@@ -304,6 +304,8 @@ interface HarnessConsoleProps {
   };
   preloadedPrompt?: string;
   onClearPreloadedPrompt?: () => void;
+  preloadedContextData?: string;
+  onClearPreloadedContextData?: () => void;
   hardwareState?: HardwareState;
   initialTab?: 'console' | 'memory' | 'architecture' | 'reality' | 'roadtests' | 'scientist_interface' | 'deepmind_synthesis';
 }
@@ -321,6 +323,8 @@ export default function HarnessConsole({
   worldState, 
   preloadedPrompt, 
   onClearPreloadedPrompt,
+  preloadedContextData,
+  onClearPreloadedContextData,
   hardwareState,
   initialTab
 }: HarnessConsoleProps) {
@@ -338,6 +342,22 @@ export default function HarnessConsole({
       }
     }
   }, [preloadedPrompt, onClearPreloadedPrompt]);
+
+  // Watch for preloaded context data
+  useEffect(() => {
+    if (preloadedContextData) {
+      setContextData(preloadedContextData);
+      setShowContextData(true);
+      if (preloadedContextData.includes("teacher_industry_years")) {
+        setActiveAgent("democratic");
+      } else if (preloadedContextData.includes("fed_rate")) {
+        setActiveAgent("finance");
+      }
+      if (onClearPreloadedContextData) {
+        onClearPreloadedContextData();
+      }
+    }
+  }, [preloadedContextData, onClearPreloadedContextData]);
   const [useDebate, setUseDebate] = useState<boolean>(true);
   const [recallN, setRecallN] = useState<number>(5);
   const [isRunning, setIsRunning] = useState<boolean>(false);
@@ -1803,31 +1823,52 @@ Instead of a random sweep, the **Curiosity Engine** evaluated entropy and inform
                       placeholder='e.g., {"fed_rate": [5.25, 5.0, ...], "yield_2y": [4.95, 4.88, ...]}'
                       className="w-full h-32 p-2.5 text-xs font-mono border-2 border-[#1A1A1A] bg-white leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold"
                     />
-                    <div className="flex justify-between items-center text-[9px] font-mono text-indigo-700">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center text-[9px] font-mono text-indigo-700 gap-2">
                       <span>Ingest custom multi-asset metrics for debate-level calibration</span>
-                      <button
-                        onClick={() => {
-                          setContextData(JSON.stringify({
-                            "fed_rate": [5.25, 5.25, 5.25, 5.0, 4.75, 4.5, 4.25, 4.0, 3.75, 3.5, 3.5, 3.25],
-                            "yield_2y": [4.95, 4.88, 4.72, 4.55, 4.38, 4.2, 4.05, 3.92, 3.88, 3.82, 3.75, 3.68],
-                            "yield_10y": [4.82, 4.75, 4.68, 4.55, 4.42, 4.35, 4.28, 4.22, 4.18, 4.15, 4.12, 4.1],
-                            "yield_curve": [-13, -13, -4, 0, 4, 15, 23, 30, 30, 33, 37, 42],
-                            "dxy": [106.2, 105.8, 104.9, 103.8, 102.5, 101.2, 100.8, 100.2, 99.8, 99.2, 98.8, 98.2],
-                            "gold": [2050, 2080, 2150, 2280, 2350, 2420, 2380, 2450, 2510, 2580, 2620, 2680],
-                            "oil_wti": [72, 75, 78, 82, 79, 76, 74, 71, 68, 65, 63, 61],
-                            "credit_hy": [320, 335, 355, 380, 395, 415, 430, 445, 460, 480, 505, 530],
-                            "spx": [108, 106, 104, 102, 105, 107, 103, 100, 98, 96, 94, 92],
-                            "gdp_growth": [2.8, 2.6, 2.4, 2.2, 2.0, 1.8, 1.6, 1.4, 1.2, 1.0, 0.8, 0.6],
-                            "core_pce": [3.2, 3.0, 2.8, 2.6, 2.5, 2.4, 2.3, 2.2, 2.2, 2.1, 2.1, 2.0],
-                            "unemployment": [3.9, 4.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5.0]
-                          }, null, 2));
-                          setQuery("Analyze the causal transmission network of Fed policy across bonds, currency, gold, oil, credit and equity. Where is the Fed's model breaking down? What does the lag structure reveal about what the Fed is getting wrong? Is there evidence of a regime change where rate hikes are no longer transmitting to inflation as the model predicts?");
-                          setActiveAgent("finance");
-                        }}
-                        className="underline text-indigo-900 font-bold hover:text-indigo-600 cursor-pointer"
-                      >
-                        Load Fed Policy Ingress
-                      </button>
+                      <div className="flex gap-2.5">
+                        <button
+                          onClick={() => {
+                            setContextData(JSON.stringify({
+                              "fed_rate": [5.25, 5.25, 5.25, 5.0, 4.75, 4.5, 4.25, 4.0, 3.75, 3.5, 3.5, 3.25],
+                              "yield_2y": [4.95, 4.88, 4.72, 4.55, 4.38, 4.2, 4.05, 3.92, 3.88, 3.82, 3.75, 3.68],
+                              "yield_10y": [4.82, 4.75, 4.68, 4.55, 4.42, 4.35, 4.28, 4.22, 4.18, 4.15, 4.12, 4.1],
+                              "yield_curve": [-13, -13, -4, 0, 4, 15, 23, 30, 30, 33, 37, 42],
+                              "dxy": [106.2, 105.8, 104.9, 103.8, 102.5, 101.2, 100.8, 100.2, 99.8, 99.2, 98.8, 98.2],
+                              "gold": [2050, 2080, 2150, 2280, 2350, 2420, 2380, 2450, 2510, 2580, 2620, 2680],
+                              "oil_wti": [72, 75, 78, 82, 79, 76, 74, 71, 68, 65, 63, 61],
+                              "credit_hy": [320, 335, 355, 380, 395, 415, 430, 445, 460, 480, 505, 530],
+                              "spx": [108, 106, 104, 102, 105, 107, 103, 100, 98, 96, 94, 92],
+                              "gdp_growth": [2.8, 2.6, 2.4, 2.2, 2.0, 1.8, 1.6, 1.4, 1.2, 1.0, 0.8, 0.6],
+                              "core_pce": [3.2, 3.0, 2.8, 2.6, 2.5, 2.4, 2.3, 2.2, 2.2, 2.1, 2.1, 2.0],
+                              "unemployment": [3.9, 4.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5.0]
+                            }, null, 2));
+                            setQuery("Analyze the causal transmission network of Fed policy across bonds, currency, gold, oil, credit and equity. Where is the Fed's model breaking down? What does the lag structure reveal about what the Fed is getting wrong? Is there evidence of a regime change where rate hikes are no longer transmitting to inflation as the model predicts?");
+                            setActiveAgent("finance");
+                          }}
+                          className="underline text-indigo-900 font-bold hover:text-indigo-600 cursor-pointer"
+                        >
+                          Load Fed Policy Ingress
+                        </button>
+                        <span className="text-neutral-300">|</span>
+                        <button
+                          onClick={() => {
+                            setContextData(JSON.stringify({
+                              "teacher_industry_years": [0, 0, 2, 3, 5, 5, 8, 10, 12, 15, 18, 20],
+                              "curriculum_relevance_score": [55, 58, 62, 65, 70, 68, 75, 78, 80, 82, 85, 88],
+                              "student_engagement_score": [60, 62, 65, 68, 72, 70, 78, 80, 82, 84, 86, 88],
+                              "student_outcome_score": [62, 64, 66, 68, 74, 72, 79, 81, 83, 85, 87, 89],
+                              "teaching_method_score": [70, 72, 70, 74, 75, 73, 78, 80, 82, 82, 84, 86],
+                              "years_teaching": [15, 12, 10, 8, 6, 8, 5, 4, 3, 2, 2, 1],
+                              "professional_dev_hours": [40, 38, 35, 32, 28, 30, 25, 22, 18, 15, 12, 10]
+                            }, null, 2));
+                            setQuery("Analyze the causal network between teacher industry experience, teaching quality indicators, and student outcomes. Does industry experience directly cause outcome improvement, or is it mediated by curriculum relevance and student engagement? Where does the effect break down?");
+                            setActiveAgent("democratic");
+                          }}
+                          className="underline text-[#059669] font-bold hover:text-emerald-600 cursor-pointer"
+                        >
+                          Load Teacher Industry Ingress
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}

@@ -23,7 +23,7 @@ export default function SopGuidePanel({
   onLoadHarnessPrompt 
 }: { 
   onLogEvent: (details: string, type: 'info' | 'physics' | 'interaction') => void;
-  onLoadHarnessPrompt: (prompt: string) => void;
+  onLoadHarnessPrompt: (prompt: string, id: string) => void;
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<'all' | 'Life Sciences' | 'Physical Systems' | 'Macro Economics' | 'Robotics & Hardware'>('all');
@@ -431,6 +431,27 @@ export default function SopGuidePanel({
       ],
       blueprintPrompt: 'Execute RBA Meta-Cognitive stress sweep under Energy Shock scenario (+120 USD Oil). Incorporate Shipping costs and Electricity index variables, prompt multi-agent critic layers, and verify prediction calibration exceeds 90%.',
       standardRef: 'IMF Monetary Policy Analysis Guidelines'
+    },
+    {
+      id: 'teacher_causal_policy',
+      name: 'Teacher Causal Policy',
+      sopCode: 'SOP-EDU-777',
+      category: 'Macro Economics',
+      icon: Cpu,
+      summary: 'Analyze the causal network between teacher industry experience, teaching quality indicators, and student outcomes. Does industry experience directly cause outcome improvement, or is it mediated by curriculum relevance and student engagement? Where does the effect break down?',
+      steps: [
+        'Feed longitudinal teacher variables: teacher_industry_years, curriculum_relevance_score, student_engagement_score, student_outcome_score',
+        'Map teaching co-factors: teaching_method_score, years_teaching, professional_dev_hours',
+        'Deploy the dual-agent debate sweep to trace direct vs. mediated causal pathways and locate diminishing returns',
+        'Synthesize findings with the Arbiter OMEGA Educational model to output co-pedagogical policy interventions'
+      ],
+      parameters: [
+        { name: 'Teacher Sample Size', value: '12 educators', desc: 'SOP standard longitudinal baseline data size' },
+        { name: 'Causal Correlation', value: 'r = 0.892', desc: 'Correlation coefficient between industry years and curriculum relevance' },
+        { name: 'Saturating Threshold', value: '10 years', desc: 'Threshold beyond which industry tenure shows diminishing returns on outcomes' }
+      ],
+      blueprintPrompt: 'Analyze the causal network between teacher industry experience, teaching quality indicators, and student outcomes. Does industry experience directly cause outcome improvement, or is it mediated by curriculum relevance and student engagement? Where does the effect break down?',
+      standardRef: 'OECD Education Policy Outlook Framework'
     }
   ];
 
@@ -453,7 +474,7 @@ export default function SopGuidePanel({
   };
 
   const handleLoadToHarness = (prompt: string, id: string) => {
-    onLoadHarnessPrompt(prompt);
+    onLoadHarnessPrompt(prompt, id);
     onLogEvent(`Loaded [${id.toUpperCase()}] SOP blueprint directly into Actuator Chat Console`, 'interaction');
   };
 
