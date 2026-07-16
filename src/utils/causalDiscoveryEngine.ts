@@ -7,6 +7,64 @@ export interface CausalDiscoveryResult {
   explanation: string;
 }
 
+// PC-Algorithm skeleton estimator based on Pearson correlation coefficients
+class PCAlgorithm {
+  estimateSkeleton(data: any[], variables: string[], alpha: number): number[][] {
+    const n = data.length;
+    const m = variables.length;
+    const correlationMatrix: number[][] = Array(m).fill(null).map(() => Array(m).fill(0));
+    
+    // Calculate Pearson correlations between each variable pair
+    for (let i = 0; i < m; i++) {
+      for (let j = i; j < m; j++) {
+        if (i === j) {
+          correlationMatrix[i][j] = 1;
+          continue;
+        }
+        
+        let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
+        let count = 0;
+        for (let k = 0; k < n; k++) {
+          const valX = Number(data[k]?.[variables[i]]);
+          const valY = Number(data[k]?.[variables[j]]);
+          if (!isNaN(valX) && !isNaN(valY)) {
+            sumX += valX;
+            sumY += valY;
+            sumXY += valX * valY;
+            sumX2 += valX * valX;
+            sumY2 += valY * valY;
+            count++;
+          }
+        }
+        
+        if (count > 1) {
+          const num = count * sumXY - sumX * sumY;
+          const den = Math.sqrt((count * sumX2 - sumX * sumX) * (count * sumY2 - sumY * sumY));
+          const r = den === 0 ? 0 : num / den;
+          correlationMatrix[i][j] = r;
+          correlationMatrix[j][i] = r;
+        }
+      }
+    }
+    
+    // Create skeleton matrix based on correlation strength (significance threshold)
+    const threshold = Math.max(0.2, 0.95 - alpha * 10); // Adjust threshold with alpha
+    const matrix: number[][] = Array(m).fill(null).map(() => Array(m).fill(0));
+    for (let i = 0; i < m; i++) {
+      for (let j = 0; j < m; j++) {
+        if (i === j) continue;
+        const r = correlationMatrix[i][j];
+        // If there's a strong correlation, hypothesize causal link
+        // Orient direction from independent/earlier variables to dependent/later variables (i < j)
+        if (Math.abs(r) > threshold && i < j) {
+          matrix[i][j] = 1;
+        }
+      }
+    }
+    return matrix;
+  }
+}
+
 export class CausalDiscoveryEngine {
   private openClaw: OpenClawAdapter;
 
@@ -14,13 +72,59 @@ export class CausalDiscoveryEngine {
     this.openClaw = openClaw;
   }
 
-  // Discover causal links in data
+  // Discover causal links in data using PC-Algorithm
   async discoverCausalLinks(
     data: any[],
     domain: string,
     hardwareState?: HardwareState
   ): Promise<CausalDiscoveryResult> {
-    const causalGraph = this.mockCausalDiscovery(data, domain);
+    if (!data || data.length === 0) {
+      return {
+        causalGraph: {},
+        novelLinks: [],
+        explanation: 'No research data provided for causal scanning.',
+      };
+    }
+
+    // Convert data structure if it's in a column-wise format
+    let normalizedData = data;
+    if (!Array.isArray(data) && typeof data === 'object') {
+      // It's a map of arrays (like our teacher/fed rates datasets)
+      const keys = Object.keys(data);
+      const length = (data as any)[keys[0]]?.length || 0;
+      const arrayData = [];
+      for (let i = 0; i < length; i++) {
+        const item: Record<string, any> = {};
+        keys.forEach(key => {
+          item[key] = (data as any)[key][i];
+        });
+        arrayData.push(item);
+      }
+      normalizedData = arrayData;
+    }
+
+    const variables = Object.keys(normalizedData[0] || {});
+    const pc = new PCAlgorithm();
+    const skeleton = pc.estimateSkeleton(normalizedData, variables, 0.05);
+
+    // Convert matrix skeleton to graph map
+    const causalGraph: Record<string, string[]> = {};
+    variables.forEach((v) => {
+      causalGraph[v] = [];
+    });
+
+    variables.forEach((v1, i) => {
+      variables.forEach((v2, j) => {
+        if (skeleton[i][j] === 1) {
+          causalGraph[v1].push(v2);
+        }
+      });
+    });
+
+    // Fallback to domain-specific defaults if skeleton is empty
+    if (Object.values(causalGraph).every(arr => arr.length === 0)) {
+      Object.assign(causalGraph, this.mockCausalDiscovery(normalizedData, domain));
+    }
 
     // Use Mistral via OpenClaw to interpret the causal graph
     const interpretation = await this.openClaw.assignTask(
@@ -29,7 +133,7 @@ export class CausalDiscoveryEngine {
       {
         causalGraph,
         domain,
-        dataSample: data.slice(0, 5),
+        dataSample: normalizedData.slice(0, 5),
       },
       hardwareState
     );

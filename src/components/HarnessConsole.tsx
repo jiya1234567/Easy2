@@ -3,7 +3,7 @@ import {
   Terminal, Play, Cpu, Database, HelpCircle, ChevronRight, AlertCircle, 
   Sparkles, BookOpen, Layers, Settings, ChevronDown, ChevronUp, RefreshCw, 
   Lightbulb, Radio, CheckCircle, Flame, Eye, Save, Trash2, Globe, Activity,
-  Image, Video, Music, Volume2, Gamepad2, Sliders, Mic, Compass
+  Image, Video, Music, Volume2, Gamepad2, Sliders, Mic, Compass, Network, Beaker
 } from 'lucide-react';
 import { HardwareState } from '../types';
 import { OpenClawAdapter } from '../utils/openClawAdapter';
@@ -22,6 +22,13 @@ import { ExplainabilityEngine } from '../utils/explainabilityEngine';
 import { AutonomousResearchDirector } from '../utils/autonomousResearchDirector';
 import { WorldBankChallenge } from '../utils/worldBankChallenge';
 import { DiscoveryScoreCalculator } from '../utils/discoveryScoreCalculator';
+
+// Scientific Dashboard Tabs
+import { HypergraphTab } from './HypergraphTab';
+import { VisualManifoldTab } from './VisualManifoldTab';
+import { RuliadTab } from './RuliadTab';
+import { ProteinFoldingTab } from './ProteinFoldingTab';
+import { MolecularDockingTab } from './MolecularDockingTab';
 
 const CAMPAIGN_RECURSIVE_LEDGERS: Record<string, Array<{
   round: string;
@@ -365,7 +372,7 @@ export default function HarnessConsole({
   const [harnessLogs, setHarnessLogs] = useState<string[]>([]);
   const [memories, setMemories] = useState<HarnessMemory[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'console' | 'memory' | 'architecture' | 'reality' | 'roadtests' | 'scientist_interface' | 'deepmind_synthesis'>(initialTab || 'console');
+  const [activeTab, setActiveTab] = useState<'console' | 'memory' | 'architecture' | 'reality' | 'roadtests' | 'scientist_interface' | 'deepmind_synthesis' | 'hypergraph' | 'manifold' | 'ruliad' | 'protein' | 'docking'>(initialTab || 'console');
 
   // Watch for initialTab changes to switch tab dynamically
   useEffect(() => {
@@ -1503,6 +1510,11 @@ Instead of a random sweep, the **Curiosity Engine** evaluated entropy and inform
             { id: 'console', label: 'RUNTIME CONSOLE', icon: Terminal },
             { id: 'deepmind_synthesis', label: '🌀 DEEPMIND SUITE', icon: Sparkles },
             { id: 'reality', label: '🌎 REALITY ANCHOR', icon: Globe },
+            { id: 'hypergraph', label: '🔗 HYPERGRAPH', icon: Network },
+            { id: 'manifold', label: '🌌 MANIFOLD', icon: Compass },
+            { id: 'ruliad', label: '📐 RULIAD', icon: Cpu },
+            { id: 'protein', label: '🧬 PROTEIN FOLDING', icon: Beaker },
+            { id: 'docking', label: '💊 MOLECULAR DOCKING', icon: Layers },
             { id: 'roadtests', label: '⚡ ROAD TEST SUITE', icon: Activity },
             { id: 'scientist_interface', label: '🔬 SCIENTIST INTERFACE', icon: Lightbulb },
             { id: 'memory', label: 'MEMORY PERSISTENCE', icon: Database },
@@ -2140,6 +2152,81 @@ Instead of a random sweep, the **Curiosity Engine** evaluated entropy and inform
           </div>
 
         </div>
+      )}
+
+      {activeTab === 'hypergraph' && (
+        <HypergraphTab
+          stateTensor={{
+            spatial: { x: worldState?.windVector?.x || 1, y: worldState?.windVector?.y || 0, z: worldState?.waterLevel || 10 },
+            temporal: { t: Date.now(), dt: 1.0 },
+            features: {
+              diffusionRate: worldState?.diffusionRate || 1.0,
+              heatFactor: worldState?.heatFactor || 1.0,
+              gravityFactor: worldState?.gravityFactor || 1.0
+            }
+          }}
+          onLogEvent={onLogEvent}
+        />
+      )}
+
+      {activeTab === 'manifold' && (
+        <VisualManifoldTab
+          stateTensor={{
+            spatial: { x: worldState?.windVector?.x || 1, y: worldState?.windVector?.y || 0, z: worldState?.waterLevel || 10 },
+            temporal: { t: Date.now(), dt: 1.0 },
+            features: {
+              diffusionRate: worldState?.diffusionRate || 1.0,
+              heatFactor: worldState?.heatFactor || 1.0,
+              gravityFactor: worldState?.gravityFactor || 1.0
+            }
+          }}
+          onLogEvent={onLogEvent}
+        />
+      )}
+
+      {activeTab === 'ruliad' && (
+        <RuliadTab
+          stateTensor={{
+            spatial: { x: worldState?.windVector?.x || 1, y: worldState?.windVector?.y || 0, z: worldState?.waterLevel || 10 },
+            temporal: { t: Date.now(), dt: 1.0 },
+            features: {
+              diffusionRate: worldState?.diffusionRate || 1.0,
+              heatFactor: worldState?.heatFactor || 1.0,
+              gravityFactor: worldState?.gravityFactor || 1.0
+            }
+          }}
+          onLogEvent={onLogEvent}
+        />
+      )}
+
+      {activeTab === 'protein' && (
+        <ProteinFoldingTab
+          stateTensor={{
+            spatial: { x: worldState?.windVector?.x || 1, y: worldState?.windVector?.y || 0, z: worldState?.waterLevel || 10 },
+            temporal: { t: Date.now(), dt: 1.0 },
+            features: {
+              diffusionRate: worldState?.diffusionRate || 1.0,
+              heatFactor: worldState?.heatFactor || 1.0,
+              gravityFactor: worldState?.gravityFactor || 1.0
+            }
+          }}
+          onLogEvent={onLogEvent}
+        />
+      )}
+
+      {activeTab === 'docking' && (
+        <MolecularDockingTab
+          stateTensor={{
+            spatial: { x: worldState?.windVector?.x || 1, y: worldState?.windVector?.y || 0, z: worldState?.waterLevel || 10 },
+            temporal: { t: Date.now(), dt: 1.0 },
+            features: {
+              diffusionRate: worldState?.diffusionRate || 1.0,
+              heatFactor: worldState?.heatFactor || 1.0,
+              gravityFactor: worldState?.gravityFactor || 1.0
+            }
+          }}
+          onLogEvent={onLogEvent}
+        />
       )}
 
       {activeTab === 'reality' && (

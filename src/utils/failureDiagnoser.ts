@@ -16,8 +16,14 @@ export class FailureDiagnoser {
     failureType: FailureType,
     severity: number,
     stateTensor: StateTensor,
-    hardwareState?: HardwareState
+    hardwareState?: HardwareState,
+    rejectedHypotheses?: string[]
   ): Promise<FailureDiagnosis> {
+    // Include rejected hypotheses in the prompt
+    const rejectedContext = rejectedHypotheses?.length
+      ? `Rejected Hypotheses (previously tested and failed):\n${rejectedHypotheses.map(h => `- ${h}`).join('\n')}`
+      : '';
+
     // Use Mistral to analyze the failure
     const diagnosis = await this.openClaw.assignTask(
       'failure_diagnosis',
@@ -30,6 +36,7 @@ export class FailureDiagnoser {
         severity,
         stateTensor,
         hardwareState,
+        rejectedHypotheses: rejectedContext,
       }
     );
 

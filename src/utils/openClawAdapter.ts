@@ -1,4 +1,5 @@
 import { StateTensor, HardwareState } from '../types';
+import { DOMAIN_BLUEPRINTS, DEFAULT_BLUEPRINT } from './prompts/blueprints';
 
 export interface OpenClawTaskResult {
   hypothesis?: string;
@@ -18,28 +19,43 @@ export class OpenClawAdapter {
     this.host = host;
   }
 
-  // Assign a task to a specific model
+  // Assign a task to a specific model with blueprint and agenda augmentation
   async assignTask(
     task: string,
     model: 'mistral' | 'phi3' | 'llava' | 'deepseek' | 'qwen' | 'gemma' | string,
     input: any,
-    hardwareState?: HardwareState
+    hardwareState?: HardwareState,
+    researchDirectorAgenda?: { confirmed: string[]; rejected: string[]; unresolved: string[] }
   ): Promise<any> {
     this.activeModels[task] = { model, task };
 
+    const domain = input?.domain || 'general';
+    const blueprint = DOMAIN_BLUEPRINTS[domain] || DEFAULT_BLUEPRINT;
+
+    const agendaContext = researchDirectorAgenda
+      ? `Research Director Agenda:\nConfirmed Hypotheses:\n${researchDirectorAgenda.confirmed.map(h => `- ${h}`).join('\n')}\nRejected Hypotheses:\n${researchDirectorAgenda.rejected.map(h => `- ${h}`).join('\n')}\nUnresolved Hypotheses:\n${researchDirectorAgenda.unresolved.map(h => `- ${h}`).join('\n')}`
+      : '';
+
+    const augmentedInput = {
+      ...input,
+      blueprint,
+      agenda: agendaContext,
+      task_instruction: `Use the following blueprint and agenda for ${domain}:\n${blueprint}\n\n${agendaContext}\n\nNow, perform the task: ${task}`,
+    };
+
     // Log the task assignment
-    console.log(`[OpenClaw] Assigned ${task} to ${model}. Input:`, input);
+    console.log(`[OpenClaw] Assigned ${task} to ${model}. Input:`, augmentedInput);
 
     // Route to the appropriate model
     switch (model) {
       case 'mistral':
-        return this.runMistral(input, hardwareState);
+        return this.runMistral(augmentedInput, hardwareState);
       case 'phi3':
-        return this.runPhi3(input, hardwareState);
+        return this.runPhi3(augmentedInput, hardwareState);
       case 'llava':
-        return this.runLLaVA(input, hardwareState);
+        return this.runLLaVA(augmentedInput, hardwareState);
       default:
-        return this.runOllamaModel(model, input, hardwareState);
+        return this.runOllamaModel(model, augmentedInput, hardwareState);
     }
   }
 

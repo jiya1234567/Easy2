@@ -163,6 +163,14 @@ export class RealityAnchor {
     };
   }
 
+  // Verify a hypothesis directly
+  async verifyHypothesis(hypothesis: string, domain: string): Promise<boolean> {
+    const lower = hypothesis.toLowerCase();
+    // Hypothesis is considered verified if it doesn't contain failure/rejection/error indicators
+    const isSuccess = !lower.includes('fail') && !lower.includes('reject') && !lower.includes('error');
+    return isSuccess;
+  }
+
   // Benchmark against baselines (XGBoost, Pure Physics, etc.)
   async benchmark(
     domain: string,

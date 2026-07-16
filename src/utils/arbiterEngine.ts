@@ -3,12 +3,24 @@ import { OpenClawAdapter } from './openClawAdapter';
 
 export class ArbiterEngine {
   private openClaw: OpenClawAdapter;
+  private reproducibilityScores: Record<string, number> = {}; // Track hypothesis reproducibility
+  private realityAnchorAccuracy: Record<string, number> = {}; // Track Reality Anchor accuracy
 
   constructor(openClaw: OpenClawAdapter) {
     this.openClaw = openClaw;
   }
 
-  // Resolve consensus between multiple models
+  // Update reproducibility score for a hypothesis
+  updateReproducibilityScore(hypothesis: string, score: number): void {
+    this.reproducibilityScores[hypothesis] = score;
+  }
+
+  // Update Reality Anchor accuracy for a hypothesis
+  updateRealityAnchorAccuracy(hypothesis: string, accuracy: number): void {
+    this.realityAnchorAccuracy[hypothesis] = accuracy;
+  }
+
+  // Resolve consensus between multiple models, incorporating reproducibility and Reality Anchor weights
   async resolveConsensus(
     task: string,
     input: any,
@@ -18,20 +30,39 @@ export class ArbiterEngine {
     consensus: any;
     disagreements: { model: string; output: any }[];
     confidence: number;
+    reproducibilityScore: number;
+    realityAnchorAccuracy: number;
   }> {
     const results = await Promise.all(
       models.map(model => this.openClaw.assignTask(task, model, input, hardwareState))
     );
 
-    // Simple consensus: Majority vote (for categorical) or average (for numerical)
+    // Calculate consensus
     const consensus = this.calculateConsensus(results);
     const disagreements = results
       .map((result, i) => ({ model: models[i], output: result }))
       .filter(item => JSON.stringify(item.output) !== JSON.stringify(consensus));
 
-    const confidence = Number((1 - (disagreements.length / Math.max(1, models.length))).toFixed(3));
+    // Get score weights
+    const hypothesis = consensus?.hypothesis || (typeof consensus === 'string' ? consensus : JSON.stringify(consensus));
+    const reproducibilityScore = this.reproducibilityScores[hypothesis] || 0.5; // Default baseline: 0.5
+    const realityAnchorAccuracy = this.realityAnchorAccuracy[hypothesis] || 0.5; // Default baseline: 0.5
 
-    return { consensus, disagreements, confidence };
+    // Weighted confidence: 50% from model agreement, 30% from reproducibility, 20% from Reality Anchor checks
+    const agreementRatio = 1 - (disagreements.length / Math.max(1, models.length));
+    const confidence = Number((
+      0.5 * agreementRatio +
+      0.3 * reproducibilityScore +
+      0.2 * realityAnchorAccuracy
+    ).toFixed(3));
+
+    return {
+      consensus,
+      disagreements,
+      confidence,
+      reproducibilityScore,
+      realityAnchorAccuracy
+    };
   }
 
   private calculateConsensus(results: any[]): any {
