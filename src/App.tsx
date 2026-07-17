@@ -216,7 +216,7 @@ export default function App() {
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
   const [harnessPreloadedPrompt, setHarnessPreloadedPrompt] = useState<string>('');
   const [harnessPreloadedContext, setHarnessPreloadedContext] = useState<string>('');
-  const [harnessInitialTab, setHarnessInitialTab] = useState<'console' | 'memory' | 'architecture' | 'reality' | 'roadtests' | 'scientist_interface' | 'deepmind_synthesis'>('console');
+  const [harnessInitialTab, setHarnessInitialTab] = useState<'console' | 'memory' | 'architecture' | 'reality' | 'roadtests' | 'scientist_interface' | 'deepmind_synthesis' | 'hypergraph' | 'manifold' | 'ruliad' | 'protein' | 'docking'>('console');
   const [showCommandDeck, setShowCommandDeck] = useState<boolean>(true);
   const [labUrls, setLabUrls] = useState<{ [key: string]: string }>({
     world: 'https://ai.studio/apps/08c79c7e-4cbb-4a89-9a63-6d177ea6775c',
@@ -490,7 +490,7 @@ export default function App() {
   }, []);
 
   // --- Open Harness Tab Helper ---
-  const openHarnessTab = (tab: 'console' | 'memory' | 'architecture' | 'reality' | 'roadtests' | 'scientist_interface' | 'deepmind_synthesis') => {
+  const openHarnessTab = (tab: 'console' | 'memory' | 'architecture' | 'reality' | 'roadtests' | 'scientist_interface' | 'deepmind_synthesis' | 'hypergraph' | 'manifold' | 'ruliad' | 'protein' | 'docking') => {
     setHarnessInitialTab(tab);
     setActiveLab('harness');
     addTemporalEvent(`Opened OMEGA Harness Console tab: ${tab.toUpperCase()}`, 'interaction');
@@ -677,12 +677,15 @@ export default function App() {
                 { label: "WORLD MODEL", action: "world", tab: null },
                 { label: "HIERARCHY", action: "architecture", tab: null },
                 { label: "DNA EDITOR", action: "drugs", tab: null },
-                { label: "MOLECULAR DOCKING", action: "materials", tab: null },
+                { label: "MOLECULAR DOCKING", action: "harness", tab: "docking" },
                 { label: "DIGITAL TWIN", action: "world", tab: null },
                 { label: "HEALTH PROTOCOL", action: "neuroscience", tab: null },
                 { label: "RESEARCH DEVICE", action: "stoned", tab: null },
                 { label: "EVOLUTION", action: "colony", tab: null },
-                { label: "VISUAL MANIFOLD", action: "aromea", tab: null },
+                { label: "VISUAL MANIFOLD", action: "harness", tab: "manifold" },
+                { label: "HYPERGRAPH", action: "harness", tab: "hypergraph" },
+                { label: "RULIAD", action: "harness", tab: "ruliad" },
+                { label: "PROTEIN FOLDING", action: "harness", tab: "protein" },
                 { label: "SINGULARITY FEED", action: "world", tab: null },
                 { label: "SCIENTIFIC DISCOVERY", action: "harness", tab: "console" },
                 { label: "DISCOVERY DASHBOARD", action: "harness", tab: "reality" },
