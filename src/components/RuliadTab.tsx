@@ -41,11 +41,15 @@ export const RuliadTab: React.FC<RuliadTabProps> = ({
 
       cellsRef.current = arr;
       setGeneration(0);
-      onLogEvent(`Initialized Ruliad cellular lattice with Rule ${rule} from starting state.`, 'physics');
     };
 
     initCells();
   }, [stateTensor, rule]);
+
+  // Log on rule changes or mount to prevent infinite loop on stateTensor
+  useEffect(() => {
+    onLogEvent(`Ruliad cellular lattice initialized with Rule ${rule} starting state.`, 'physics');
+  }, [rule]);
 
   // Compute next cellular automaton generation based on rule number
   const computeNextGeneration = () => {

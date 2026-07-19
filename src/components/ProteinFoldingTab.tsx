@@ -28,6 +28,22 @@ export const ProteinFoldingTab: React.FC<ProteinFoldingTabProps> = ({
     handleFold();
   }, []);
 
+  // Listen to stateTensor features to detect melanoma/cancer context
+  useEffect(() => {
+    if (stateTensor?.features) {
+      const keys = Object.keys(stateTensor.features).map(k => k.toLowerCase());
+      const hasMelanoma = keys.some(k => k.includes('tumour') || k.includes('immune') || k.includes('pdl1') || k.includes('melanoma'));
+      if (hasMelanoma) {
+        const pdl1Seq = "MFTVTVPKDLYVVEYGSNMTIECKFPVEKQLDLAALIVYWEMEDKNIIQFVHGEEDLKVQHSSYRQRARLLKDQLSLGNAALQITDVKLQDAGVYRCMISYGGADYKRITVKVNAPYNKINQRILVVDPVTSEHELTCQAEGYPKAEVIWTSSDHQVLSGKTTTTNSKREEKLFNVTSTLRINTTTNEIFYCTFRRLDPEENHTAELVIPELPLAHPPNERTHLVILGAILLCLGVALTFIFRLRKGRMMDVKKCGIQDTNSKKQSDTHLEET";
+        if (sequence !== pdl1Seq) {
+          setSequence(pdl1Seq);
+          const result = ProteinFoldingEngine.foldSequence(pdl1Seq);
+          setFoldingResult(result);
+        }
+      }
+    }
+  }, [stateTensor, sequence]);
+
   const handleFold = () => {
     const result = ProteinFoldingEngine.foldSequence(sequence);
     setFoldingResult(result);

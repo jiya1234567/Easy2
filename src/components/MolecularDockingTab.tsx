@@ -28,6 +28,22 @@ export const MolecularDockingTab: React.FC<MolecularDockingTabProps> = ({
     handleDock();
   }, []);
 
+  // Listen to stateTensor features to detect melanoma/cancer context
+  useEffect(() => {
+    if (stateTensor?.features) {
+      const keys = Object.keys(stateTensor.features).map(k => k.toLowerCase());
+      const hasMelanoma = keys.some(k => k.includes('tumour') || k.includes('immune') || k.includes('pdl1') || k.includes('melanoma'));
+      if (hasMelanoma) {
+        if (protein !== 'PD-L1_Receptor_Complex' || ligand !== 'Atezolizumab_Fab_Domain') {
+          setProtein('PD-L1_Receptor_Complex');
+          setLigand('Atezolizumab_Fab_Domain');
+          const result = MolecularDockingEngine.dockLigand('PD-L1_Receptor_Complex', 'Atezolizumab_Fab_Domain');
+          setDockingResult(result);
+        }
+      }
+    }
+  }, [stateTensor, protein, ligand]);
+
   const handleDock = () => {
     const result = MolecularDockingEngine.dockLigand(protein, ligand);
     setDockingResult(result);

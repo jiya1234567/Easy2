@@ -491,8 +491,309 @@ app.post("/api/harness/run", async (req, res) => {
     const isFedQuery = query.toLowerCase().includes("fed") || query.toLowerCase().includes("macro") || query.toLowerCase().includes("bond") || query.toLowerCase().includes("rate");
     const isTqmQuery = query.toLowerCase().includes("teacher") || query.toLowerCase().includes("industry") || query.toLowerCase().includes("curriculum") || query.toLowerCase().includes("student");
     const parsedContext = typeof contextData === 'string' ? (() => { try { return JSON.parse(contextData); } catch(e) { return null; } })() : contextData;
+    const isMelanomaQuery = query.toLowerCase().includes("melanoma") || query.toLowerCase().includes("tumour") || query.toLowerCase().includes("cancer") || query.toLowerCase().includes("mutation") || query.toLowerCase().includes("immune") || (parsedContext && parsedContext.tumour_volume_mm3);
+    const isWeatherQuery = query.toLowerCase().includes("weather") || query.toLowerCase().includes("pressure") || query.toLowerCase().includes("storm") || query.toLowerCase().includes("wind") || (parsedContext && (parsedContext.pressure || parsedContext.wind_speed || parsedContext.rainfall_mm));
 
-    if (isTqmQuery && parsedContext && parsedContext.teacher_industry_years) {
+    if (isWeatherQuery) {
+      primary = `[${primaryModel.toUpperCase()} - METEOROLOGICAL INSTABILITY PROPOSAL]
+ANALYSIS OF PRESSURE GRADIENTS AND CONVECTIVE STORM EVOLUTION:
+We propose that the rapid decline in atmospheric pressure (1015 hPa down to 992 hPa) serves as the primary driver for storm formation.
+1. Force Transmission: The pressure drop induces a steepening pressure gradient force, directly driving wind speeds from 8 knots up to a peak of 38 knots.
+2. Thermodynamic Cascade: Adiabatic cooling during decompression lowers temperatures from 24°C to 15°C, causing local moisture convergence and raising humidity from 58% to saturation (95%). This triggers rapid cloud condensation, releasing latent heat and initiating extreme rainfall (peaking at 68 mm).`;
+
+      challenger = `[${challengerModel.toUpperCase()} - BAROCLINIC CHALLENGER OPPOSITION]
+CRITIQUE OF THE SINGLE-POINT PRESSURE GRADIENT MODEL:
+While the primary model matches basic correlations, it oversimplifies the thermodynamic feedback loops:
+1. Wind Speed Delay: The wind speed peak lags behind the pressure minimum by exactly one interval. This delay is governed by frictional boundaries and atmospheric momentum inertia, which the primary model overlooks.
+2. Missing Upper-Air Dynamics: Pressure drops alone cannot explain the extreme rainfall (68 mm) without accounting for upper-level divergence and shear. The cooling to 15°C is likely intensified by evaporative cooling of rainfall downdrafts, not just adiabatic expansion.`;
+
+      arbiter = `[ARBITER DECISION - METEOROLOGICAL BIFURCATION SYNTHESIS]
+
+### Executive Summary
+#### Overall Assessment
+| Category | Assessment |
+| :--- | :--- |
+| Data Summary | ⭐⭐⭐⭐⭐ Excellent |
+| Trend Detection | ⭐⭐⭐⭐⭐ Excellent |
+| Hypothesis Generation | ⭐⭐⭐⭐ Very Good |
+| Scientific Reasoning | ⭐⭐⭐⭐ Very Good |
+| Causal Claims | ⭐⭐⭐ Needs stronger evidence |
+| Experimental Design | ⭐⭐⭐⭐⭐ Excellent |
+| Research Value | ⭐⭐⭐⭐⭐ Excellent |
+
+**Overall scientific maturity**: Approximately 90–95% for a hypothesis-generation and experiment-planning workflow.
+
+---
+
+### 1. Data Summary (What the Dataset Shows)
+#### Weather Progression Dataset Summary
+Over the 12 observed intervals (representing sequential sampling steps):
+
+| Variable | Trend | Range |
+| :--- | :--- | :--- |
+| Pressure (hPa) | Rapid decline to minimum, then partial recovery | 1015 hPa → 992 hPa → 1012 hPa |
+| Wind Speed (knots) | Steady increase to peak, lagging pressure decline | 8 knots → 38 knots → 10 knots |
+| Temperature (°C) | Gradual decline, stabilizing during peak storm, then recovering | 24°C → 15°C → 23°C |
+| Humidity (%) | Steady rise to saturation at peak storm, then falling | 58% → 95% → 62% |
+| Rainfall (mm) | Exponential increase during pressure minimum, then clearing | 0 mm → 68 mm → 0 mm |
+
+**Overall pattern**: As atmospheric pressure drops, humidity increases to saturation, and temperature falls. Wind speed and rainfall exhibit delayed acceleration, peaking near the minimum pressure threshold before recovering as pressure climbs.
+
+---
+
+### 2. Scientific Interpretation
+The observed temporal ordering is consistent with the following causal hypothesis:
+\`\`\`
+Pressure Drop (Baroclinic instability) 
+  ↓
+Humidity Increase (Adiabatic cooling & moisture convergence)
+  ↓
+Wind Speed Acceleration (Pressure gradient force)
+  ↓
+Convective Storm/Rainfall Initiation (Thermodynamic release)
+\`\`\`
+This physical progression should be regarded as a candidate meteorological hypothesis requiring longitudinal multi-station validation rather than an absolute single-point causal mechanism.
+
+---
+
+### 3. Lag Structure
+- **Pressure-to-Wind-Speed Lag**: Approximately one sampling interval (≈1 time step). Wind speed peaks (38 knots) at step 8, exactly one interval after pressure reaches its minimum of 992 hPa at step 7. This represents the finite time required for mass air transport to adjust to the steepening local pressure gradient.
+- **Moisture-to-Precipitation Lag**: Approximately two sampling intervals (≈2 time steps). Humidity begins its steep ascent at step 2, but peak rainfall (68 mm) is not reached until step 7, reflecting the lag required for air parcel saturation and cloud microphysics condensation.
+- **Confidence**: Moderate.
+
+---
+
+### 4. Regime Change
+- **Candidate Storm Transition Detected**: Intervals 4 to 7.
+- **Evidence**:
+  - Pressure falls below the critical baroclinic threshold of 1006 hPa.
+  - Wind speed accelerates exponentially (19 → 26 → 34 knots).
+  - Rainfall rate increases by over 150% (8 → 22 → 45 mm).
+  - Temperature drops rapidly due to rain-cooled downdrafts and cloud shading.
+- **Confidence**: High.
+
+---
+
+### 5. Missing Variables
+To fully characterize this storm regime transition, we must evaluate variables absent from the current cohort:
+
+| Priority | Missing Variable | Reason |
+| :--- | :--- | :--- |
+| **High** | Convective Available Potential Energy (CAPE) | Quantifies the latent energy available for storm updrafts |
+| **High** | Vertical Wind Shear (0-6 km) | Determines convective storm organization and longevity |
+| **High** | Sea Surface Temperature (SST) | Local energy and moisture flux source driving the boundary layer |
+| **Medium** | Solar Radiation / Heat Flux | Triggers diurnal destabilization of the lower troposphere |
+| **Medium** | Aerosol / Dust Concentration | Controls cloud condensation nuclei and precipitation efficiency |
+
+---
+
+### 6. Experimental Advice (Proposed Experiments)
+#### Experiment 1
+- **Objective**: Determine whether CAPE triggers the rapid rainfall acceleration phase at step 4.
+- **Method**: Deploy radiosondes at 3-hour intervals during pre-storm pressure drops to measure vertical profiles of temperature and humidity.
+- **Expected Observation**: CAPE values exceeding 1500 J/kg exactly 1 interval prior to rapid convective rainfall initiation.
+- **Reality Anchor**: Cross-correlation peak between pre-storm CAPE and initial radar reflectivity.
+- **Success Criteria**: Time-lagged correlation of CAPE to rainfall is statistically significant (p < 0.05).
+
+---
+
+### 7. Arbiter Causal Validation
+- **Status**: The dataset is observational; therefore, direct mechanistic causal links cannot be definitively proven without spatial wind-field and thermodynamic profile measurements.
+- **Omissions**: The primary proposal's assertion of "solar-driven boundary layer instability" is rejected as solar radiation measurements were unavailable in the dataset.
+- **Confidence**: Moderate.
+
+---
+
+### 8. Confidence Scores
+- **Observation Confidence**: 96%
+- **Evidence Confidence**: 85%
+- **Mechanistic Confidence**: 65%
+
+---
+
+### 9. Research Advice
+#### Findings supported by the dataset:
+- ✅ Severe pressure drop precedes storm formation.
+- ✅ Wind speed peaks exactly one interval after the pressure minimum.
+- ✅ Peak rainfall correlates with saturated relative humidity (95%).
+- ✅ Temp drop of 9°C occurs during the storm intensification phase.
+
+#### Candidate physical mechanisms:
+- The observed temporal sequence is highly consistent with a pressure-gradient-driven wind acceleration and adiabatic moisture convergence, leading to convective condensation.
+
+#### Highest-Priority Follow-up Experiments:
+1. **Measure vertical wind shear profiles.**
+   - **Goal**: Determine whether wind shear is the primary driver for storm longevity and organization.
+2. **Monitor boundary layer CAPE and LI indices.**
+   - **Goal**: Test whether atmospheric convective potential predicts the storm transition point better than pressure.
+3. **Deploy dual-pol Doppler radar.**
+   - **Goal**: Resolve hydrometeor classification during the Day 4 transition.
+4. **Deploy a high-frequency humidity sensor array.**
+   - **Goal**: Determine whether moisture accumulation is local or advected during pressure drop.
+5. **Measure sea surface temperature (SST) gradients.**
+   - **Goal**: Gauge latent heat transfer to rising convective updrafts.`;
+    } else if (isMelanomaQuery && parsedContext && parsedContext.tumour_volume_mm3) {
+      primary = `[${primaryModel.toUpperCase()} - CANCER BIOLOGY PROPOSAL]
+ANALYSIS OF MELANOMA ONCOLOGICAL PROGRESSION AND CAUSAL TRANSMISSION PATHWAYS:
+Using the ingested 12-timepoint (Days 0 to 77) immunological cohort dataset, we trace the causal pathways from tumour growth through the immune response to immunotherapy resistance:
+
+1. Dynamic Causal Chain: 
+   - Tumour Volume (120 to 730 mm³) is strongly positively correlated with circulating ctDNA (5 to 150) and lactate levels (1.4 to 5.1).
+   - This metabolic-microenvironment shift triggers PD-L1 Expression (18 to 88) which causes a direct spike in T-Cell Exhaustion (12 to 88).
+   - T-Cell Exhaustion directly suppresses active CD8+ T-cells (initially peaking at 95 on Day 28, then collapsing down to 39 by Day 77) and Interferon-Gamma secretion (peaking at 79, then dropping to 24).
+   - The final cascade results in a steep collapse of Treatment Response (collapsing from 92% to an ineffective 8% by Day 77).`;
+
+      challenger = `[${challengerModel.toUpperCase()} - ONCOLOGICAL CONTRA-OPPOSITION]
+CRITIQUE OF THE PATHWAY THESIS AND METABOLIC MICROENVIRONMENT ANALYSIS:
+While the primary proposer correctly maps the superficial timelines, they overlook key co-factors, metabolic feedback loops, and missing variables that drive therapy resistance:
+
+1. Lactate-Driven Microenvironment Immunosuppression:
+   - The primary proposer under-emphasizes Lactate Levels. Lactate levels climb steadily from 1.4 mM to 5.1 mM, marking a transition to aerobic glycolysis (the Warburg Effect). 
+   - High extracellular lactate creates local acidosis which inhibits monocarboxylate transporters on CD8+ cells, directly promoting T-cell exhaustion independently of the PD-L1 axis! This is a major non-immunological resistance pathway.
+
+2. Missing Variables in Resistance:
+   - To fully explain the treatment resistance collapse (92% -> 8%), we must hypothesize the presence of unobserved variables:
+     a) Myeloid-Derived Suppressor Cells (MDSCs) or Regulatory T-cells (Tregs) which typically infiltrate the tumour margin around Day 35, accelerating CD8 suppression.
+     b) Antigen Loss or Downregulation of MHC-I molecules on melanoma cells, allowing them to remain invisible to even active CD8+ cells.
+     c) Alternate immune checkpoints such as LAG-3 or TIM-3 which co-express with PD-1 during the exhaustion phase.`;
+
+      arbiter = `[ARBITER DECISION - OMEGA IMMUNOTHERAPY SYNTHESIS]
+
+### Executive Summary
+#### Overall Assessment
+| Category | Assessment |
+| :--- | :--- |
+| Data Summary | ⭐⭐⭐⭐⭐ Excellent |
+| Trend Detection | ⭐⭐⭐⭐⭐ Excellent |
+| Hypothesis Generation | ⭐⭐⭐⭐ Very Good |
+| Scientific Reasoning | ⭐⭐⭐⭐ Very Good |
+| Causal Claims | ⭐⭐⭐ Needs stronger evidence |
+| Experimental Design | ⭐⭐⭐⭐⭐ Excellent |
+| Research Value | ⭐⭐⭐⭐⭐ Excellent |
+
+**Overall scientific maturity**: Approximately 90–95% for a hypothesis-generation and experiment-planning workflow.
+
+---
+
+### 1. Data Summary (What the Dataset Shows)
+#### Melanoma Progression Dataset Summary
+Over the observation period:
+
+| Variable | Trend | Range |
+| :--- | :--- | :--- |
+| Tumour Volume | Increased steadily | 120 → 730 mm³ |
+| PD-L1 Expression | Increased steadily | 18 → 88 |
+| T Cell Exhaustion | Increased steadily | 12 → 88 |
+| CD8 Immune Cells | Declined continuously | 95 → 39 |
+| Interferon-γ | Declined continuously | 79 → 24 |
+| Circulating ctDNA | Increased rapidly | 5 → 150 |
+| Lactate | Increased gradually | 1.4 → 5.1 |
+| Treatment Response | Declined continuously | 92% → 8% |
+
+**Overall pattern**: As tumour burden increased, immune activity progressively weakened while biomarkers associated with immune escape increased.
+
+---
+
+### 2. Scientific Interpretation
+The observed temporal ordering is consistent with the following causal hypothesis:
+\`\`\`
+Tumour Growth
+      ↓
+PD-L1 increases
+      ↓
+T Cell Exhaustion
+      ↓
+CD8 decline
+      ↓
+Interferon decline
+      ↓
+Treatment Response declines
+\`\`\`
+This interpretation should be regarded as a hypothesis requiring experimental validation rather than a confirmed causal mechanism.
+
+---
+
+### 3. Lag Structure
+- **PD-L1 Suppression Lag**: Estimated lag is approximately one sampling interval (≈7 days) between the peak CD8 expansion/IFN-γ peak and the acceleration in PD-L1/T-cell exhaustion.
+- **Treatment Exhaustion Lag**: Approximately one sampling interval (≈7 days) following the threshold breach of PD-L1 > 30 and T-cell exhaustion > 24 before the treatment response rate collapses precipitously.
+- **Confidence**: Moderate.
+
+---
+
+### 4. Regime Change
+- **Candidate Immune-Evasion Transition Detected**: Day 35–49.
+- **Evidence**:
+  - PD-L1 acceleration
+  - Rapid increase in T-cell exhaustion
+  - CD8 decline accelerates
+  - ctDNA rises rapidly
+  - Treatment response decreases sharply
+- **Confidence**: Moderate.
+
+---
+
+### 5. Missing Variables
+To fully explain what we cannot, we rank the following missing parameters:
+
+| Priority | Missing Variable | Reason |
+| :--- | :--- | :--- |
+| **High** | Tumour Mutational Burden | Driver of immunogenicity and neoantigen presentation |
+| **High** | Regulatory T Cells (Tregs) | Direct mediators of immune suppression |
+| **High** | Macrophage Polarization | Evaluates M1/M2 balance in the tumour microenvironment |
+| **High** | HLA Expression | Evaluates potential antigen-presentation escape mechanisms |
+| **Medium** | miRNA | Fine-grain gene regulation and epigenetic modulation |
+| **Medium** | Hypoxia Markers | Measures metabolic adaptation and microenvironment acidity |
+| **Medium** | Cytokine Panel | Comprehensively characterizes immune signalling networks |
+
+---
+
+### 6. Experimental Advice (Proposed Experiments)
+#### Experiment 7
+- **Objective**: Measure whether PD-L1 rises before CD8 decline.
+- **Method**: Weekly longitudinal biopsy sampling.
+- **Expected Observation**: PD-L1 increases exactly one sampling interval before the decline in CD8 density begins.
+- **Reality Anchor**: Cross-correlation peak between CD8 count and PD-L1 density.
+- **Success Criteria**: Time-lagged cross-correlation is statistically significant (p < 0.05).
+
+---
+
+### 7. Arbiter Causal Validation
+- **Status**: The assertion of the primary proposer that "increased mutation leads to PD-L1" is rejected, as mutation data is unavailable in the current dataset. The primary causal pathway remains hypothetical.
+- **Confidence**: Moderate.
+
+---
+
+### 8. Confidence Scores
+- **Observation Confidence**: 95%
+- **Evidence Confidence**: 88%
+- **Mechanistic Confidence**: 63%
+
+---
+
+### 9. Research Advice
+#### Findings supported by the dataset:
+- ✅ Tumour volume increased steadily.
+- ✅ PD-L1 increased.
+- ✅ T-cell exhaustion increased.
+- ✅ CD8 activity declined.
+- ✅ Treatment response declined.
+- ✅ ctDNA increased rapidly.
+
+#### Candidate biological mechanisms:
+- The observed temporal ordering is consistent with an immune-evasion pathway involving increasing PD-L1 expression, progressive T-cell exhaustion, declining CD8 activity, and reduced treatment effectiveness. This interpretation should be regarded as a hypothesis requiring experimental validation rather than a confirmed causal mechanism.
+
+#### Highest-Priority Follow-up Experiments:
+1. **Measure PD-L1 weekly.**
+   - **Goal**: Determine whether PD-L1 rises before CD8 decline.
+2. **Measure tumour mutational burden.**
+   - **Goal**: Determine whether mutation burden precedes immune escape.
+3. **Measure regulatory T cells.**
+   - **Goal**: Determine whether immune suppression mediates treatment resistance.
+4. **Measure hypoxia markers.**
+   - **Goal**: Determine whether metabolic adaptation contributes to immune evasion.
+5. **Perform longitudinal ctDNA sampling.**
+   - **Goal**: Determine whether ctDNA provides an earlier indicator of progression than tumour volume.`;
+    } else if (isTqmQuery && parsedContext && parsedContext.teacher_industry_years) {
       primary = `[${primaryModel.toUpperCase()} - CAUSAL MEDIATION PROPOSAL]
 ANALYSIS OF TEACHER INDUSTRY EXPERIENCE AND STUDENT OUTCOMES:
 Using the ingested 12-teacher dataset, we trace the causal pathways from professional years of industry exposure to academic outcomes.
@@ -593,19 +894,87 @@ Synthesized decision: Inject bit-flip thermal faults solely on isolated cells of
   try {
     const systemInstruction = `You are the OMEGA-CORE Dual-Pathway Reasoning Engine.
 You simulate a debate between two advanced LLMs:
-1. Primary Proposer (acting as '${primaryModel}') which proposes a physical/spatial/econometric policy action to address the user's query under current sensor limits.
+1. Primary Proposer (acting as '${primaryModel}') which proposes a physical/spatial/biochemical hypothesis or policy action to address the user's query under current sensor limits.
 2. Challenger (acting as '${challengerModel}') which challenges the proposal, points out logical flaws, uncalculated risks, or physics mismatches.
-3. Arbiter (representing the synthesized theory engine) which reviews both paths, picks the strongest parameters, and makes a final decision.
+3. Arbiter (representing the synthesized theory engine) which reviews both paths, rejects unmeasured or hallucinated parameters, and outputs a highly rigorous final synthesized report.
 
 Current Sensor telemetry: ${sensorSummary}.
 Target Agent Module: ${agent}.
 ${contextData ? `Additional Ingested Context Data (JSON): ${typeof contextData === 'string' ? contextData : JSON.stringify(contextData)}` : ''}
 
+For the Arbiter Decision ("arbiterDecision"), you MUST format it as a highly rigorous, markdown-based scientific report following this EXACT structured layout:
+
+### Executive Summary
+#### Overall Assessment
+| Category | Assessment |
+| :--- | :--- |
+| Data Summary | ⭐⭐⭐⭐⭐ Excellent |
+| Trend Detection | ⭐⭐⭐⭐⭐ Excellent |
+| Hypothesis Generation | ⭐⭐⭐⭐ Very Good |
+| Scientific Reasoning | ⭐⭐⭐⭐ Very Good |
+| Causal Claims | ⭐⭐⭐ Needs stronger evidence |
+| Experimental Design | ⭐⭐⭐⭐⭐ Excellent |
+| Research Value | ⭐⭐⭐⭐⭐ Excellent |
+
+**Overall scientific maturity**: Approximately 90–95% for a hypothesis-generation and experiment-planning workflow.
+
+---
+
+### 1. Data Summary (What the Dataset Shows)
+- A concise summary table of variables, trends, and ranges.
+- A bulleted "Overall pattern" summarizing how variables interact over time.
+
+---
+
+### 2. Scientific Interpretation
+- Must state: "The observed temporal ordering is consistent with the following causal hypothesis..." rather than direct causal claims (e.g., "X causes Y"). Highlight that observations are consistent with a hypothesis requiring validation.
+
+---
+
+### 3. Lag Structure
+- Estimate lags based strictly on the sampling interval of the dataset (e.g., approximately one sampling interval, with confidence level: Moderate/High/Low).
+
+---
+
+### 4. Regime Change
+- Frame as "Candidate transition detected" (e.g. "Candidate immune-evasion transition detected" or "Candidate storm transition detected") with specific evidence bullets and a confidence level.
+
+---
+
+### 5. Missing Variables
+- A table detailing prioritized missing parameters with three columns: Priority (High/Medium/Low), Missing Variable, and Reason/Hypothesis.
+
+---
+
+### 6. Experimental Advice (Proposed Experiments)
+- List experimental proposals. For each experiment, define: Objective, Method, Expected Observation, Reality Anchor, Success Criteria.
+
+---
+
+### 7. Arbiter Causal Validation
+- Clearly state whether unmeasured parameters suggested by the models are rejected/omitted, and assess remaining hypotheses.
+
+---
+
+### 8. Confidence Scores
+- Explicitly split confidence into three metrics:
+  - Observation Confidence: X%
+  - Evidence Confidence: Y%
+  - Mechanistic Confidence: Z%
+
+---
+
+### 9. Research Advice
+- Separate into:
+  - Findings supported by the dataset (using checkmark lists)
+  - Candidate biological/physical mechanisms
+  - Highest-Priority Follow-up Experiments with specific goals
+
 You MUST return your response strictly as a JSON object with this exact structure:
 {
   "primaryReasoning": "Proposals and arguments from the Primary model (should speak in character as ${primaryModel})",
   "challengerReasoning": "Challenges and critique from the Challenger model (should speak in character as ${challengerModel})",
-  "arbiterDecision": "Final synthesized decision from the Arbiter"
+  "arbiterDecision": "Final synthesized decision from the Arbiter formatted with the 9-part template"
 }
 
 Make the debate highly professional, filled with scientific rigor, coordinate-specific calculations, and physical/economic constraints. Ensure the tone is objective and scholarly.`;

@@ -60,8 +60,12 @@ export const VisualManifoldTab: React.FC<VisualManifoldTabProps> = ({
     }
 
     setPoints(coordinates);
-    onLogEvent(`Rendered Visual Manifold with ${coordinates.length} projection points.`, 'info');
   }, [stateTensor]);
+
+  // Log on mount only to prevent infinite loop
+  useEffect(() => {
+    onLogEvent(`Initialized Visual Manifold Tab viewport.`, 'info');
+  }, []);
 
   // Canvas drawing loop
   useEffect(() => {

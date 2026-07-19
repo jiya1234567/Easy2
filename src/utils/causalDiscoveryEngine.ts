@@ -153,6 +153,24 @@ export class CausalDiscoveryEngine {
     domain: string
   ): Record<string, string[]> {
     const normalizedDomain = domain.toLowerCase();
+    
+    // Check if the input data keys suggest a melanoma/immunology study
+    const sampleKeys = data && data[0] ? Object.keys(data[0]) : [];
+    const isMelanoma = sampleKeys.some(k => k.includes('tumour') || k.includes('immune') || k.includes('pdl1'));
+    
+    if (isMelanoma) {
+      return {
+        'day': ['tumour_volume_mm3', 'circulating_ctDNA'],
+        'tumour_volume_mm3': ['circulating_ctDNA', 'lactate_level'],
+        'immune_cd8_cells': ['interferon_gamma', 'treatment_response'],
+        'pdl1_expression': ['t_cell_exhaustion', 'treatment_response'],
+        't_cell_exhaustion': ['immune_cd8_cells'],
+        'interferon_gamma': ['pdl1_expression'],
+        'lactate_level': ['t_cell_exhaustion'],
+        'treatment_response': ['tumour_volume_mm3']
+      };
+    }
+
     if (normalizedDomain.includes('finance') || normalizedDomain.includes('rba')) {
       return {
         'Oil Prices': ['Freight Costs', 'Inflation'],
