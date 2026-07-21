@@ -29,6 +29,7 @@ import { VisualManifoldTab } from './VisualManifoldTab';
 import { RuliadTab } from './RuliadTab';
 import { ProteinFoldingTab } from './ProteinFoldingTab';
 import { MolecularDockingTab } from './MolecularDockingTab';
+import HardwareIntegrationPanel from './HardwareIntegrationPanel';
 
 const CAMPAIGN_RECURSIVE_LEDGERS: Record<string, Array<{
   round: string;
@@ -443,14 +444,175 @@ export default function HarnessConsole({
   const [harnessLogs, setHarnessLogs] = useState<string[]>([]);
   const [memories, setMemories] = useState<HarnessMemory[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'console' | 'memory' | 'architecture' | 'reality' | 'roadtests' | 'scientist_interface' | 'deepmind_synthesis' | 'hypergraph' | 'manifold' | 'ruliad' | 'protein' | 'docking'>(initialTab || 'console');
+  const [activeTab, setActiveTab] = useState<'scientific_discovery' | 'console' | 'memory' | 'architecture' | 'reality' | 'roadtests' | 'scientist_interface' | 'deepmind_synthesis' | 'hypergraph' | 'manifold' | 'ruliad' | 'protein' | 'docking'>(initialTab || 'scientific_discovery');
+
+  const [scientificSubTab, setScientificSubTab] = useState<'global' | 'manifold' | 'hypergraph' | 'ruliad' | 'planner' | 'autochain' | 'hardware'>('global');
+  const [isAutoChainRunning, setIsAutoChainRunning] = useState<boolean>(false);
+  
+  // Custom states for Discovery Planner sub-tab
+  const [plannerActiveTabId, setPlannerActiveTabId] = useState<string>('weather');
+  const [plannerIsRunning, setPlannerIsRunning] = useState<boolean>(false);
+  const [plannerProgress, setPlannerProgress] = useState<number>(0);
+  const [plannerTrials, setPlannerTrials] = useState<any[]>([]);
+  const [plannerBestTrial, setPlannerBestTrial] = useState<any | null>(null);
+  const [plannerCurrentStep, setPlannerCurrentStep] = useState<string>('');
+
+  const [autoChainQueue, setAutoChainQueue] = useState<any[]>([
+    {
+      id: 'exp_rba_cognitive_01',
+      domain: 'finance',
+      description: 'Execute RBA Meta-Cognitive stress sweep under Energy Shock (+120 USD Oil).',
+      expectedInformationGain: 0.942,
+      estimatedRuntime: '5 minutes',
+      rationale: 'Calibrates secondary cargo-freight and energy congestion variables.',
+      confidence: 0.94,
+      status: 'completed',
+      result: 'USDI Score: 92% (Optimal capital buffer preserves 98.4% liquidity)'
+    },
+    {
+      id: 'exp_weather_diff_02',
+      domain: 'weather',
+      description: 'Optimize urban aerosol tracer dispersal rates to maximize AQI correction.',
+      expectedInformationGain: 0.88,
+      estimatedRuntime: '3 minutes',
+      rationale: 'Balances aerosol boundary height restrictions against moisture anomalies.',
+      confidence: 0.88,
+      status: 'completed',
+      result: 'Dispersal prediction accuracy improved by 28%'
+    },
+    {
+      id: 'exp_quantum_phase_03',
+      domain: 'quantum',
+      description: 'Model stabilizer surface-17 codes across 128 qubits to preserve coherence.',
+      expectedInformationGain: 0.94,
+      estimatedRuntime: '8 minutes',
+      rationale: 'Suppresses thermal drift using sub-millisecond phase realignment pulses.',
+      confidence: 0.94,
+      status: 'proposed',
+      result: null
+    },
+    {
+      id: 'exp_cancer_supp_04',
+      domain: 'cancer',
+      description: 'Targeted immune checkpoint micro-dose pathway suppressive delivery.',
+      expectedInformationGain: 0.95,
+      estimatedRuntime: '12 minutes',
+      rationale: 'Upregulate MHC-I expression to reverse melanoma therapeutic resistance.',
+      confidence: 0.95,
+      status: 'proposed',
+      result: null
+    }
+  ]);
+
+  // Backward compatible redirects for initial tabs
+  useEffect(() => {
+    if (activeTab === 'console') {
+      setActiveTab('scientific_discovery');
+      setScientificSubTab('global');
+    } else if (activeTab === 'hypergraph') {
+      setActiveTab('scientific_discovery');
+      setScientificSubTab('hypergraph');
+    } else if (activeTab === 'manifold') {
+      setActiveTab('scientific_discovery');
+      setScientificSubTab('manifold');
+    } else if (activeTab === 'ruliad') {
+      setActiveTab('scientific_discovery');
+      setScientificSubTab('ruliad');
+    }
+  }, [activeTab]);
 
   // Watch for initialTab changes to switch tab dynamically
   useEffect(() => {
     if (initialTab) {
-      setActiveTab(initialTab);
+      if (initialTab === 'console') {
+        setActiveTab('scientific_discovery');
+        setScientificSubTab('global');
+      } else if ((initialTab as string) === 'hypergraph') {
+        setActiveTab('scientific_discovery');
+        setScientificSubTab('hypergraph');
+      } else if ((initialTab as string) === 'manifold') {
+        setActiveTab('scientific_discovery');
+        setScientificSubTab('manifold');
+      } else if ((initialTab as string) === 'ruliad') {
+        setActiveTab('scientific_discovery');
+        setScientificSubTab('ruliad');
+      } else {
+        setActiveTab(initialTab as any);
+      }
     }
   }, [initialTab]);
+
+  // Auto-chain autonomous simulation loop
+  useEffect(() => {
+    if (!isAutoChainRunning) return;
+
+    const interval = setInterval(() => {
+      setAutoChainQueue((prevQueue) => {
+        const nextQueue = [...prevQueue];
+        
+        // Find if there's a running trial
+        const runningIdx = nextQueue.findIndex(exp => exp.status === 'running');
+        if (runningIdx !== -1) {
+          // Complete it!
+          const completed = { ...nextQueue[runningIdx] };
+          completed.status = 'completed';
+          const score = Math.floor(Math.random() * 15) + 82; // 82 - 96
+          completed.result = `USDI Score: ${score}% (Dynamic envelope stabilized with peak efficiency)`;
+          nextQueue[runningIdx] = completed;
+          
+          onLogEvent(`[AUTO-CHAIN] Completed autonomous trial: ${completed.description}. Convergence achieved with verification score of ${score}%.`, 'interaction');
+          return nextQueue;
+        }
+
+        // Else find the first proposed trial to run
+        const proposedIdx = nextQueue.findIndex(exp => exp.status === 'proposed');
+        if (proposedIdx !== -1) {
+          const running = { ...nextQueue[proposedIdx] };
+          running.status = 'running';
+          nextQueue[proposedIdx] = running;
+          
+          onLogEvent(`[AUTO-CHAIN] Running simulation loop for proposed experiment: "${running.description}"`, 'physics');
+          return nextQueue;
+        }
+
+        // If all are completed, propose a new random experiment
+        const domains = ['quantum', 'genomics', 'semiconductor', 'satellite', 'surgery', 'cancer', 'regenmed'];
+        const randomDomain = domains[Math.floor(Math.random() * domains.length)];
+        const randomTitles = [
+          "Dynamic Thermal Junction Backpressure Balance",
+          "Continuous Reed-Solomon Radiation Decoupling",
+          "Feedback-Gain Coherence Boundary Tune",
+          "Oncology Expressive Micro-dose Suppressive Route",
+          "Multi-Layer CRISPR Alignment Splice Target"
+        ];
+        const randomQueries = [
+          "Calibrate micro-chiplet feedback loop to dump 4.2 kW/cm² high-frequency transient hotspots.",
+          "Optimize GOES-18 signal forward-error-correction under extreme solar radiation flares.",
+          "Synthesize sub-millisecond phase tracking Realignment Pulses over 128-qubit register.",
+          "Verify target transcript down-regulation with zero healthy cell toxicity bounds.",
+          "Splice dynamic RNA guided vectors to isolate off-target genomic anomalies."
+        ];
+        
+        const idx = Math.floor(Math.random() * randomTitles.length);
+        const newProposal = {
+          id: `exp_auto_${Date.now()}`,
+          domain: randomDomain,
+          description: randomTitles[idx],
+          expectedInformationGain: parseFloat((Math.random() * 0.2 + 0.8).toFixed(3)),
+          estimatedRuntime: `${Math.floor(Math.random() * 5) + 3} minutes`,
+          rationale: randomQueries[idx],
+          confidence: 0.94,
+          status: 'proposed',
+          result: null
+        };
+
+        onLogEvent(`[AUTO-CHAIN] Autonomous director proposed new active-learning experiment: "${newProposal.description}" with expected information gain of ${newProposal.expectedInformationGain}.`, 'info');
+        return [newProposal, ...nextQueue];
+      });
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [isAutoChainRunning, onLogEvent]);
 
   // DeepMind Orchestrator State Variables
   const [selectedDeepMindModel, setSelectedDeepMindModel] = useState<'gemini_image' | 'gemini_omni' | 'veo' | 'lyria' | 'gemini_audio' | 'genie'>('gemini_omni');
@@ -1737,12 +1899,9 @@ Instead of a random sweep, the **Curiosity Engine** evaluated entropy and inform
         {/* Tab Controls */}
         <div className="flex gap-1 bg-neutral-100 border border-[#1A1A1A] p-1 self-start md:self-center overflow-x-auto max-w-full shrink-0">
           {[
-            { id: 'console', label: 'RUNTIME CONSOLE', icon: Terminal },
+            { id: 'scientific_discovery', label: '🌌 SCIENTIFIC DISCOVERY (UNIFIED)', icon: Compass },
             { id: 'deepmind_synthesis', label: '🌀 DEEPMIND SUITE', icon: Sparkles },
             { id: 'reality', label: '🌎 REALITY ANCHOR', icon: Globe },
-            { id: 'hypergraph', label: '🔗 HYPERGRAPH', icon: Network },
-            { id: 'manifold', label: '🌌 MANIFOLD', icon: Compass },
-            { id: 'ruliad', label: '📐 RULIAD', icon: Cpu },
             { id: 'protein', label: '🧬 PROTEIN FOLDING', icon: Beaker },
             { id: 'docking', label: '💊 MOLECULAR DOCKING', icon: Layers },
             { id: 'roadtests', label: '⚡ ROAD TEST SUITE', icon: Activity },
@@ -1769,7 +1928,368 @@ Instead of a random sweep, the **Curiosity Engine** evaluated entropy and inform
         </div>
       </div>
 
-      {activeTab === 'console' && (
+      {activeTab === 'scientific_discovery' && (
+        <div className="space-y-6 mb-6">
+          {/* Scientific Discovery Header & Banner */}
+          <div className="border-2 border-[#1A1A1A] bg-indigo-50/20 p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-left shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]">
+            <div className="space-y-1">
+              <span className="text-[10px] font-mono font-bold text-indigo-700 uppercase tracking-widest block">
+                OMEGA-CORE UNIFIED SYSTEM • PHASE 2
+              </span>
+              <h3 className="text-lg font-serif font-black uppercase text-neutral-800 flex items-center gap-2">
+                <Compass className="w-5 h-5 text-indigo-600 animate-spin-slow" />
+                Spatial End-to-End Scientific Discovery
+              </h3>
+              <p className="text-xs text-neutral-600 leading-relaxed font-sans max-w-3xl">
+                A unified multi-dimensional research framework that bonds raw sensor tensors, geometric manifold topologies, causal graphs, auto-chaining active learning loops, and predictive arbiter systems.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <span className="text-[10px] font-mono font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 px-2.5 py-1 rounded-sm shadow-sm flex items-center gap-1">
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                INTEGRATED FLOW ONLINE
+              </span>
+            </div>
+          </div>
+
+          {/* Unified Sub-tab Controls Strip */}
+          <div className="flex flex-col gap-1.5 border-b-2 border-[#1A1A1A] pb-2">
+            <span className="text-[10px] font-bold font-mono uppercase text-neutral-500 text-left">
+              Select Analytical Viewport
+            </span>
+            <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+              {[
+                { id: 'global', label: '🌐 GLOBAL SCIENTIFIC CONSOLE', desc: 'Core execution & telemetry logs' },
+                { id: 'manifold', label: '🌌 VISUAL MANIFOLD', desc: 'Thermodynamic coordinate topology' },
+                { id: 'hypergraph', label: '🔗 HYPER GRAPH CAUSAL MESH', desc: 'Causal variable networks' },
+                { id: 'ruliad', label: '📐 GEOMETRIC RULIAD', desc: 'Discrete causal pathways' },
+                { id: 'planner', label: '💡 GENERATE SUGGESTIONS (DISCOVERY PLANNER)', desc: 'Pre-designed experiment sweeps' },
+                { id: 'autochain', label: '⛓️ AUTO-CHAIN DISCOVERY (AUTONOMOUS)', desc: 'Active learning auto-loop' },
+                { id: 'hardware', label: '🔌 HARDWARE & DEVICE LAYERS', desc: 'Physical instruments & loop orchestration' }
+              ].map((sub) => {
+                const isSubActive = scientificSubTab === sub.id;
+                return (
+                  <button
+                    key={sub.id}
+                    onClick={() => setScientificSubTab(sub.id as any)}
+                    className={`px-4 py-2 text-[10px] font-mono font-extrabold tracking-tight cursor-pointer flex flex-col items-start gap-0.5 border-2 transition rounded-none text-left shrink-0 ${
+                      isSubActive
+                        ? 'bg-[#1A1A1A] text-white border-[#1A1A1A] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
+                        : 'bg-white text-neutral-700 border-neutral-200 hover:border-neutral-800'
+                    }`}
+                  >
+                    <span>{sub.label}</span>
+                    <span className={`text-[8px] font-normal leading-none font-sans ${isSubActive ? 'text-neutral-400' : 'text-neutral-500'}`}>
+                      {sub.desc}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {scientificSubTab === 'planner' && (
+            <div className="bg-white border-2 border-[#1A1A1A] p-6 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] rounded-none flex flex-col gap-5 text-left">
+              <div className="flex items-center justify-between border-b border-[#1A1A1A] pb-3">
+                <div className="flex items-center gap-2">
+                  <Lightbulb className="w-5 h-5 text-indigo-600 animate-pulse" />
+                  <h4 className="font-bold text-[#1A1A1A] tracking-tight text-sm font-serif uppercase">💡 Discovery Planner & Suggestions</h4>
+                </div>
+                <span className="text-[9px] font-mono text-[#E05A36] bg-[#FCFAF7] px-2.5 py-0.5 border border-[#1A1A1A]/30 font-bold uppercase">
+                  Integrated Workbench
+                </span>
+              </div>
+
+              {/* 13 Labs Interactive Strip */}
+              <div className="flex flex-col gap-1.5 border-b border-[#EBE8E3] pb-3">
+                <span className="text-[10px] font-bold font-mono uppercase text-[#1A1A1A]/70">
+                  Select Target Lab Scenario
+                </span>
+                <div className="flex gap-1 overflow-x-auto pb-1 scrollbar-thin">
+                  {[
+                    { id: 'weather', name: '🌦️ WEATHER' },
+                    { id: 'finance', name: '🏦 FINANCE' },
+                    { id: 'quantum', name: '🌀 QUANTUM' },
+                    { id: 'semiconductor', name: '💾 SEMICONDUCTOR' },
+                    { id: 'satellite', name: '🛰️ SATELLITE' },
+                    { id: 'genomics', name: '🧬 GENOMICS' },
+                    { id: 'economic', name: '📈 ECONOMIC' },
+                    { id: 'video', name: '📹 VIDEO' },
+                    { id: 'meddevices', name: '⚕️ MEDDEVICES' },
+                    { id: 'surgery', name: '🦾 SURGERY' },
+                    { id: 'cancer', name: '🔬 CANCER' },
+                    { id: 'regenmed', name: '🌱 REGENMED' },
+                    { id: 'implants', name: '🦿 IMPLANTS' }
+                  ].map((tab) => {
+                    const isActive = tab.id === plannerActiveTabId;
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => {
+                          if (plannerIsRunning) return;
+                          setPlannerActiveTabId(tab.id);
+                          setPlannerTrials([]);
+                          setPlannerBestTrial(null);
+                          setPlannerProgress(0);
+                        }}
+                        disabled={plannerIsRunning}
+                        className={`px-3 py-1 text-[10px] font-bold font-mono tracking-tight transition cursor-pointer flex items-center gap-1 shrink-0 border rounded-none ${
+                          isActive
+                            ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]'
+                            : 'bg-[#FCFAF7] text-[#1A1A1A] border-[#EBE8E3] hover:border-[#1A1A1A]'
+                        } ${plannerIsRunning ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        <span>{tab.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Lab Guide Detail */}
+              <div className="bg-[#FCFAF7] border border-[#1A1A1A] p-4 font-serif text-xs flex flex-col gap-1.5">
+                <div className="flex items-center gap-2 text-black font-bold text-xs uppercase font-mono">
+                  <span>💡 Dynamic Lab Calibration Goal:</span>
+                </div>
+                <p className="text-slate-700 leading-relaxed italic">
+                  "Based on telemetry boundaries (pressure differentials, active agents, thermal shifts), configure optimal coefficients to stabilize local system conditions."
+                </p>
+              </div>
+
+              {/* Predefined Suggestions for selected lab */}
+              <div className="space-y-3">
+                <span className="text-[10px] font-bold font-mono uppercase text-[#1A1A1A]/70 block">
+                  Suggested Experiments for Active Workspace
+                </span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {(agentExperiments[activeAgent] || agentExperiments['democratic']).map((exp, idx) => (
+                    <div 
+                      key={idx} 
+                      className="border border-neutral-200 bg-white p-3.5 flex flex-col justify-between gap-3 hover:border-[#1A1A1A] transition shadow-sm"
+                    >
+                      <div>
+                        <span className="text-[10px] font-mono font-bold text-indigo-700 block mb-1 uppercase tracking-wide">
+                          {exp.title}
+                        </span>
+                        <p className="text-[11px] text-neutral-600 font-sans leading-relaxed">
+                          "{exp.query}"
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setQuery(exp.query);
+                          setScientificSubTab('global');
+                          onLogEvent(`[PLANNER] Loaded suggested experiment: "${exp.title}" as active hypothesis.`, 'interaction');
+                        }}
+                        className="bg-[#1A1A1A] hover:bg-neutral-800 text-white px-3 py-1.5 text-[9px] font-mono font-bold tracking-tight uppercase transition cursor-pointer w-full text-center"
+                      >
+                        Load Experiment & Go to Console
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Sweep Parameter Controls */}
+              <div className="border-t border-neutral-200 pt-4 mt-2">
+                {!plannerIsRunning && !plannerBestTrial ? (
+                  <button
+                    onClick={() => {
+                      setPlannerIsRunning(true);
+                      setPlannerProgress(0);
+                      setPlannerTrials([]);
+                      setPlannerBestTrial(null);
+                      setPlannerCurrentStep('Initializing Parameter Sweep Analysis...');
+                      onLogEvent(`[PLANNER] Initiated high-fidelity parameter envelope sweep for ${plannerActiveTabId.toUpperCase()}`, 'info');
+                      
+                      let currentProg = 0;
+                      const interval = setInterval(() => {
+                        currentProg += 5;
+                        setPlannerProgress(currentProg);
+                        
+                        if (currentProg === 20) {
+                          setPlannerCurrentStep('Running Trial #1: Low Intensity Floor...');
+                          setPlannerTrials([{ id: 't-1', name: 'Low Intensity Floor', score: 58, outcome: 'Trace release reduces boundary anomalies with standard concerns.' }]);
+                        } else if (currentProg === 50) {
+                          setPlannerCurrentStep('Running Trial #2: Optimal Equilibrium Curve...');
+                          setPlannerTrials(prev => [...prev, { id: 't-2', name: 'Optimal Equilibrium Curve', score: 92, outcome: 'Optimal equilibrium preserves 98.4% local stability.' }]);
+                        } else if (currentProg === 80) {
+                          setPlannerCurrentStep('Running Trial #3: Excessive Saturation Boundary...');
+                          setPlannerTrials(prev => [...prev, { id: 't-3', name: 'Excessive Saturation Boundary', score: 71, outcome: 'Total saturation boundary triggers stress constraints and thermal warning alerts.' }]);
+                        } else if (currentProg >= 100) {
+                          clearInterval(interval);
+                          setPlannerIsRunning(false);
+                          setPlannerCurrentStep('Autonomous Parameter Sweep Complete!');
+                          const optimal = { id: 't-2', name: 'Optimal Equilibrium Curve', score: 92, outcome: 'Optimal equilibrium preserves 98.4% local stability.' };
+                          setPlannerBestTrial(optimal);
+                          onLogEvent(`[PLANNER] Determined optimal parameters (Peak Efficiency Score: 92/100)`, 'interaction');
+                        }
+                      }, 150);
+                    }}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-none py-3 text-xs font-bold font-mono uppercase tracking-wider flex items-center justify-center gap-1.5 transition border border-indigo-700 cursor-pointer"
+                  >
+                    <Beaker className="w-4 h-4 text-white" />
+                    Analyze Optimal Parameter Envelope ({plannerActiveTabId.toUpperCase()})
+                  </button>
+                ) : (
+                  <div className="bg-[#FCFAF7] border border-[#1A1A1A] rounded-none p-4 flex flex-col gap-3">
+                    <div className="flex items-center justify-between text-xs font-mono font-bold">
+                      <span className="text-[#1A1A1A] flex items-center gap-1.5">
+                        {plannerIsRunning ? <RefreshCw className="w-3.5 h-3.5 text-indigo-600 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5 text-emerald-700" />}
+                        <span>{plannerCurrentStep}</span>
+                      </span>
+                      <span className="text-indigo-700 font-extrabold">{plannerProgress}%</span>
+                    </div>
+                    <div className="w-full bg-[#EBE8E3] h-2 rounded-none overflow-hidden border border-[#1A1A1A]">
+                      <div
+                        className="bg-indigo-600 h-full transition-all duration-150"
+                        style={{ width: `${plannerProgress}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Sweep Trial Results */}
+              {plannerTrials.length > 0 && (
+                <div className="space-y-2">
+                  <span className="text-[10px] font-bold font-mono uppercase text-neutral-500 block">Active Parameters Sweep Trial Log</span>
+                  <div className="space-y-2">
+                    {plannerTrials.map((trial) => (
+                      <div key={trial.id} className="bg-neutral-50 border border-neutral-200 p-3 rounded-none flex items-start gap-2.5 text-xs text-black animate-fadeIn">
+                        <div className="bg-white border border-[#1A1A1A] rounded-none px-2 py-0.5 font-mono text-black text-[10px] font-bold shrink-0">
+                          {trial.id.toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex justify-between items-center mb-0.5 border-b border-neutral-200 pb-1">
+                            <strong className="text-black text-[11px] font-serif font-bold italic">{trial.name}</strong>
+                            <span className="text-[10px] font-mono font-bold text-[#1B6A43]">Score: {trial.score}/100</span>
+                          </div>
+                          <p className="text-xs text-slate-800 leading-normal font-sans mt-1">"{trial.outcome}"</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {scientificSubTab === 'autochain' && (
+            <div className="bg-white border-2 border-[#1A1A1A] p-6 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] rounded-none flex flex-col gap-5 text-left">
+              <div className="flex items-center justify-between border-b border-[#1A1A1A] pb-3">
+                <div className="flex items-center gap-2">
+                  <RefreshCw className={`w-5 h-5 text-emerald-600 ${isAutoChainRunning ? 'animate-spin' : ''}`} />
+                  <h4 className="font-bold text-[#1A1A1A] tracking-tight text-sm font-serif uppercase">⛓️ OMEGA-CORE Autonomous Research Loop</h4>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full ${isAutoChainRunning ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                  <span className="text-[9px] font-mono uppercase font-bold text-neutral-600">
+                    {isAutoChainRunning ? 'AUTOPILOT RUNNING' : 'AUTOPILOT IDLE'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Description Banner */}
+              <p className="text-xs text-neutral-600 leading-relaxed font-sans">
+                The OMEGA Autonomous Active Learning Director systematically maps parameter boundaries, evaluates modeling failures, uses meta-cognitive critique loops, and triggers targeted simulations autonomously.
+              </p>
+
+              {/* Dashboard Controller Actions */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="border border-neutral-200 bg-neutral-50 p-4 flex flex-col justify-between gap-4">
+                  <div>
+                    <h5 className="font-mono text-[11px] font-bold uppercase text-neutral-800 mb-1">AUTONOMOUS SCHEDULING MODE</h5>
+                    <p className="text-[11px] text-neutral-500 leading-normal font-sans">
+                      Activate auto-chaining to automatically execute the active learning queue. The director will run back-to-back experiment simulations in background threads.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsAutoChainRunning(!isAutoChainRunning);
+                      onLogEvent(`[AUTO-CHAIN] Autonomous Scheduler toggled to ${!isAutoChainRunning ? 'ACTIVE' : 'IDLE'}.`, 'interaction');
+                    }}
+                    className={`w-full font-mono text-xs uppercase tracking-wider py-2.5 px-4 font-bold border-2 transition shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center gap-2 cursor-pointer ${
+                      isAutoChainRunning
+                        ? 'bg-rose-600 text-white border-rose-600 hover:bg-rose-700'
+                        : 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                    }`}
+                  >
+                    {isAutoChainRunning ? 'Stop Active Auto-Chain Loop' : 'Start Active Auto-Chain Loop'}
+                  </button>
+                </div>
+
+                <div className="border border-neutral-200 bg-neutral-50 p-4 flex flex-col justify-between gap-4">
+                  <div>
+                    <h5 className="font-mono text-[11px] font-bold uppercase text-neutral-800 mb-1">GLOBAL DISCOVERY REPORT</h5>
+                    <p className="text-[11px] text-neutral-500 leading-normal font-sans">
+                      Compile all autonomous findings, verified parameters, and convergent active learning curves into a comprehensive PDF scientific research paper format.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      onLogEvent(`[AUTO-CHAIN] Generating global Unified Research Passport...`, 'interaction');
+                      alert("Unified Scientific Discovery Report generated! Details compiled in Scientific Passport.");
+                    }}
+                    className="w-full bg-[#1A1A1A] hover:bg-neutral-800 text-white font-mono text-xs uppercase tracking-wider py-2.5 px-4 font-bold border-2 border-[#1A1A1A] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer text-center"
+                  >
+                    Compile Scientific Report
+                  </button>
+                </div>
+              </div>
+
+              {/* Queue Table */}
+              <div className="space-y-2">
+                <span className="text-[10px] font-bold font-mono uppercase text-neutral-500 block">Autonomous Active Learning Queue</span>
+                <div className="border border-neutral-200 overflow-x-auto rounded-none">
+                  <table className="w-full text-left font-mono text-[11px]">
+                    <thead>
+                      <tr className="bg-neutral-100 border-b border-neutral-200 text-neutral-600">
+                        <th className="p-2.5 uppercase font-bold text-[10px]">ID</th>
+                        <th className="p-2.5 uppercase font-bold text-[10px]">Domain</th>
+                        <th className="p-2.5 uppercase font-bold text-[10px]">Experiment Description</th>
+                        <th className="p-2.5 uppercase font-bold text-[10px]">Info Gain</th>
+                        <th className="p-2.5 uppercase font-bold text-[10px]">Status</th>
+                        <th className="p-2.5 uppercase font-bold text-[10px]">Results Summary</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-100 bg-white text-neutral-800">
+                      {autoChainQueue.map((item, idx) => (
+                        <tr key={idx} className="hover:bg-neutral-50">
+                          <td className="p-2.5 font-bold text-neutral-900">{item.id.slice(0, 12)}</td>
+                          <td className="p-2.5 uppercase text-indigo-700 font-bold">{item.domain}</td>
+                          <td className="p-2.5 truncate max-w-[200px]">{item.description}</td>
+                          <td className="p-2.5 font-bold text-neutral-500">{item.expectedInformationGain || '0.942'}</td>
+                          <td className="p-2.5">
+                            <span className={`px-2 py-0.5 text-[9px] font-bold uppercase rounded-sm border ${
+                              item.status === 'completed'
+                                ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                                : item.status === 'running'
+                                ? 'bg-indigo-50 text-indigo-800 border-indigo-300 animate-pulse'
+                                : 'bg-neutral-50 text-neutral-600 border-neutral-200'
+                            }`}>
+                              {item.status}
+                            </span>
+                          </td>
+                          <td className="p-2.5 truncate max-w-[180px] italic text-neutral-500 text-[10px]">
+                            {item.result || 'Awaiting simulation execution...'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {scientificSubTab === 'hardware' && (
+            <HardwareIntegrationPanel onLogEvent={onLogEvent} />
+          )}
+        </div>
+      )}
+
+      {(activeTab === 'console' || (activeTab === 'scientific_discovery' && scientificSubTab === 'global')) && (
         <div className="space-y-6">
 
           {/* HYPOTHESIS ENGINE ACROSS MULTI-ASSET NETWORKS (MATCHES PIC 2) */}
@@ -2384,7 +2904,7 @@ Instead of a random sweep, the **Curiosity Engine** evaluated entropy and inform
         </div>
       )}
 
-      {activeTab === 'hypergraph' && (
+      {(activeTab === 'hypergraph' || (activeTab === 'scientific_discovery' && scientificSubTab === 'hypergraph')) && (
         <HypergraphTab
           stateTensor={memoizedStateTensor}
           causalGraph={causalGraph}
@@ -2392,14 +2912,14 @@ Instead of a random sweep, the **Curiosity Engine** evaluated entropy and inform
         />
       )}
 
-      {activeTab === 'manifold' && (
+      {(activeTab === 'manifold' || (activeTab === 'scientific_discovery' && scientificSubTab === 'manifold')) && (
         <VisualManifoldTab
           stateTensor={memoizedStateTensor}
           onLogEvent={onLogEvent}
         />
       )}
 
-      {activeTab === 'ruliad' && (
+      {(activeTab === 'ruliad' || (activeTab === 'scientific_discovery' && scientificSubTab === 'ruliad')) && (
         <RuliadTab
           stateTensor={memoizedStateTensor}
           onLogEvent={onLogEvent}
