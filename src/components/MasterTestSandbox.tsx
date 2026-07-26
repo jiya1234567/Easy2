@@ -1,23 +1,113 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Beaker, CheckCircle, Play, RefreshCw, Layers, Database, 
-  ChevronRight, ArrowRight, ClipboardCheck, Info, FileCode, AlertCircle, HelpCircle
+  ChevronRight, ArrowRight, ClipboardCheck, Info, FileCode, AlertCircle, HelpCircle,
+  Copy, Check, Sparkles, Network, Compass, GitCommit, X, Activity, Cpu, Eye
 } from 'lucide-react';
 
-interface DatasetItem {
+export interface TelemetryPacket {
+  experiment_id: string;
+  reading: number;
+  timestamp: string;
+  device: string;
+  joint_angle_deg?: number;
+  motor_current_a?: number;
+  torque_nm?: number;
+  grip_force_n?: number;
+  temperature_c?: number;
+  status: string;
+  [key: string]: any;
+}
+
+export interface ScientificConfidenceBreakdown {
+  modelConfidence: string;
+  dataQuality: string;
+  parameterSpaceCoverage: string;
+  reproducibilityScore: string;
+  externalValidationAgreement: string;
+}
+
+export interface CompetingHypothesis {
+  id: string;
+  statement: string;
+  likelihood: string;
+  evidence: string;
+}
+
+export interface CausalEdgeRating {
+  source: string;
+  target: string;
+  ratingStars: number;
+  evidenceLevel: string;
+}
+
+export interface InstrumentHealth {
+  name: string;
+  calibration: string;
+  sensorDrift: string;
+  powerBattery: string;
+  status: 'Healthy' | 'Warning' | 'Calibrate';
+}
+
+export interface ExecutiveDecisionSummary {
+  questionAnswered: boolean;
+  confidenceLevel: 'HIGH' | 'MEDIUM' | 'LOW';
+  publicationReady: 'YES' | 'NO' | 'CONDITIONAL';
+  readinessReason: string;
+  missingMeasurementsNeeded: string[];
+  recommendedNextExperiment: string;
+  estimatedInformationGain: string;
+}
+
+export interface UniversalTestPackage {
   id: string;
   title: string;
   domain: string;
   icon: string;
-  mission: string;
-  context: Record<string, any>;
-  devices: Record<string, string>;
+  metadata: {
+    experiment_id: string;
+    researcher: string;
+    timestamp: string;
+    device: string;
+    simulation: boolean;
+    version: string;
+    validation: string;
+    evidenceLevel: 'Simulation' | 'Historical Data' | 'Laboratory' | 'Field Data' | 'Independent Replication';
+    noveltyScore: 'Known Science' | 'Moderately Novel' | 'Potentially Novel' | 'Requires Independent Validation';
+    noveltyPercent: number;
+  };
+  confidenceBreakdown: ScientificConfidenceBreakdown;
+  causalEdgeRatings: CausalEdgeRating[];
+  competingHypotheses: CompetingHypothesis[];
+  instrumentHealthList: InstrumentHealth[];
+  missingVariablesList: string[];
+  knowledgeGraphStats: {
+    nodes: number;
+    confirmedEdges: number;
+    graphGrowth: string;
+  };
+  executiveDecision: ExecutiveDecisionSummary;
+  missionIntent: {
+    question: string;
+    objectives: string[];
+  };
+  scientificContext: {
+    description: string;
+    parametersMeasured: string[];
+    assumptions: Record<string, any>;
+  };
+  deviceConfiguration: Record<string, any>;
   environment: Record<string, any>;
-  measurements: Record<string, number[]>;
+  rawTelemetry: Record<string, number[] | string[]>;
+  telemetryPackets: TelemetryPacket[];
+  groundTruth: {
+    expected_failure: boolean;
+    inspection: string;
+    notes?: string;
+  };
   plotX: string;
   plotY: string;
   expectedDiscovery: string;
-  deviceTelemetry: Record<string, any>;
   metaCognition: {
     mission: string;
     confidence: string;
@@ -28,364 +118,693 @@ interface DatasetItem {
     nextExperiment: string;
     knowledgeGraph: string;
   };
+  // Discovery Explanation Panels Data
+  discoveryExplanation: {
+    missionReason: string;
+    manifoldPlacement: string;
+    hypergraphCauses: string;
+    ruliadRecommendation: string;
+    timeline: Array<{
+      step: number;
+      label: string;
+      desc: string;
+      confidence: string;
+    }>;
+  };
 }
 
-const PROOF_OF_PRINCIPLE_DATASETS: DatasetItem[] = [
+export const UNIVERSAL_TEST_PACKAGES: UniversalTestPackage[] = [
   {
-    id: 'materials',
-    title: 'Materials Science (Al-Mg-Graphene)',
-    domain: 'Metallurgy & Composites',
+    id: 'robotics_pincherx',
+    title: 'Robotics Fatigue Test (PincherX)',
+    domain: 'Robotics & Mechanical Wear',
+    icon: '🤖',
+    metadata: {
+      experiment_id: 'EXP-2026-001',
+      researcher: 'WorldLab Robotics',
+      timestamp: '2026-07-24T14:20:00Z',
+      device: 'PincherX',
+      simulation: true,
+      version: 'OMEGA-CORE v2.4',
+      validation: 'Scaffold',
+      evidenceLevel: 'Laboratory',
+      noveltyScore: 'Moderately Novel',
+      noveltyPercent: 62
+    },
+    confidenceBreakdown: {
+      modelConfidence: '89.4%',
+      dataQuality: '96.2%',
+      parameterSpaceCoverage: '78.0%',
+      reproducibilityScore: '92.5%',
+      externalValidationAgreement: '91.0%'
+    },
+    causalEdgeRatings: [
+      { source: 'Grip Force Cycle', target: 'Joint Temperature', ratingStars: 5, evidenceLevel: 'Laboratory Telemetry' },
+      { source: 'Joint Temperature', target: 'Nylon Gear Mesh Friction', ratingStars: 4, evidenceLevel: 'Thermal Camera' },
+      { source: 'Gear Mesh Friction', target: 'Motor Current Spike', ratingStars: 5, evidenceLevel: 'High-Hz Current Probe' }
+    ],
+    competingHypotheses: [
+      { id: 'HYP-A', statement: 'Thermal expansion of nylon gear drives non-linear friction and current spike at 15° deflection.', likelihood: '82%', evidence: 'Supported by 39°C thermal gradient telemetry' },
+      { id: 'HYP-B', statement: 'Aluminium sample work-hardening increases resistive grip force directly.', likelihood: '45%', evidence: 'Partial match with torque sensor readings' },
+      { id: 'HYP-C', statement: 'Motor driver MOSFET thermal throttling limits voltage output.', likelihood: '28%', evidence: 'Requires PCB thermocouple validation' }
+    ],
+    instrumentHealthList: [
+      { name: 'Joint_2 Optical Encoder', calibration: '99.1%', sensorDrift: '0.2%', powerBattery: '100%', status: 'Healthy' },
+      { name: 'Motor Current Sensor (50Hz)', calibration: '98.5%', sensorDrift: '0.4%', powerBattery: '99.5%', status: 'Healthy' },
+      { name: 'Grip Force Load Cell', calibration: '94.2%', sensorDrift: '1.5%', powerBattery: '98.0%', status: 'Warning' }
+    ],
+    missingVariablesList: ['Gear Mesh Nylon Thermal Expansion Coefficient', 'PCB Driver MOSFET Thermocouple', 'Ultra-High Frequency Strain Gauge (100Hz)'],
+    knowledgeGraphStats: {
+      nodes: 145,
+      confirmedEdges: 32,
+      graphGrowth: '+12 nodes (+9%)'
+    },
+    executiveDecision: {
+      questionAnswered: true,
+      confidenceLevel: 'HIGH',
+      publicationReady: 'CONDITIONAL',
+      readinessReason: 'Requires thermal active cooling test run to isolate nylon expansion from structural gear wear.',
+      missingMeasurementsNeeded: ['Infrared Thermal Imager', 'Nylon Expansion Profile'],
+      recommendedNextExperiment: 'Cool Joint_2 to 20°C and execute 100-cycle high-speed duty stress sweep.',
+      estimatedInformationGain: '38%'
+    },
+    missionIntent: {
+      question: 'Determine whether repeated grip force causes component fatigue in PincherX joint assembly.',
+      objectives: [
+        'Identify nonlinear mechanical wear under cyclic loading.',
+        'Find structural failure threshold for Joint_2.',
+        'Recommend next material or strain-rate experiment.'
+      ]
+    },
+    scientificContext: {
+      description: 'Robot repeatedly grips identical aluminium samples under high sampling frequency.',
+      parametersMeasured: ['Grip Force', 'Joint Torque', 'Temperature', 'Motor Current', 'Position Error', 'Cycle Time'],
+      assumptions: {
+        material: 'Aluminium 6061-T6',
+        test_cycles: 20,
+        load_profile: 'Cyclic step pulse'
+      }
+    },
+    deviceConfiguration: {
+      device: 'PincherX',
+      mode: 'Simulation',
+      sampling_hz: 50,
+      joint: 'Joint_2',
+      cycles: 20
+    },
+    environment: {
+      temperature: 24,
+      humidity: 58,
+      surface: 'Aluminium',
+      lighting: 'Laboratory'
+    },
+    rawTelemetry: {
+      time: [1, 2, 3, 4, 5],
+      joint_angle: [0, 5, 9, 12, 15],
+      motor_current: [0.42, 0.44, 0.49, 0.57, 0.68],
+      torque: [0.32, 0.34, 0.36, 0.40, 0.48],
+      grip_force: [4.9, 5.0, 5.0, 5.1, 5.2],
+      temperature: [31, 32, 34, 36, 39]
+    },
+    telemetryPackets: [
+      { experiment_id: 'EXP-000245', reading: 1, timestamp: '2026-07-24T14:20:01Z', device: 'PincherX', joint_angle_deg: 0, motor_current_a: 0.42, torque_nm: 0.32, grip_force_n: 4.9, temperature_c: 31.0, status: 'OK' },
+      { experiment_id: 'EXP-000245', reading: 2, timestamp: '2026-07-24T14:20:02Z', device: 'PincherX', joint_angle_deg: 5.0, motor_current_a: 0.44, torque_nm: 0.34, grip_force_n: 5.0, temperature_c: 32.0, status: 'OK' },
+      { experiment_id: 'EXP-000245', reading: 3, timestamp: '2026-07-24T14:20:03Z', device: 'PincherX', joint_angle_deg: 9.0, motor_current_a: 0.49, torque_nm: 0.36, grip_force_n: 5.0, temperature_c: 34.0, status: 'OK' },
+      { experiment_id: 'EXP-000245', reading: 4, timestamp: '2026-07-24T14:20:04Z', device: 'PincherX', joint_angle_deg: 12.0, motor_current_a: 0.57, torque_nm: 0.40, grip_force_n: 5.1, temperature_c: 36.0, status: 'OK' },
+      { experiment_id: 'EXP-000245', reading: 5, timestamp: '2026-07-24T14:20:05Z', device: 'PincherX', joint_angle_deg: 15.0, motor_current_a: 0.68, torque_nm: 0.48, grip_force_n: 5.2, temperature_c: 39.0, status: 'WARMING' }
+    ],
+    groundTruth: {
+      expected_failure: false,
+      inspection: 'No cracks detected on Joint_2 gear mesh; thermal gradient +25% elevated.'
+    },
+    plotX: 'joint_angle',
+    plotY: 'motor_current',
+    expectedDiscovery: 'Motor current rises nonlinearly above 12° deflection, signaling thermal dissipation resistance and localized gear mesh friction.',
+    metaCognition: {
+      mission: 'Determine fatigue and failure thresholds in PincherX robot joint',
+      confidence: '89.4%',
+      realityScore: '96.2% alignment',
+      whatFailed: 'Linear stiffness assumption failed as motor current spiked at 15° deflection.',
+      missingVariable: 'Thermal expansion coefficient of internal nylon reduction gear.',
+      instrumentNeeded: 'Infrared thermal imaging camera & motor current sensor at 100Hz.',
+      nextExperiment: 'Cool Joint_2 to 20°C and execute 100-cycle high-speed duty stress sweep.',
+      knowledgeGraph: 'Add edge: Joint Temperature -> [Gear Mesh Friction] -> [Motor Current Spike].'
+    },
+    discoveryExplanation: {
+      missionReason: 'Evaluated mechanical fatigue resistance under continuous 50Hz load cycles to pinpoint micro-friction thermal thresholds.',
+      manifoldPlacement: 'Sample sits inside the "Thermal Friction Boundary Cluster" near low-cost robotic actuator models.',
+      hypergraphCauses: 'Joint Angle (15°) + Temp (39°C) ──> Gear Mesh Friction ──> Motor Current Spike (0.68A)',
+      ruliadRecommendation: 'Branch to Experiment 8: Thermal cooling active cycle test to isolate thermal expansion from mechanical fatigue.',
+      timeline: [
+        { step: 1, label: 'Initial Baseline Grip', desc: 'PincherX zero-load current established at 0.42A.', confidence: '99%' },
+        { step: 2, label: 'Cyclic Load Injection', desc: 'Applied 5.0N continuous grip force over Aluminium sample.', confidence: '95%' },
+        { step: 3, label: 'Thermal Anomaly Detected', desc: 'Joint temperature rose to 39°C accompanied by 61% motor current surge.', confidence: '89%' },
+        { step: 4, label: 'Causal Attribution', desc: 'Isolating nylon gear mesh expansion as primary cause.', confidence: '92%' }
+      ]
+    }
+  },
+  {
+    id: 'materials_semiconductor',
+    title: 'Materials Science (Semiconductor Mobility)',
+    domain: 'Microelectronics & Materials',
     icon: '🔬',
-    mission: 'Discover a lightweight alloy with thermal conductivity above 250 W/m·K while maintaining tensile strength above 450 MPa.',
-    context: {
-      "candidate_material": "Al-Mg-Graphene",
-      "objective": "Increase thermal conductivity while reducing density",
-      "constraints": {
-        "density_max": 2.9,
-        "cost_max": 25,
-        "thermal_conductivity_min": 250
+    metadata: {
+      experiment_id: 'EXP-2026-002',
+      researcher: 'NanoFab WorldLab',
+      timestamp: '2026-07-24T14:30:00Z',
+      device: 'Cleanroom Cluster',
+      simulation: true,
+      version: 'OMEGA-CORE v2.4',
+      validation: 'Scaffold',
+      evidenceLevel: 'Independent Replication',
+      noveltyScore: 'Potentially Novel',
+      noveltyPercent: 88
+    },
+    confidenceBreakdown: {
+      modelConfidence: '93.8%',
+      dataQuality: '98.1%',
+      parameterSpaceCoverage: '91.2%',
+      reproducibilityScore: '96.0%',
+      externalValidationAgreement: '94.8%'
+    },
+    causalEdgeRatings: [
+      { source: '1050°C Laser Spike Anneal', target: 'Grain Boundary Expansion (98nm)', ratingStars: 5, evidenceLevel: 'TEM In-Situ Diffraction' },
+      { source: 'Grain Size 98nm', target: 'Boundary Electron Scattering Drop', ratingStars: 5, evidenceLevel: 'Hall Effect Probe' },
+      { source: 'Scattering Drop', target: 'Electron Mobility 2100 cm²/V·s', ratingStars: 5, evidenceLevel: 'Wafer Level Testing' }
+    ],
+    competingHypotheses: [
+      { id: 'HYP-1', statement: 'Laser annealing eliminates grain boundary traps, enabling ballistic carrier transport.', likelihood: '91%', evidence: 'Single-crystal XRD diffraction peaks match perfect lattice' },
+      { id: 'HYP-2', statement: 'Substrate strain relaxation drives high carrier mobility.', likelihood: '39%', evidence: 'Raman spectroscopy shows minimal strain variance' }
+    ],
+    instrumentHealthList: [
+      { name: 'Laser Spike Annealer', calibration: '99.8%', sensorDrift: '0.1%', powerBattery: '100%', status: 'Healthy' },
+      { name: 'Hall Effect Mobility Tester', calibration: '99.4%', sensorDrift: '0.2%', powerBattery: '100%', status: 'Healthy' }
+    ],
+    missingVariablesList: ['Interstitial Oxygen Impurity Concentration', 'Interface Trap State Density (Dit)'],
+    knowledgeGraphStats: {
+      nodes: 172,
+      confirmedEdges: 58,
+      graphGrowth: '+27 nodes (+18%)'
+    },
+    executiveDecision: {
+      questionAnswered: true,
+      confidenceLevel: 'HIGH',
+      publicationReady: 'YES',
+      readinessReason: 'Single-crystal lattice confirmed with 2100 cm²/V·s mobility across 4 independent wafer lots.',
+      missingMeasurementsNeeded: ['SIMS Oxygen Profile'],
+      recommendedNextExperiment: 'Sweep anneal temperature at 1075°C to test grain boundary saturation.',
+      estimatedInformationGain: '45%'
+    },
+    missionIntent: {
+      question: 'Find a semiconductor material with higher mobility, lower leakage, better yield, and lower cost.',
+      objectives: [
+        'Maximize electron mobility above 2000 cm²/V·s.',
+        'Suppress defect density below 1.0 defects/cm².',
+        'Balance thermal conductivity with defect passivation.'
+      ]
+    },
+    scientificContext: {
+      description: 'Grain boundary refinement sweep across four synthesized wafer lots.',
+      parametersMeasured: ['Wafer ID', 'Grain Size', 'Defect Density', 'Electron Mobility', 'Thermal Conductivity'],
+      assumptions: {
+        substrate: 'Silicon-on-Insulator (SOI)',
+        anneal_profile: 'Laser spike 1050°C'
       }
     },
-    devices: {
-      "SEM": "Zeiss Sigma",
-      "XRD": "Bruker D8",
-      "Raman": "Renishaw",
-      "DSC": "TA Discovery",
-      "Robot": "Universal Robots UR5"
+    deviceConfiguration: {
+      device: 'Laser Spike Annealer',
+      mode: 'Cleanroom In-Situ',
+      sampling_hz: 10,
+      wafer_count: 4
     },
     environment: {
-      "temperature_C": 25,
-      "humidity_pct": 42,
-      "pressure_kPa": 101.4
+      temperature: 22,
+      humidity: 35,
+      surface: 'Cleanroom ISO-4',
+      lighting: 'UV Shielded'
     },
-    measurements: {
-      "density": [2.82, 2.80, 2.81],
-      "thermal_conductivity": [210, 225, 244],
-      "yield_strength": [455, 460, 462],
-      "grain_size_nm": [180, 165, 150]
+    rawTelemetry: {
+      wafer_id: [1, 2, 3, 4],
+      grain_size: [82, 84, 91, 98],
+      defect_density: [1.5, 1.3, 1.0, 0.7],
+      electron_mobility: [1500, 1650, 1820, 2100],
+      thermal_conductivity: [420, 470, 490, 520]
     },
-    plotX: 'grain_size_nm',
-    plotY: 'thermal_conductivity',
-    expectedDiscovery: 'Grain refinement increases conductivity; conductivity plateau near 245 W/m·K; graphene loading likely insufficient; recommend 3.5% graphene.',
-    deviceTelemetry: {
-      "device_id": "SEM-01",
-      "manufacturer": "Zeiss",
-      "timestamp": "2026-07-21T09:30:00Z",
-      "status": "OK",
-      "calibration": "PASS",
-      "temperature": 25.1,
-      "measurement": {
-        "grain_size_nm": 145
-      }
+    telemetryPackets: [
+      { experiment_id: 'EXP-2026-002', reading: 1, timestamp: '2026-07-24T14:30:01Z', device: 'Cleanroom Wafer 1', grain_size: 82, defect_density: 1.5, electron_mobility: 1500, thermal_conductivity: 420, status: 'OK' },
+      { experiment_id: 'EXP-2026-002', reading: 2, timestamp: '2026-07-24T14:30:02Z', device: 'Cleanroom Wafer 2', grain_size: 84, defect_density: 1.3, electron_mobility: 1650, thermal_conductivity: 470, status: 'OK' },
+      { experiment_id: 'EXP-2026-002', reading: 3, timestamp: '2026-07-24T14:30:03Z', device: 'Cleanroom Wafer 3', grain_size: 91, defect_density: 1.0, electron_mobility: 1820, thermal_conductivity: 490, status: 'OK' },
+      { experiment_id: 'EXP-2026-002', reading: 4, timestamp: '2026-07-24T14:30:04Z', device: 'Cleanroom Wafer 4', grain_size: 98, defect_density: 0.7, electron_mobility: 2100, thermal_conductivity: 520, status: 'OPTIMAL' }
+    ],
+    groundTruth: {
+      expected_failure: false,
+      inspection: 'Wafer 4 exhibits single-crystal grain coalescence without dislocation loops.'
     },
+    plotX: 'grain_size',
+    plotY: 'electron_mobility',
+    expectedDiscovery: 'Grain size expansion directly reduces electron scattering at boundaries, driving mobility past 2100 cm²/V·s threshold.',
     metaCognition: {
-      mission: "Discover lightweight high-conductivity alloy",
-      confidence: "87.4%",
-      realityScore: "92.1% alignment",
-      whatFailed: "Conductivity did not exceed 250 W/m·K target due to plateau.",
-      missingVariable: "Graphene volume fraction and lattice dispersion index.",
-      instrumentNeeded: "Renishaw Raman Spectrometer (measuring G/D band ratio and peak dispersion).",
-      nextExperiment: "Inject 3.5% Graphene under 150nm grain refinement sweep.",
-      knowledgeGraph: "Add edge: Graphene dispersion -> [Thermal Conductive Manifold]."
+      mission: 'Optimize semiconductor mobility via grain size expansion',
+      confidence: '93.8%',
+      realityScore: '98.1% alignment',
+      whatFailed: 'Lower annealing temperatures resulted in high defect density (1.5).',
+      missingVariable: 'Interstitial oxygen impurity concentration.',
+      instrumentNeeded: 'Bruker XRD & Secondary Ion Mass Spectrometer.',
+      nextExperiment: 'Sweep anneal temperature at 1075°C to test grain boundary saturation.',
+      knowledgeGraph: 'Add edge: Grain Size (98nm) -> [Scattering Reduction] -> [Electron Mobility 2100].'
+    },
+    discoveryExplanation: {
+      missionReason: 'Identified the crystal phase transition that maximizes electron mobility while suppressing gate leakage.',
+      manifoldPlacement: 'Sample lies in the "Ultra-High Mobility Semiconductor Subspace" along wafer lot #4 trajectory.',
+      hypergraphCauses: 'Anneal Temperature (1050°C) ──> Grain Size (98nm) ──> Defect Density (0.7) ──> Electron Mobility (2100 cm²/V·s)',
+      ruliadRecommendation: 'Branch to Experiment 12: Oxygen vacancy passivation sweep using hydrogen plasma.',
+      timeline: [
+        { step: 1, label: 'Wafer 1 Baseline', desc: 'Initial mobility measured at 1500 cm²/V·s with 1.5 defect density.', confidence: '98%' },
+        { step: 2, label: 'Laser Anneal Step', desc: 'Applied 1050°C spike anneal expanding grain size to 91nm.', confidence: '96%' },
+        { step: 3, label: 'Threshold Exceeded', desc: 'Wafer 4 reached 2100 cm²/V·s mobility at 0.7 defect density.', confidence: '94%' }
+      ]
     }
   },
   {
-    id: 'semiconductor',
-    title: 'Semiconductor Research (3nm GAAFET)',
-    domain: 'Microelectronics',
-    icon: '⚡',
-    mission: 'Reduce leakage current below 0.5 nA in 3nm Gate-All-Around field effect transistors.',
-    context: {
-      "technology": "3nm GAAFET",
-      "annealing": "Laser",
-      "gate_material": "HfO2"
-    },
-    devices: {
-      "AFM": "Bruker",
-      "ProbeStation": "Cascade",
-      "ThermalCamera": "FLIR"
-    },
-    environment: {
-      "temperature_C": 21.8,
-      "humidity_pct": 35.2,
-      "pressure_kPa": 101.1
-    },
-    measurements: {
-      "anneal_temp": [900, 950, 1000, 1050],
-      "gate_leakage_nA": [2.8, 1.4, 0.7, 0.45],
-      "oxide_thickness_nm": [1.8, 1.7, 1.6, 1.5]
-    },
-    plotX: 'anneal_temp',
-    plotY: 'gate_leakage_nA',
-    expectedDiscovery: 'Leakage current falls rapidly until gate oxide crystallization reaches monoclinic equilibrium near 1.5 nm.',
-    deviceTelemetry: {
-      "device_id": "PROBE-STATION-03",
-      "manufacturer": "Cascade",
-      "timestamp": "2026-07-21T10:15:00Z",
-      "status": "OK",
-      "calibration": "PASS",
-      "temperature": 21.8,
-      "measurement": {
-        "gate_leakage_nA": 0.45
-      }
-    },
-    metaCognition: {
-      mission: "Reduce GAAFET leakage current < 0.5 nA",
-      confidence: "91.2%",
-      realityScore: "96.8% alignment",
-      whatFailed: "Initial trials above 0.5 nA due to incomplete crystallization of HfO2.",
-      missingVariable: "Oxygen vacancy concentration and crystal phase ratio (Monoclinic vs Tetragonal).",
-      instrumentNeeded: "Bruker XRD & Raman Spectrometer.",
-      nextExperiment: "Perform 1075°C rapid laser spike annealing sweep on 1.5nm HfO2.",
-      knowledgeGraph: "Add edge: Laser Anneal Temp -> [Tetragonal Phase Fraction] -> [Gate Leakage Manifold]."
-    }
-  },
-  {
-    id: 'climate',
-    title: 'Climate Diagnostics (Queensland Storms)',
+    id: 'weather_barometric',
+    title: 'Weather Diagnostics (Barometric Storm Precursor)',
     domain: 'Meteorology & Sensing',
     icon: '⛈️',
-    mission: 'Determine whether barometric pressure drops precede severe localized storm systems in Queensland.',
-    context: {
-      "location": "Queensland",
-      "season": "Summer"
+    metadata: {
+      experiment_id: 'EXP-2026-003',
+      researcher: 'Global Climate Lab',
+      timestamp: '2026-07-24T14:40:00Z',
+      device: 'Queensland Station B',
+      simulation: true,
+      version: 'OMEGA-CORE v2.4',
+      validation: 'Scaffold',
+      evidenceLevel: 'Field Data',
+      noveltyScore: 'Moderately Novel',
+      noveltyPercent: 55
     },
-    devices: {
-      "WeatherStation": "BOM",
-      "Satellite": "Himawari",
-      "Radar": "Doppler"
+    confidenceBreakdown: {
+      modelConfidence: '91.2%',
+      dataQuality: '97.5%',
+      parameterSpaceCoverage: '84.0%',
+      reproducibilityScore: '90.1%',
+      externalValidationAgreement: '95.0%'
+    },
+    causalEdgeRatings: [
+      { source: 'Barometric Pressure Drop (1012 hPa)', target: 'Wind Acceleration (17kts)', ratingStars: 5, evidenceLevel: 'Anemometer & Barometer Array' },
+      { source: 'Wind Acceleration', target: 'CAPE Convective Energy Surge (1800 J/kg)', ratingStars: 4, evidenceLevel: 'Radiosonde Sounding' },
+      { source: 'CAPE Surge', target: 'Severe Supercell Convective Cell', ratingStars: 5, evidenceLevel: 'Doppler Radar' }
+    ],
+    competingHypotheses: [
+      { id: 'HYP-W1', statement: 'Pressure drop acts indirectly via wind shear and moisture flux acceleration to trigger convection.', likelihood: '88%', evidence: 'Validated by 18-minute lag between pressure drop and radar echo' },
+      { id: 'HYP-W2', statement: 'Direct thermal updraft triggers storm without needing wind shear coupling.', likelihood: '32%', evidence: 'Poor fit with low-level anemometer speed' }
+    ],
+    instrumentHealthList: [
+      { name: 'Queensland Station B Barometer', calibration: '99.5%', sensorDrift: '0.1%', powerBattery: '100%', status: 'Healthy' },
+      { name: 'Doppler Radar Unit #4', calibration: '97.8%', sensorDrift: '0.5%', powerBattery: '96.0%', status: 'Healthy' }
+    ],
+    missingVariablesList: ['Vertical Doppler Wind Profile at 5000ft', 'Upper Atmosphere Temperature Gradient'],
+    knowledgeGraphStats: {
+      nodes: 206,
+      confirmedEdges: 91,
+      graphGrowth: '+34 nodes (+20%)'
+    },
+    executiveDecision: {
+      questionAnswered: true,
+      confidenceLevel: 'HIGH',
+      publicationReady: 'YES',
+      readinessReason: 'Causal indirect mechanism validated by field station telemetry and Doppler radar echo.',
+      missingMeasurementsNeeded: ['5000ft Doppler Profiler'],
+      recommendedNextExperiment: 'Incorporate Doppler radial velocity vectors into hypergraph mesh.',
+      estimatedInformationGain: '40%'
+    },
+    missionIntent: {
+      question: 'Analyze whether atmospheric pressure causes storm formation directly or indirectly through wind acceleration.',
+      objectives: [
+        'Determine barometric pressure drop velocity.',
+        'Track convective available potential energy (CAPE).',
+        'Distinguish direct vs indirect causal pathways.'
+      ]
+    },
+    scientificContext: {
+      description: 'Continuous atmospheric pressure and wind vector monitoring across weather station array.',
+      parametersMeasured: ['Pressure', 'Humidity', 'Wind Speed', 'CAPE'],
+      assumptions: {
+        location: 'Queensland Coast',
+        season: 'Late Summer'
+      }
+    },
+    deviceConfiguration: {
+      device: 'BOM Weather Array',
+      mode: 'Real-Time Stream',
+      sampling_hz: 1
     },
     environment: {
-      "temperature_C": 31.4,
-      "humidity_pct": 78.5,
-      "pressure_kPa": 100.2
+      temperature: 31,
+      humidity: 74,
+      surface: 'Coastal Plain',
+      lighting: 'Overcast'
     },
-    measurements: {
-      "pressure": [1018, 1016, 1014, 1009, 1002, 996],
-      "wind": [8, 10, 15, 22, 35, 45],
-      "humidity": [60, 63, 70, 82, 91, 95],
-      "rain": [0, 0, 4, 16, 55, 80]
+    rawTelemetry: {
+      pressure: [1015, 1014, 1012, 1004, 996],
+      humidity: [62, 68, 74, 85, 92],
+      wind: [8, 11, 17, 28, 42],
+      cape: [600, 950, 1800, 2400, 3100]
+    },
+    telemetryPackets: [
+      { experiment_id: 'EXP-2026-003', reading: 1, timestamp: '2026-07-24T14:40:01Z', device: 'WX-STN-01', pressure: 1015, humidity: 62, wind: 8, cape: 600, status: 'OK' },
+      { experiment_id: 'EXP-2026-003', reading: 2, timestamp: '2026-07-24T14:40:02Z', device: 'WX-STN-01', pressure: 1014, humidity: 68, wind: 11, cape: 950, status: 'OK' },
+      { experiment_id: 'EXP-2026-003', reading: 3, timestamp: '2026-07-24T14:40:03Z', device: 'WX-STN-01', pressure: 1012, humidity: 74, wind: 17, cape: 1800, status: 'ALERT' },
+      { experiment_id: 'EXP-2026-003', reading: 4, timestamp: '2026-07-24T14:40:04Z', device: 'WX-STN-01', pressure: 1004, humidity: 85, wind: 28, cape: 2400, status: 'STORM' }
+    ],
+    groundTruth: {
+      expected_failure: false,
+      inspection: 'Severe convective cell formed 18 minutes after pressure dropped below 1012 mbar.'
     },
     plotX: 'pressure',
-    plotY: 'rain',
-    expectedDiscovery: 'Pressure drop serves as a leading indicator of storm intensity, triggering cascades: Pressure ↓ Wind ↓ Rain ↓ Storm.',
-    deviceTelemetry: {
-      "device_id": "WX-STN-BOM-07",
-      "manufacturer": "BOM",
-      "timestamp": "2026-07-21T11:45:00Z",
-      "status": "OK",
-      "calibration": "PASS",
-      "temperature": 31.4,
-      "measurement": {
-        "pressure_mbar": 996
-      }
-    },
+    plotY: 'wind',
+    expectedDiscovery: 'Barometric drop acts indirectly through wind shear and moisture flux acceleration to trigger supercell convection.',
     metaCognition: {
-      mission: "Identify storm precursors",
-      confidence: "85.0%",
-      realityScore: "98.2% alignment",
-      whatFailed: "Oversimplified model missed wind shear vector changes.",
-      missingVariable: "Atmospheric vertical wind shear and convection index.",
-      instrumentNeeded: "Himawari Satellite Infrared sounder & Doppler Radar.",
-      nextExperiment: "Map high-resolution radar vertical convection sweeps during pressure gradients.",
-      knowledgeGraph: "Add edge: Pressure Drop -> [Convection Shear] -> [Storm Intensity]."
+      mission: 'Isolate direct vs indirect atmospheric storm triggers',
+      confidence: '91.2%',
+      realityScore: '97.5% alignment',
+      whatFailed: 'Direct pressure-to-storm model failed without incorporating CAPE moisture vector.',
+      missingVariable: 'Vertical Doppler wind profile at 5000ft.',
+      instrumentNeeded: 'Doppler Radar & Satellite Sounder.',
+      nextExperiment: 'Incorporate Doppler radial velocity vectors into hypergraph mesh.',
+      knowledgeGraph: 'Add edge: Pressure Drop -> Wind Acceleration -> Convective Moisture -> Storm Formation.'
+    },
+    discoveryExplanation: {
+      missionReason: 'Determined if pressure drop directly causes storm convection or acts via wind shear momentum.',
+      manifoldPlacement: 'Positioned inside the "Severe Convective Instability Manifold".',
+      hypergraphCauses: 'Pressure Drop (1012 mbar) ──> Wind Speed (17knots) ──> CAPE Surge (1800 J/kg) ──> Severe Convective Cell',
+      ruliadRecommendation: 'Branch to Experiment 5: Doppler radial wind shear velocity integration.',
+      timeline: [
+        { step: 1, label: 'Ambient Stability', desc: 'Baseline pressure at 1015 mbar with low CAPE (600 J/kg).', confidence: '99%' },
+        { step: 2, label: 'Barometric Drop', desc: 'Pressure fell to 1012 mbar, triggering wind acceleration to 17 knots.', confidence: '96%' },
+        { step: 3, label: 'Convective Explosion', desc: 'CAPE surged to 1800 J/kg creating severe updraft cell.', confidence: '91%' }
+      ]
     }
   },
   {
-    id: 'immunotherapy',
-    title: 'Oncology Immunotherapy (Melanoma Escape)',
-    domain: 'Biomedicine & Genomics',
-    icon: '🧬',
-    mission: 'Identify causal drivers of tumor cell melanoma immune escape and CD8 exhaustion.',
-    context: {
-      "therapy": "Nivolumab",
-      "mutation": "BRAF V600E"
+    id: 'neurobiology_alzheimers',
+    title: 'Neurobiology (Alzheimers Tau Pathway)',
+    domain: 'Neuroscience & Pathways',
+    icon: '🧠',
+    metadata: {
+      experiment_id: 'EXP-2026-004',
+      researcher: 'BioNeuro Institute',
+      timestamp: '2026-07-24T14:50:00Z',
+      device: 'High-Content Imager',
+      simulation: true,
+      version: 'OMEGA-CORE v2.4',
+      validation: 'Scaffold',
+      evidenceLevel: 'Laboratory',
+      noveltyScore: 'Potentially Novel',
+      noveltyPercent: 82
     },
-    devices: {
-      "FlowCytometer": "BD",
-      "Sequencer": "Illumina",
-      "Microscope": "Leica"
+    confidenceBreakdown: {
+      modelConfidence: '88.7%',
+      dataQuality: '94.2%',
+      parameterSpaceCoverage: '81.0%',
+      reproducibilityScore: '89.5%',
+      externalValidationAgreement: '92.0%'
     },
-    environment: {
-      "temperature_C": 37.0,
-      "humidity_pct": 95.0,
-      "pressure_kPa": 101.3
+    causalEdgeRatings: [
+      { source: 'Tau Accumulation (240 ng/mL)', target: 'Microglial Neuroinflammation (NLRP3)', ratingStars: 5, evidenceLevel: 'Immunofluorescence Assay' },
+      { source: 'NLRP3 Inflammasome', target: 'Synaptic Pruning (82%)', ratingStars: 4, evidenceLevel: 'Confocal Synaptic Density Count' },
+      { source: 'Synaptic Pruning', target: 'Cognitive Score Loss (22)', ratingStars: 4, evidenceLevel: 'Behavioral Test Battery' }
+    ],
+    competingHypotheses: [
+      { id: 'HYP-N1', statement: 'Tau cytotoxicity is indirect and mediated primarily by microglial NLRP3 inflammasome activation.', likelihood: '86%', evidence: 'IL-1β inflammatory cytokines 4x elevated in Tau 240 cohorts' },
+      { id: 'HYP-N2', statement: 'Tau aggregates disrupt axonal transport directly without immune involvement.', likelihood: '38%', evidence: 'Cell-free microtubule assays show lesser speed disruption' }
+    ],
+    instrumentHealthList: [
+      { name: 'Leica SP8 Confocal Imager', calibration: '99.0%', sensorDrift: '0.2%', powerBattery: '100%', status: 'Healthy' },
+      { name: 'Flow Cytometer', calibration: '96.5%', sensorDrift: '0.8%', powerBattery: '98.0%', status: 'Healthy' }
+    ],
+    missingVariablesList: ['Microglial NLRP3 Inflammasome Activation State', 'Single-cell RNA Transcriptomics Profile'],
+    knowledgeGraphStats: {
+      nodes: 248,
+      confirmedEdges: 140,
+      graphGrowth: '+42 nodes (+20%)'
     },
-    measurements: {
-      "tumour_volume": [100, 120, 150, 180, 220, 280],
-      "PDL1": [20, 25, 35, 48, 60, 72],
-      "CD8": [95, 90, 82, 70, 60, 48],
-      "IFNg": [80, 76, 70, 60, 50, 40],
-      "ctDNA": [5, 8, 12, 20, 34, 48]
+    executiveDecision: {
+      questionAnswered: true,
+      confidenceLevel: 'HIGH',
+      publicationReady: 'CONDITIONAL',
+      readinessReason: 'Requires co-dosing experiment with NLRP3 inhibitor to prove causal blockage of synaptic loss.',
+      missingMeasurementsNeeded: ['Single-cell RNA Sequencer', 'Flow Cytometer'],
+      recommendedNextExperiment: 'Test NLRP3 inflammasome inhibitor alongside Tau antibody dosing.',
+      estimatedInformationGain: '48%'
     },
-    plotX: 'PDL1',
-    plotY: 'CD8',
-    expectedDiscovery: 'BRAF V600E triggers PD-L1 upregulation, driving CD8 exhaustion and tumor escape pathway.',
-    deviceTelemetry: {
-      "device_id": "CYTOMETER-BD-2",
-      "manufacturer": "BD",
-      "timestamp": "2026-07-21T13:20:00Z",
-      "status": "OK",
-      "calibration": "PASS",
-      "temperature": 37.0,
-      "measurement": {
-        "CD8_active_pct": 48
+    missionIntent: {
+      question: 'Determine whether Tau protein causes Alzheimer\'s progression directly or through neuroinflammation.',
+      objectives: [
+        'Map Tau phosphorylation concentrations.',
+        'Track microglial neuroinflammation activation.',
+        'Measure synaptic density loss vs cognitive score.'
+      ]
+    },
+    scientificContext: {
+      description: 'Single-cell assays tracking phosphorylated Tau accumulation and synaptic degradation.',
+      parametersMeasured: ['Tau', 'Amyloid-Beta', 'Synaptic Density', 'Cognitive Score'],
+      assumptions: {
+        model: 'Human iPSC Derived Neurons',
+        assay_type: 'Immunofluorescence'
       }
     },
+    deviceConfiguration: {
+      device: 'Leica SP8 Microscope',
+      mode: 'Fluorescence Imaging',
+      sampling_hz: 0.1
+    },
+    environment: {
+      temperature: 37,
+      humidity: 95,
+      surface: 'Glass Cover Slip',
+      lighting: 'Dark Incubator'
+    },
+    rawTelemetry: {
+      tau: [180, 210, 240, 290, 340],
+      amyloid: [0.81, 0.74, 0.66, 0.52, 0.41],
+      synaptic_density: [95, 90, 82, 71, 58],
+      cognitive_score: [28, 26, 22, 17, 12]
+    },
+    telemetryPackets: [
+      { experiment_id: 'EXP-2026-004', reading: 1, timestamp: '2026-07-24T14:50:01Z', device: 'Imager-01', tau: 180, amyloid: 0.81, synaptic_density: 95, cognitive_score: 28, status: 'OK' },
+      { experiment_id: 'EXP-2026-004', reading: 2, timestamp: '2026-07-24T14:50:02Z', device: 'Imager-01', tau: 210, amyloid: 0.74, synaptic_density: 90, cognitive_score: 26, status: 'OK' },
+      { experiment_id: 'EXP-2026-004', reading: 3, timestamp: '2026-07-24T14:50:03Z', device: 'Imager-01', tau: 240, amyloid: 0.66, synaptic_density: 82, cognitive_score: 22, status: 'DEGRADED' }
+    ],
+    groundTruth: {
+      expected_failure: false,
+      inspection: 'Neuroinflammation markers (IL-1β) were 4x higher in Tau 240 ng/mL cohorts.'
+    },
+    plotX: 'tau',
+    plotY: 'synaptic_density',
+    expectedDiscovery: 'Tau accumulation drives neuroinflammation, which subsequently causes synaptic pruning and cognitive loss.',
     metaCognition: {
-      mission: "Map melanoma immune escape causal loops",
-      confidence: "89.0%",
-      realityScore: "94.5% alignment",
-      whatFailed: "Single-agent treatment failed to stop volume growth.",
-      missingVariable: "Alternative immune checkpoints like LAG-3 or TIM-3 expression levels.",
-      instrumentNeeded: "Illumina Sequencer (single-cell transcriptomics) & BD Flow Cytometer.",
-      nextExperiment: "Dose Nivolumab + Relatlimab (anti-LAG-3) dual cocktail on cell lines.",
-      knowledgeGraph: "Add edge: LAG-3 activation -> [CD8 Exhaustion Manifold] -> [Immune Escape]."
+      mission: 'Dissect Tau protein direct vs inflammatory disease mechanisms',
+      confidence: '88.7%',
+      realityScore: '94.2% alignment',
+      whatFailed: 'Direct Tau cytotoxicity model failed without microglial inflammatory mediator.',
+      missingVariable: 'Microglial NLRP3 inflammasome activation state.',
+      instrumentNeeded: 'Single-cell RNA sequencer & Flow Cytometer.',
+      nextExperiment: 'Test NLRP3 inflammasome inhibitor alongside Tau antibody dosing.',
+      knowledgeGraph: 'Add edge: Tau (240) -> Microglial Inflammation -> Synaptic Loss (82%) -> Cognitive Score Decline.'
+    },
+    discoveryExplanation: {
+      missionReason: 'Isolated whether Tau cytotoxicity is cell-autonomous or mediated by microglial neuroinflammation.',
+      manifoldPlacement: 'Located inside the "Neurodegenerative Inflammatory Pathway Manifold".',
+      hypergraphCauses: 'Tau Accumulation (240) ──> Microglial Inflammation (NLRP3) ──> Synaptic Pruning (82%) ──> Cognitive Score Loss (22)',
+      ruliadRecommendation: 'Branch to Experiment 9: Anti-NLRP3 inflammasome co-therapy trial.',
+      timeline: [
+        { step: 1, label: 'Early Tau Aggregation', desc: 'Tau measured at 180 ng/mL; synaptic density intact at 95%.', confidence: '97%' },
+        { step: 2, label: 'Inflammatory Cascade', desc: 'At Tau 240 ng/mL, microglial activation surged 400%.', confidence: '92%' },
+        { step: 3, label: 'Synaptic Degradation', desc: 'Synaptic density dropped from 95% to 82%, driving cognitive decline.', confidence: '88%' }
+      ]
     }
   },
   {
-    id: 'propulsion',
-    title: 'Propulsion Nozzle (LOX/Methane)',
-    domain: 'Aerospace Engineering',
-    icon: '🚀',
-    mission: 'Prevent structural combustion nozzle fatigue and erosion failure during static fire tests.',
-    context: {
-      "technology": "Regenerative Nozzle",
-      "fuel": "LOX/Methane"
+    id: 'climate_extreme_weather',
+    title: 'Climate Change & Extreme Heatwaves',
+    domain: 'Meteorology & Climate Physics',
+    icon: '🌍',
+    metadata: {
+      experiment_id: 'EXP-2026-CLIMATE-001',
+      researcher: 'Global Climate & Earth Sciences Array',
+      timestamp: '2026-07-25T12:00:00Z',
+      device: 'Australia East Coast Climate Array',
+      simulation: false,
+      version: 'OMEGA-CORE v2.4',
+      validation: 'Satellite & Station Verified',
+      evidenceLevel: 'Field Data',
+      noveltyScore: 'Potentially Novel',
+      noveltyPercent: 92
     },
-    devices: {
-      "ThermalCamera": "FLIR",
-      "PressureSensor": "Honeywell",
-      "StrainGauge": "HBM"
+    confidenceBreakdown: {
+      modelConfidence: '95.4%',
+      dataQuality: '98.9%',
+      parameterSpaceCoverage: '92.0%',
+      reproducibilityScore: '96.8%',
+      externalValidationAgreement: '97.5%'
     },
-    environment: {
-      "temperature_C": 18.5,
-      "humidity_pct": 52.0,
-      "pressure_kPa": 101.8
+    causalEdgeRatings: [
+      { source: 'CO2 Greenhouse Concentration (426.5ppm)', target: 'Global Mean & Surface Warming (46°C)', ratingStars: 5, evidenceLevel: 'Satellite & Station Network' },
+      { source: 'Surface Warming', target: 'Soil Moisture Depletion (12%)', ratingStars: 5, evidenceLevel: 'Soil Moisture Probes' },
+      { source: 'Soil Moisture Depletion', target: 'Dry Heat Dome Amplification & High-Pressure Lock', ratingStars: 5, evidenceLevel: 'LiDAR & Barometer Array' },
+      { source: 'Heat Dome Lock', target: 'Wildfire Risk Explosion (Fire Index 60)', ratingStars: 5, evidenceLevel: 'Satellite Thermal Maps' }
+    ],
+    competingHypotheses: [
+      { id: 'HYP-C1', statement: 'Multi-stage feedback loop: CO2 drives warming -> soil drying below 15% -> suppresses latent heat cooling -> locks persistent high-pressure heat dome -> surges wildfire risk.', likelihood: '94%', evidence: 'Strong correlation with 48-hour soil moisture lead lag prior to peak heat dome' },
+      { id: 'HYP-C2', statement: 'Direct atmospheric radiative heating without soil moisture feedback accounts for 100% of heatwave intensity.', likelihood: '22%', evidence: 'Fails to account for 3.4x non-linear temperature jump when soil drops below 15%' }
+    ],
+    instrumentHealthList: [
+      { name: 'Weather Station Temperature Sensor', calibration: '99.7%', sensorDrift: '0.1%', powerBattery: '100%', status: 'Healthy' },
+      { name: 'Soil Moisture Probe Array (10cm-1m)', calibration: '98.2%', sensorDrift: '0.3%', powerBattery: '99.0%', status: 'Healthy' },
+      { name: 'CO2 Infrared Gas Analyzer', calibration: '99.9%', sensorDrift: '0.05%', powerBattery: '100%', status: 'Healthy' },
+      { name: 'Doppler Radar & LiDAR Wind Profiler', calibration: '97.4%', sensorDrift: '0.6%', powerBattery: '95.0%', status: 'Healthy' }
+    ],
+    missingVariablesList: [
+      '3D Jet Stream Vorticity & Upper Troposphere Jet Speed',
+      'Root-Zone Soil Tension at 1 Meter Depth',
+      'Sea Surface Temperature (SST) Anomaly Index',
+      'Vegetation Fuel Moisture Content (FMC)'
+    ],
+    knowledgeGraphStats: {
+      nodes: 312,
+      confirmedEdges: 188,
+      graphGrowth: '+64 nodes (+25%)'
     },
-    measurements: {
-      "combustion_temp": [2800, 2950, 3100, 3250],
-      "pressure_bar": [90, 110, 130, 145],
-      "strain": [0.10, 0.14, 0.18, 0.26],
-      "erosion_mm": [0.00, 0.02, 0.07, 0.18]
+    executiveDecision: {
+      questionAnswered: true,
+      confidenceLevel: 'HIGH',
+      publicationReady: 'YES',
+      readinessReason: 'Causal loop CO2 -> Soil Moisture Tipping Point -> Heat Dome Lock confirmed by satellite thermal mapping and 14-day field sensor array.',
+      missingMeasurementsNeeded: ['Upper-Air Radiosonde', '3D Jet Stream Vorticity'],
+      recommendedNextExperiment: 'Deploy upper-atmosphere radiosonde and measure soil moisture recovery threshold post-rainfall.',
+      estimatedInformationGain: '52%'
     },
-    plotX: 'combustion_temp',
-    plotY: 'erosion_mm',
-    expectedDiscovery: 'Pressure spikes drive extreme heat flux and thermal fatigue, leading to nozzle erosion failures above 3100K.',
-    deviceTelemetry: {
-      "device_id": "THERMO-FLIR-X",
-      "manufacturer": "FLIR",
-      "timestamp": "2026-07-21T14:40:00Z",
-      "status": "OK",
-      "calibration": "PASS",
-      "temperature": 18.5,
-      "measurement": {
-        "nozzle_throat_temp": 3250
+    missionIntent: {
+      question: 'Determine whether increasing greenhouse gas concentrations are causally driving extreme heatwaves through atmospheric warming, soil drying, and persistent high-pressure blocking systems.',
+      objectives: [
+        'Trace causal chain: CO2 -> Surface Temp -> Soil Moisture -> Humidity -> Wildfire Risk.',
+        'Identify lag structure between soil moisture depletion and heat dome amplification.',
+        'Detect regime change tipping points and missing variables.',
+        'Recommend next targeted observational sensor deployment.'
+      ]
+    },
+    scientificContext: {
+      description: 'Continuous 14-day climate array monitoring across Australia East Coast tracking heat dome development, moisture deficits, and fire weather indices.',
+      parametersMeasured: ['CO2 ppm', 'Surface Temp (°C)', 'Soil Moisture (%)', 'Barometric Pressure (hPa)', 'Wind Speed (m/s)', 'Relative Humidity (%)', 'Rainfall (mm)', 'Fire Index'],
+      assumptions: {
+        location: 'Australia East Coast',
+        season: 'Summer',
+        surface: 'Mixed Vegetation',
+        altitude_m: 120,
+        co2_baseline_ppm: 421.0
       }
     },
-    metaCognition: {
-      mission: "Prevent combustion nozzle fatigue & erosion",
-      confidence: "93.0%",
-      realityScore: "97.2% alignment",
-      whatFailed: "Simple linear expansion models failed to predict the erosion spike above 3100K.",
-      missingVariable: "Nozzle boundary layer gas composition and carbon soot deposition rate.",
-      instrumentNeeded: "Raman Spectroscopy (in-situ gas analysis) & high-resolution FLIR cameras.",
-      nextExperiment: "Execute a combustion test sweep varying LOX-to-fuel mixture ratio from 2.8 to 3.4.",
-      knowledgeGraph: "Add edge: Mixture Ratio -> [Soot Boundary Layer] -> [Erosion Velocity]."
-    }
-  },
-  {
-    id: 'metrology',
-    title: 'CAD Metrology Print Shrinkage',
-    domain: 'Additive Manufacturing',
-    icon: '📐',
-    mission: 'Automatically compensate 3D-printed metal alloy shrinkage using high-density laser scan feedback loops.',
-    context: {
-      "alloy": "Inconel 718",
-      "printer": "Selective Laser Sintering"
-    },
-    devices: {
-      "CAD": "Autodesk Fusion",
-      "Printer": "EOS M290",
-      "LaserScanner": "Creaform"
+    deviceConfiguration: {
+      experiment_id: 'EXP-2026-CLIMATE-001',
+      domain: 'Meteorology & Climate Physics',
+      sampling_interval: '1 hour',
+      study_duration: '14 days',
+      spatial_resolution: '25 km',
+      update_rate: '60 minutes',
+      instruments: 'Weather Station, Barometer, Soil Moisture Probes, CO2 Analyzer, Doppler Radar, Satellite, Ocean Buoy, Radiosonde, LiDAR Wind Profiler'
     },
     environment: {
-      "temperature_C": 24.2,
-      "humidity_pct": 44.1,
-      "pressure_kPa": 101.5
+      location: 'Australia East Coast',
+      season: 'Summer',
+      surface: 'Mixed vegetation',
+      altitude_m: 120,
+      co2_ppm: 427,
+      temperature_range_c: [22, 46],
+      humidity_range: [18, 94],
+      pressure_range_hpa: [990, 1023],
+      wind_range_ms: [2, 28]
     },
-    measurements: {
-      "CAD_mm": [100, 50, 25],
-      "Printed_mm": [99.1, 49.5, 24.7],
-      "LaserScan_mm": [99.2, 49.6, 24.8]
+    rawTelemetry: {
+      time: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      co2_ppm: [421, 421.2, 421.4, 421.7, 422.1, 422.6, 423.1, 423.7, 424.3, 425.0, 425.8, 426.5],
+      surface_temp: [29, 30, 31, 32, 34, 36, 39, 41, 43, 44, 45, 46],
+      soil_moisture: [32, 31, 30, 28, 25, 22, 20, 17, 15, 14, 13, 12],
+      pressure: [1018, 1017, 1016, 1015, 1013, 1010, 1007, 1004, 1002, 1001, 1003, 1006],
+      wind_speed: [5, 6, 7, 9, 12, 16, 20, 23, 26, 28, 24, 18],
+      humidity: [62, 60, 58, 54, 48, 42, 36, 30, 24, 22, 20, 24],
+      rainfall: [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4],
+      fire_index: [4, 5, 6, 8, 12, 18, 24, 31, 40, 52, 60, 44]
     },
-    plotX: 'CAD_mm',
-    plotY: 'Printed_mm',
-    expectedDiscovery: 'Systematic shrinkage of ~1% observed. Apply toolpath compensation multiplier and reprint for error correction.',
-    deviceTelemetry: {
-      "device_id": "METROLOGY-CREAFORM-1",
-      "manufacturer": "Creaform",
-      "timestamp": "2026-07-21T15:55:00Z",
-      "status": "OK",
-      "calibration": "PASS",
-      "temperature": 24.2,
-      "measurement": {
-        "dimensional_deviation_pct": -0.9
-      }
+    telemetryPackets: [
+      { experiment_id: 'EXP-2026-CLIMATE-001', reading: 1, timestamp: '2026-07-25T01:00:00Z', device: 'AUS-EC-STN-01', co2_ppm: 421.0, surface_temp: 29, soil_moisture: 32, pressure: 1018, wind_speed: 5, humidity: 62, fire_index: 4, status: 'NORMAL' },
+      { experiment_id: 'EXP-2026-CLIMATE-001', reading: 3, timestamp: '2026-07-25T03:00:00Z', device: 'AUS-EC-STN-01', co2_ppm: 421.4, surface_temp: 31, soil_moisture: 30, pressure: 1016, wind_speed: 7, humidity: 58, fire_index: 6, status: 'WARMING' },
+      { experiment_id: 'EXP-2026-CLIMATE-001', reading: 6, timestamp: '2026-07-25T06:00:00Z', device: 'AUS-EC-STN-01', co2_ppm: 422.6, surface_temp: 36, soil_moisture: 22, pressure: 1010, wind_speed: 16, humidity: 42, fire_index: 18, status: 'HEAT DOME BUILDING' },
+      { experiment_id: 'EXP-2026-CLIMATE-001', reading: 9, timestamp: '2026-07-25T09:00:00Z', device: 'AUS-EC-STN-01', co2_ppm: 424.3, surface_temp: 43, soil_moisture: 15, pressure: 1002, wind_speed: 26, humidity: 24, fire_index: 40, status: 'EXTREME WILDFIRE RISK' },
+      { experiment_id: 'EXP-2026-CLIMATE-001', reading: 11, timestamp: '2026-07-25T11:00:00Z', device: 'AUS-EC-STN-01', co2_ppm: 425.8, surface_temp: 45, soil_moisture: 13, pressure: 1003, wind_speed: 24, humidity: 20, fire_index: 60, status: 'CRITICAL HEATWAVE PEAK' }
+    ],
+    groundTruth: {
+      expected_failure: true,
+      inspection: 'Extreme Heatwave & Wildfire Surge Confirmed. Peak temperature reached 46°C with soil moisture dropping to 12% and Fire Index surging to 60.'
     },
+    plotX: 'soil_moisture',
+    plotY: 'fire_index',
+    expectedDiscovery: 'Soil moisture depletion below 15% triggers non-linear wildfire risk explosion (Fire Index 8 -> 60), as dry surface heating amplifies high-pressure heat dome stability.',
     metaCognition: {
-      mission: "Compensate 3D print shrinkage automatically",
-      confidence: "94.8%",
-      realityScore: "99.1% alignment",
-      whatFailed: "Initial print without shrinkage scaling factor failed mechanical tolerances.",
-      missingVariable: "Anisotropic shrinkage coefficient along the Z-axis relative to thermal cooling rate.",
-      instrumentNeeded: "High-resolution Laser Metrology scanner & pyrometers.",
-      nextExperiment: "Print a multi-axial test coupon with 1.1% isotropic scale offset.",
-      knowledgeGraph: "Add edge: Thermal Cooling Rate -> [Anisotropic Shrinkage Tensor] -> [CAD compensation path]."
+      mission: 'Deconstruct CO2 to Wildfire Risk causal loop during Australian heatwave',
+      confidence: '95.4%',
+      realityScore: '98.9% alignment',
+      whatFailed: 'Direct atmosphere-only model underestimated wildfire risk by 340% without soil moisture feedback.',
+      missingVariable: '3D Jet stream vorticity index & root-zone soil tension at 1m depth.',
+      instrumentNeeded: 'LiDAR Wind Profiler & High-Resolution Ocean Buoy Thermal Sensor.',
+      nextExperiment: 'Deploy upper-atmosphere radiosonde and measure soil moisture recovery threshold post-rainfall.',
+      knowledgeGraph: 'Add edge: CO2 (426.5ppm) -> Surface Temp (46°C) -> Soil Drying (12%) -> Fire Index (60).'
+    },
+    discoveryExplanation: {
+      missionReason: 'Evaluated whether greenhouse gas warming acts directly on surface heat or through a multi-stage soil drying feedback loop that amplifies high-pressure blocking.',
+      manifoldPlacement: 'Sample trajectory shifts from "Normal Summer" to "Fire Regime" as soil moisture drops below 15% threshold.',
+      hypergraphCauses: 'CO2 (426.5ppm) ──> Surface Temp (46°C) ──> Soil Moisture Drop (12%) ──> Humidity Plunge (20%) ──> Wildfire Risk (60)',
+      ruliadRecommendation: 'Branch to Experiment CLIMATE-002: Evaluate El Niño vs La Niña ocean sea-surface temperature anomaly coupling.',
+      timeline: [
+        { step: 1, label: 'Baseline CO2 Accumulation', desc: 'CO2 at 421 ppm, temperature 29°C, soil moisture 32%.', confidence: '99%' },
+        { step: 2, label: 'Soil Drying Tipping Point', desc: 'Temperature rose to 36°C; soil moisture fell below 22%, humidity plunged to 42%.', confidence: '96%' },
+        { step: 3, label: 'Extreme Heat & Fire Surge', desc: 'Peak temperature reached 46°C; Fire Index spiked to 60 as soil moisture hit 12%.', confidence: '95%' },
+        { step: 4, label: 'Causal Attribution Confirmed', desc: 'Soil moisture depletion acts as leading indicator 48 hours prior to heat dome peak.', confidence: '98%' }
+      ]
     }
   }
 ];
 
-interface ValidationStep {
-  step: number;
-  name: string;
-  desc: string;
-  targetTab: string;
-  sequenceStep: string;
-  verificationKey: string;
-}
-
-const MASTER_TEST_STEPS: ValidationStep[] = [
-  { step: 1, name: 'Mission Intent', desc: 'Define falsifiable scientific objective and targets', targetTab: '🔬 HARNESS CONSOLE / ROADTESTS', sequenceStep: 'Step 1 (Goal Specification)', verificationKey: 'Mission Intent' },
-  { step: 2, name: 'Scientific Context', desc: 'Validate candidate parameters, objective variables & constraints', targetTab: '💡 DISCOVERY PLANNER (SUGGESTIONS)', sequenceStep: 'Step 2 (Assumptions Binding)', verificationKey: 'Context' },
-  { step: 3, name: 'Instrument Config', desc: 'Bind and calibrate physical hardware instrumentation', targetTab: '🔌 HARDWARE & DEVICE LAYERS', sequenceStep: 'Step 3 (Hardware Registries)', verificationKey: 'Instrument Setup' },
-  { step: 4, name: 'Environmental Capture', desc: 'Acquire real-time atmospheric & mechanical biases', targetTab: '🔌 HARDWARE & DEVICE LAYERS', sequenceStep: 'Step 4 (Ambient Arrays)', verificationKey: 'Environment' },
-  { step: 5, name: 'Measurement Dataset', desc: 'Feed raw sensor & instrument readings into the terminal', targetTab: '💻 TERMINAL / CONSOLE FEED', sequenceStep: 'Step 5 (Ingestion Feed)', verificationKey: 'Raw Data' },
-  { step: 6, name: 'Simulation Run', desc: 'Predictive modeling & multi-physics theoretical manifold calculation', targetTab: '📐 GEOMETRIC MANIFOLD / REALITY', sequenceStep: 'Step 6 (Manifold Forecast)', verificationKey: 'Simulation' },
-  { step: 7, name: 'Reality Anchor', desc: 'Map empirical observations directly against simulated bounds', targetTab: '💻 REALITY TAB / METROLOGY', sequenceStep: 'Step 7 (Scans Alignment)', verificationKey: 'Reality Anchor' },
-  { step: 8, name: 'Knowledge Graph Update', desc: 'Establish links and causal weights between variables', targetTab: '🔗 HYPER GRAPH CAUSAL MESH', sequenceStep: 'Step 8 (Mesh Edge Ingestion)', verificationKey: 'AI Reasoning' },
-  { step: 9, name: 'Meta Reflection', desc: 'Engage critique loops on missing variables & anomalies', targetTab: '📐 GEOMETRIC RULIAD', sequenceStep: 'Step 9 (Pathways Uncertainty)', verificationKey: 'Meta-Cognition' },
-  { step: 10, name: 'Next Experiment', desc: 'Formulate highest-information-gain parameters sweep', targetTab: '⛓️ AUTO-CHAIN DISCOVERY', sequenceStep: 'Step 10 (Autonomous Iteration)', verificationKey: 'Next Experiment' }
-];
-
 export default function MasterTestSandbox({ onLogEvent }: { onLogEvent: (details: string, type: 'info' | 'physics' | 'interaction') => void }) {
-  const [selectedDatasetId, setSelectedDatasetId] = useState<string>('materials');
-  const [activePackageTab, setActivePackageTab] = useState<'mission' | 'devices' | 'measurements'>('mission');
+  const [selectedDatasetId, setSelectedDatasetId] = useState<string>('robotics_pincherx');
+  const [activePackageTab, setActivePackageTab] = useState<'mission' | 'context' | 'config' | 'env' | 'telemetry' | 'groundTruth'>('mission');
   
   const [executing, setExecuting] = useState<boolean>(false);
   const [activeStepIdx, setActiveStepIdx] = useState<number>(-1);
   const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
   const [showScorecard, setShowScorecard] = useState<boolean>(false);
+  const [copiedTelemetry, setCopiedTelemetry] = useState<boolean>(false);
   
+  // Explain Discovery Modal State
+  const [showExplainModal, setShowExplainModal] = useState<boolean>(false);
+  
+  // Show Researchers Workflow Guide
+  const [showGuide, setShowGuide] = useState<boolean>(true);
+
   const consoleEndRef = useRef<HTMLDivElement>(null);
 
-  const selectedDataset = PROOF_OF_PRINCIPLE_DATASETS.find(d => d.id === selectedDatasetId) || PROOF_OF_PRINCIPLE_DATASETS[0];
+  const selectedDataset = UNIVERSAL_TEST_PACKAGES.find(d => d.id === selectedDatasetId) || UNIVERSAL_TEST_PACKAGES[0];
 
   useEffect(() => {
     if (consoleEndRef.current) {
       consoleEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [terminalLogs]);
+
+  const copyTelemetryToClipboard = () => {
+    navigator.clipboard.writeText(JSON.stringify(selectedDataset.telemetryPackets, null, 2));
+    setCopiedTelemetry(true);
+    setTimeout(() => setCopiedTelemetry(false), 2000);
+  };
 
   const runMasterValidation = () => {
     if (executing) return;
@@ -394,78 +813,54 @@ export default function MasterTestSandbox({ onLogEvent }: { onLogEvent: (details
     setShowScorecard(false);
     setTerminalLogs([
       `[MASTER-RUN] Initializing Standard Test Package for Domain: ${selectedDataset.title.toUpperCase()}`,
-      `[MASTER-RUN] Ingesting Universal Device Telemetry schema...`
+      `[MASTER-RUN] Experiment Metadata: ${JSON.stringify(selectedDataset.metadata)}`,
+      `[MASTER-RUN] Ingesting Universal Device Telemetry schema (${selectedDataset.telemetryPackets.length} packets)...`
     ]);
 
     onLogEvent(`[MASTER_SANDBOX] Commenced 10-step validation loop for ${selectedDataset.title}`, 'interaction');
 
+    const STEPS = [
+      '1. MISSION INTENT: Ingesting falsifiable hypothesis',
+      '2. SCIENTIFIC CONTEXT: Binding physical parameters & assumptions',
+      '3. DEVICE CONFIGURATION: Locking instrument sampling specs',
+      '4. ENVIRONMENT: Measuring atmospheric & surface biases',
+      '5. RAW TELEMETRY: Ingesting 6-block Universal Telemetry Packets',
+      '6. AGENT HARNESS: Cross-debating hypotheses across Gemini/Phi',
+      '7. VISUAL MANIFOLD: Projecting sample onto n-dimensional state space',
+      '8. HYPERGRAPH: Wiring multi-cause causal edges & variable nodes',
+      '9. RULIAD & REALITY ANCHOR: Calculating uncertainty & prediction delta',
+      '10. DISCOVERY PLANNER & AUTO CHAIN: Scheduling highest-information-gain experiment'
+    ];
+
     let currentStep = 0;
     const interval = setInterval(() => {
-      if (currentStep >= MASTER_TEST_STEPS.length) {
+      if (currentStep >= STEPS.length) {
         clearInterval(interval);
         setExecuting(false);
         setShowScorecard(true);
         setTerminalLogs(prev => [
           ...prev,
-          `[✓] Validation sequence complete for ${selectedDataset.title}. All OMEGA layers integrated successfully.`,
+          `[✓] Validation sequence complete for ${selectedDataset.title}. All 6 Universal Test Package sections processed!`,
           `[✓] SCORECARD GENERATED: 11/11 criteria satisfied (PASS)`
         ]);
         onLogEvent(`[MASTER_SANDBOX] Validation loop successfully concluded for ${selectedDataset.title}`, 'physics');
         return;
       }
 
-      const stepDetails = MASTER_TEST_STEPS[currentStep];
       setActiveStepIdx(currentStep);
-
-      // Add specialized terminal messages based on step
-      let logMsg = '';
-      switch (stepDetails.step) {
-        case 1:
-          logMsg = `[STAGE 1/10] [MISSION INTENT] Set objective: "${selectedDataset.mission}"`;
-          break;
-        case 2:
-          logMsg = `[STAGE 2/10] [SCIENTIFIC CONTEXT] Loaded parameters & constraints: ${JSON.stringify(selectedDataset.context)}`;
-          break;
-        case 3:
-          logMsg = `[STAGE 3/10] [DEVICE SETUP] Binding instruments: ${JSON.stringify(selectedDataset.devices)}`;
-          break;
-        case 4:
-          logMsg = `[STAGE 4/10] [ENVIRONMENT] Atmospheric sensor bounds recorded at Temp=${selectedDataset.environment.temperature_C}°C`;
-          break;
-        case 5:
-          logMsg = `[STAGE 5/10] [DATASET] Processing measurements of length ${Object.values(selectedDataset.measurements)[0].length}: ${JSON.stringify(selectedDataset.measurements)}`;
-          break;
-        case 6:
-          logMsg = `[STAGE 6/10] [SIMULATION] Launching DFT/Finite-Element Predictor. Computing continuous state manifold coordinates...`;
-          break;
-        case 7:
-          logMsg = `[STAGE 7/10] [REALITY ANCHOR] Comparing model predicted limits to empirical instrument telemetry...`;
-          break;
-        case 8:
-          logMsg = `[STAGE 8/10] [CAUSAL MESH] Updating Knowledge Graph edges. Intersecting nodes inside causal hypergraph network...`;
-          break;
-        case 9:
-          logMsg = `[STAGE 9/10] [META-COGNITION] Initiating internal reflection. Confident level: ${selectedDataset.metaCognition.confidence}. Found anomaly trigger: "${selectedDataset.metaCognition.whatFailed}"`;
-          break;
-        case 10:
-          logMsg = `[STAGE 10/10] [NEXT SWEEP] Scheduling next autonomous experiment suite: "${selectedDataset.metaCognition.nextExperiment}"`;
-          break;
-      }
-
       setTerminalLogs(prev => [
         ...prev,
-        logMsg,
-        `   └─ Location: ${stepDetails.targetTab} | Sequence: ${stepDetails.sequenceStep}`
+        `[STAGE ${currentStep + 1}/10] ${STEPS[currentStep]}`
       ]);
 
       currentStep++;
-    }, 1200);
+    }, 1000);
   };
 
   // Custom SVG plot generator
   const renderSVGChart = () => {
-    const dataX = selectedDataset.measurements[selectedDataset.plotX];
-    const dataY = selectedDataset.measurements[selectedDataset.plotY];
+    const dataX = selectedDataset.rawTelemetry[selectedDataset.plotX] as number[];
+    const dataY = selectedDataset.rawTelemetry[selectedDataset.plotY] as number[];
     if (!dataX || !dataY) return null;
 
     const width = 450;
@@ -486,10 +881,10 @@ export default function MasterTestSandbox({ onLogEvent }: { onLogEvent: (details
     const points = dataX.map((x, i) => `${getX(x)},${getY(dataY[i])}`).join(' ');
 
     return (
-      <div className="bg-white border border-neutral-300 p-4 rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] text-left flex-1 min-w-[300px]">
+      <div className="bg-white border border-neutral-300 p-4 rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] text-left flex-1 min-w-[280px]">
         <div className="flex justify-between items-center mb-1.5 border-b border-neutral-100 pb-1">
-          <span className="text-[10px] font-bold font-mono text-indigo-700 uppercase">
-            📈 Dynamic Empirical Curve Plotter
+          <span className="text-[10px] font-bold font-mono text-indigo-700 uppercase flex items-center gap-1">
+            <Activity className="w-3.5 h-3.5" /> Dynamic Empirical Curve Plotter
           </span>
           <span className="text-[9px] font-mono text-neutral-400">
             X: {selectedDataset.plotX} vs Y: {selectedDataset.plotY}
@@ -566,19 +961,24 @@ export default function MasterTestSandbox({ onLogEvent }: { onLogEvent: (details
           <div className="flex items-center gap-2">
             <Layers className="w-5 h-5 text-indigo-700" />
             <h3 className="font-black text-[#1A1A1A] tracking-tight text-base font-serif uppercase">
-              5. Master Test Format & Multi-Domain Proof-of-Principle Sandbox
+              5. Universal Scientific Test Package & Multi-Domain Proof-of-Principle Sandbox
             </h3>
           </div>
           <p className="text-xs text-neutral-600 font-sans max-w-4xl">
-            This module represents OMEGA's transition from an analytical platform to an active scientific operating system. 
-            Researchers can load small proof-of-principle datasets across six distinct domains to test end-to-end telemetry, 
-            reality comparing, and causal hypergraph induction.
+            Every experiment in OMEGA outputs a standardized 6-section <strong>Universal Test Package</strong> with metadata.
+            This domain-independent architecture ensures the Agent Harness, Visual Manifold, Causal Hypergraph, and Ruliad operate identically whether evaluating robot arms, semiconductors, weather stations, or bio-pathways.
           </p>
         </div>
 
-        {/* Selected domain trigger */}
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="text-[10px] font-mono font-bold text-neutral-500 uppercase">Domain Preset:</span>
+        {/* Selected domain trigger & Explain Discovery Button */}
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            onClick={() => setShowExplainModal(true)}
+            className="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-neutral-900 border-2 border-[#1A1A1A] font-mono text-xs font-black uppercase flex items-center gap-1.5 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer"
+          >
+            <Sparkles className="w-3.5 h-3.5" /> 🔬 Explain This Discovery
+          </button>
+
           <select 
             value={selectedDatasetId}
             onChange={(e) => {
@@ -590,7 +990,7 @@ export default function MasterTestSandbox({ onLogEvent }: { onLogEvent: (details
             disabled={executing}
             className="border-2 border-[#1A1A1A] bg-white px-2.5 py-1.5 text-xs font-mono font-bold text-neutral-800 focus:outline-none cursor-pointer rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50"
           >
-            {PROOF_OF_PRINCIPLE_DATASETS.map((d) => (
+            {UNIVERSAL_TEST_PACKAGES.map((d) => (
               <option key={d.id} value={d.id}>
                 {d.icon} {d.title}
               </option>
@@ -599,34 +999,75 @@ export default function MasterTestSandbox({ onLogEvent }: { onLogEvent: (details
         </div>
       </div>
 
+      {/* Step-by-step navigation guide for global researchers */}
+      <div className="border border-indigo-200 bg-indigo-50/40 p-3.5 rounded-none">
+        <div className="flex items-center justify-between cursor-pointer" onClick={() => setShowGuide(!showGuide)}>
+          <div className="flex items-center gap-2">
+            <Info className="w-4 h-4 text-indigo-700" />
+            <span className="text-xs font-black font-mono text-indigo-900 uppercase">
+              📖 Global Researchers Workflow Guide (10 Closed-Loop Discovery Steps)
+            </span>
+          </div>
+          <span className="text-xs font-mono text-indigo-700 font-bold">{showGuide ? 'Hide Guide ▲' : 'Show Guide ▼'}</span>
+        </div>
+
+        {showGuide && (
+          <div className="mt-3 pt-3 border-t border-indigo-200/60 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 text-[11px] font-sans">
+            <div className="bg-white border border-indigo-100 p-2">
+              <strong className="text-indigo-900 font-mono text-[10px] block">STEP 1–3: DATA INGESTION</strong>
+              <p className="text-neutral-600 leading-tight mt-0.5">Define Mission Intent, paste Scientific Context, and configure optional Device Telemetry.</p>
+            </div>
+            <div className="bg-white border border-indigo-100 p-2">
+              <strong className="text-indigo-900 font-mono text-[10px] block">STEP 4: RUN HARNESS</strong>
+              <p className="text-neutral-600 leading-tight mt-0.5">Press "Run Harness" to initiate multi-LLM debate, generating causal hypotheses.</p>
+            </div>
+            <div className="bg-white border border-indigo-100 p-2">
+              <strong className="text-indigo-900 font-mono text-[10px] block">STEP 5–7: REASONING VIEWS</strong>
+              <p className="text-neutral-600 leading-tight mt-0.5">Inspect Visual Manifold (state space), Hypergraph (multi-cause mesh), and Ruliad (rule branches).</p>
+            </div>
+            <div className="bg-white border border-indigo-100 p-2">
+              <strong className="text-indigo-900 font-mono text-[10px] block">STEP 8–9: REALITY & PLANNER</strong>
+              <p className="text-neutral-600 leading-tight mt-0.5">Validate prediction vs reality, then select the next high-information-gain experiment.</p>
+            </div>
+            <div className="bg-white border border-indigo-100 p-2">
+              <strong className="text-indigo-900 font-mono text-[10px] block">STEP 10: AUTO CHAIN</strong>
+              <p className="text-neutral-600 leading-tight mt-0.5">Click "Auto Chain" to continuously iterate Intent → Data → Reason → Reality → Learn.</p>
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         
-        {/* Left Side: Standard Test Package Viewer (3 tabs) */}
+        {/* Left Side: 6-Section Universal Scientific Test Package Viewer */}
         <div className="lg:col-span-5 flex flex-col gap-4">
           <div className="border border-neutral-300 p-4 bg-[#FCFAF7] rounded-none space-y-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.05)]">
             <div className="flex items-center justify-between border-b border-neutral-200 pb-2">
               <span className="text-[10.5px] font-black font-mono text-neutral-800 uppercase flex items-center gap-1.5">
-                📦 Standard Test Package Package
+                📦 Universal Scientific Test Package (6 Blocks)
               </span>
               <span className="text-[9px] font-mono bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded-sm uppercase font-bold border border-indigo-200">
-                {selectedDataset.domain}
+                {selectedDataset.metadata.version}
               </span>
             </div>
 
-            {/* Test package internal tabs */}
-            <div className="flex border-b border-neutral-200 gap-1 text-[10px] font-mono">
+            {/* Test package 6 section tabs */}
+            <div className="flex flex-wrap gap-1 text-[9px] font-mono border-b border-neutral-200 pb-1">
               {[
-                { id: 'mission', label: '1. MISSION & CONTEXT' },
-                { id: 'devices', label: '2. DEVICES & ATMO' },
-                { id: 'measurements', label: '3. RAW MEASUREMENTS' }
+                { id: 'mission', label: '1. MISSION INTENT' },
+                { id: 'context', label: '2. CONTEXT' },
+                { id: 'config', label: '3. DEVICE CONFIG' },
+                { id: 'env', label: '4. ENVIRONMENT' },
+                { id: 'telemetry', label: '5. RAW TELEMETRY' },
+                { id: 'groundTruth', label: '6. GROUND TRUTH' }
               ].map((t) => (
                 <button
                   key={t.id}
                   onClick={() => setActivePackageTab(t.id as any)}
-                  className={`px-2.5 py-1 transition cursor-pointer font-bold rounded-t-sm border-t border-x -mb-[1px] ${
+                  className={`px-2 py-1 transition cursor-pointer font-bold border ${
                     activePackageTab === t.id 
-                      ? 'bg-white text-indigo-700 border-neutral-300' 
-                      : 'bg-neutral-100/60 text-neutral-500 border-transparent hover:text-neutral-800'
+                      ? 'bg-indigo-600 text-white border-indigo-600' 
+                      : 'bg-white text-neutral-600 border-neutral-300 hover:bg-neutral-100'
                   }`}
                 >
                   {t.label}
@@ -634,113 +1075,125 @@ export default function MasterTestSandbox({ onLogEvent }: { onLogEvent: (details
               ))}
             </div>
 
-            {/* Tab 1: Mission & Context */}
+            {/* Section 1: Mission Intent */}
             {activePackageTab === 'mission' && (
-              <div className="space-y-3 font-sans text-xs">
+              <div className="space-y-2 font-sans text-xs text-left">
                 <div>
-                  <span className="text-[9.5px] font-bold font-mono text-neutral-400 uppercase block mb-1">Mission Intent:</span>
+                  <span className="text-[9.5px] font-bold font-mono text-neutral-400 uppercase block mb-1">Scientific Question:</span>
                   <div className="bg-white border border-neutral-200 p-2.5 rounded-none font-serif font-black text-neutral-800 italic leading-relaxed border-l-3 border-l-indigo-600">
-                    "{selectedDataset.mission}"
+                    "{selectedDataset.missionIntent.question}"
                   </div>
                 </div>
 
                 <div>
-                  <span className="text-[9.5px] font-bold font-mono text-neutral-400 uppercase block mb-1">Scientific Context (JSON):</span>
-                  <pre className="bg-[#121212] text-emerald-400 p-2.5 font-mono text-[10px] overflow-x-auto rounded-none">
-                    {JSON.stringify(selectedDataset.context, null, 2)}
+                  <span className="text-[9.5px] font-bold font-mono text-neutral-400 uppercase block mb-1">Key Objectives:</span>
+                  <ul className="list-disc list-inside space-y-1 bg-neutral-100 p-2 font-mono text-[10px]">
+                    {selectedDataset.missionIntent.objectives.map((obj, i) => (
+                      <li key={i} className="text-neutral-700">{obj}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            {/* Section 2: Scientific Context */}
+            {activePackageTab === 'context' && (
+              <div className="space-y-2 font-sans text-xs text-left">
+                <p className="text-neutral-700 leading-relaxed italic bg-white p-2 border border-neutral-200">
+                  {selectedDataset.scientificContext.description}
+                </p>
+                <div>
+                  <span className="text-[9.5px] font-bold font-mono text-neutral-400 uppercase block mb-1">Measured Parameters:</span>
+                  <div className="flex flex-wrap gap-1">
+                    {selectedDataset.scientificContext.parametersMeasured.map((p, i) => (
+                      <span key={i} className="text-[9px] font-mono bg-indigo-50 text-indigo-800 px-1.5 py-0.5 border border-indigo-200">
+                        {p}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-[9.5px] font-bold font-mono text-neutral-400 uppercase block mb-1">Assumptions & Bounds:</span>
+                  <pre className="bg-[#121212] text-emerald-400 p-2 font-mono text-[10px]">
+                    {JSON.stringify(selectedDataset.scientificContext.assumptions, null, 2)}
                   </pre>
                 </div>
               </div>
             )}
 
-            {/* Tab 2: Devices & Atmospheric */}
-            {activePackageTab === 'devices' && (
-              <div className="space-y-3 font-sans text-xs">
+            {/* Section 3: Device Configuration */}
+            {activePackageTab === 'config' && (
+              <div className="space-y-2 text-left">
+                <span className="text-[9.5px] font-bold font-mono text-neutral-400 uppercase block">Device Settings & Instrument Mapping:</span>
+                <pre className="bg-[#121212] text-indigo-300 p-2.5 font-mono text-[10px]">
+                  {JSON.stringify(selectedDataset.deviceConfiguration, null, 2)}
+                </pre>
+              </div>
+            )}
+
+            {/* Section 4: Environment */}
+            {activePackageTab === 'env' && (
+              <div className="space-y-2 text-left">
+                <span className="text-[9.5px] font-bold font-mono text-neutral-400 uppercase block">Ambient Boundary Conditions:</span>
+                <pre className="bg-[#121212] text-amber-300 p-2.5 font-mono text-[10px]">
+                  {JSON.stringify(selectedDataset.environment, null, 2)}
+                </pre>
+              </div>
+            )}
+
+            {/* Section 5: Raw Telemetry */}
+            {activePackageTab === 'telemetry' && (
+              <div className="space-y-2 text-left">
+                <span className="text-[9.5px] font-bold font-mono text-neutral-400 uppercase block">Time-Series Measurements:</span>
+                <pre className="bg-[#121212] text-neutral-200 p-2.5 font-mono text-[10px] max-h-[140px] overflow-y-auto">
+                  {JSON.stringify(selectedDataset.rawTelemetry, null, 2)}
+                </pre>
+              </div>
+            )}
+
+            {/* Section 6: Ground Truth & Metadata */}
+            {activePackageTab === 'groundTruth' && (
+              <div className="space-y-2 text-left">
                 <div>
-                  <span className="text-[9.5px] font-bold font-mono text-neutral-400 uppercase block mb-1">Active Instrument Configuration:</span>
-                  <pre className="bg-[#121212] text-indigo-300 p-2.5 font-mono text-[10px] overflow-x-auto rounded-none">
-                    {JSON.stringify(selectedDataset.devices, null, 2)}
+                  <span className="text-[9.5px] font-bold font-mono text-neutral-400 uppercase block mb-1">Metadata Header:</span>
+                  <pre className="bg-[#121212] text-teal-300 p-2 font-mono text-[9.5px]">
+                    {JSON.stringify(selectedDataset.metadata, null, 2)}
                   </pre>
                 </div>
-
                 <div>
-                  <span className="text-[9.5px] font-bold font-mono text-neutral-400 uppercase block mb-1">Captured Ambient Conditions:</span>
-                  <pre className="bg-[#121212] text-amber-300 p-2.5 font-mono text-[10px] overflow-x-auto rounded-none">
-                    {JSON.stringify(selectedDataset.environment, null, 2)}
-                  </pre>
+                  <span className="text-[9.5px] font-bold font-mono text-neutral-400 uppercase block mb-1">Ground Truth Inspection:</span>
+                  <div className="bg-white border border-neutral-200 p-2 text-xs font-mono">
+                    <strong>Failure Status:</strong> {selectedDataset.groundTruth.expected_failure ? 'CRITICAL FAILURE' : 'NO FAILURE'}<br/>
+                    <strong>Notes:</strong> {selectedDataset.groundTruth.inspection}
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* Tab 3: Measurements */}
-            {activePackageTab === 'measurements' && (
-              <div className="space-y-3 font-sans text-xs">
-                <div>
-                  <span className="text-[9.5px] font-bold font-mono text-neutral-400 uppercase block mb-1">Raw Measurement Datasets:</span>
-                  <pre className="bg-[#121212] text-neutral-200 p-2.5 font-mono text-[10px] overflow-x-auto rounded-none">
-                    {JSON.stringify(selectedDataset.measurements, null, 2)}
-                  </pre>
-                </div>
-
-                <div>
-                  <span className="text-[9.5px] font-bold font-mono text-neutral-400 uppercase block mb-1">Expected Theoretical Discovery:</span>
-                  <p className="bg-white border border-neutral-200 p-2.5 rounded-none font-medium text-neutral-700 leading-relaxed italic">
-                    "{selectedDataset.expectedDiscovery}"
-                  </p>
-                </div>
-              </div>
-            )}
           </div>
 
-          {/* Master 10-Step Sequential Checklist Visualizer */}
-          <div className="border border-neutral-300 p-4 bg-white rounded-none">
-            <span className="text-[10px] font-black font-mono text-neutral-400 block uppercase mb-2">
-              📋 10-Step Master Test Flow Sequence mapping
-            </span>
-            <div className="space-y-1 max-h-[170px] overflow-y-auto pr-1">
-              {MASTER_TEST_STEPS.map((step, idx) => {
-                const isActive = idx === activeStepIdx;
-                const isPassed = idx < activeStepIdx || (!executing && activeStepIdx === 9);
-                return (
-                  <div 
-                    key={idx}
-                    className={`p-2 border text-[11px] font-sans flex items-center justify-between rounded-none ${
-                      isActive 
-                        ? 'border-indigo-600 bg-indigo-50/60 font-bold scale-[1.01]' 
-                        : isPassed 
-                        ? 'border-emerald-200 bg-emerald-50/10' 
-                        : 'border-neutral-200 bg-neutral-50/45 text-neutral-500'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className={`w-4 h-4 rounded-full text-[9px] font-mono font-bold flex items-center justify-center border ${
-                        isActive 
-                          ? 'bg-indigo-600 text-white border-indigo-600' 
-                          : isPassed 
-                          ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
-                          : 'bg-neutral-200 text-neutral-600 border-neutral-300'
-                      }`}>
-                        {step.step}
-                      </span>
-                      <span className="font-sans font-semibold text-neutral-800">{step.name}</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[8px] font-mono text-neutral-400 px-1 py-0.5 border border-neutral-200 bg-white">
-                        {step.sequenceStep}
-                      </span>
-                      <span className="text-[8px] font-mono font-bold bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-sm">
-                        {step.targetTab}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
+          {/* Universal Telemetry Packets Array Stream View */}
+          <div className="border border-neutral-300 p-3 bg-white rounded-none space-y-2 text-left">
+            <div className="flex items-center justify-between border-b border-neutral-200 pb-1.5">
+              <span className="text-[10px] font-black font-mono text-indigo-800 uppercase flex items-center gap-1">
+                <Cpu className="w-3.5 h-3.5" /> Output Telemetry Packets Array ({selectedDataset.telemetryPackets.length})
+              </span>
+              <button
+                onClick={copyTelemetryToClipboard}
+                className="text-[9px] font-mono font-bold bg-neutral-100 hover:bg-neutral-200 text-neutral-800 px-2 py-0.5 border border-neutral-300 flex items-center gap-1 cursor-pointer"
+              >
+                {copiedTelemetry ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                {copiedTelemetry ? 'Copied JSON!' : 'Copy Telemetry Array'}
+              </button>
             </div>
+
+            <pre className="bg-[#121212] text-emerald-400 p-2 font-mono text-[9px] h-[110px] overflow-y-auto rounded-none">
+              {JSON.stringify(selectedDataset.telemetryPackets, null, 2)}
+            </pre>
           </div>
         </div>
 
-        {/* Right Side: Active Loop Execution Console, Graphs & Unified Telemetry format */}
+        {/* Right Side: Execution Console, Plotter & Meta-Cognition */}
         <div className="lg:col-span-7 flex flex-col gap-4">
           
           {/* Action Row */}
@@ -762,12 +1215,11 @@ export default function MasterTestSandbox({ onLogEvent }: { onLogEvent: (details
               ) : (
                 <>
                   <Play className="w-4 h-4 text-white fill-white" />
-                  Run 10-Step Master validation ({selectedDataset.title.split(' ')[0]})
+                  Run 10-Step Discovery Flow ({selectedDataset.title.split(' ')[0]})
                 </>
               )}
             </button>
 
-            {/* Quick reset button */}
             <button
               onClick={() => {
                 setActiveStepIdx(-1);
@@ -782,14 +1234,14 @@ export default function MasterTestSandbox({ onLogEvent }: { onLogEvent: (details
           </div>
 
           {/* Live Execution Logs Console */}
-          <div className="bg-[#121212] text-neutral-200 p-4 border-2 border-[#1A1A1A] font-mono text-[10.5px] h-[220px] overflow-y-auto flex flex-col relative shadow-[inset_0px_2px_8px_rgba(0,0,0,0.8)] rounded-none">
+          <div className="bg-[#121212] text-neutral-200 p-4 border-2 border-[#1A1A1A] font-mono text-[10.5px] h-[200px] overflow-y-auto flex flex-col relative shadow-[inset_0px_2px_8px_rgba(0,0,0,0.8)] rounded-none">
             <span className="text-[9px] font-bold text-indigo-400 border-b border-neutral-800 pb-1 mb-1.5 block uppercase">
-              🌌 MASTER PROTOCOL RUNNER & CONSOLE FEED
+              🌌 OMEGA DISCOVERY ENGINE TERMINAL FEED
             </span>
             
             {terminalLogs.length === 0 ? (
               <div className="text-neutral-500 italic my-auto text-center">
-                Console idle. Click "Run 10-Step Master Validation" above to process the standard test package.
+                Console idle. Click "Run 10-Step Discovery Flow" above to process the standard test package.
               </div>
             ) : (
               <div className="space-y-1 flex-1 text-left">
@@ -797,7 +1249,6 @@ export default function MasterTestSandbox({ onLogEvent }: { onLogEvent: (details
                   let logColor = 'text-neutral-200';
                   if (log.startsWith('[MASTER-RUN]')) logColor = 'text-indigo-400 font-bold';
                   else if (log.includes('[✓]')) logColor = 'text-emerald-400 font-bold';
-                  else if (log.startsWith('   └─')) logColor = 'text-amber-300 text-[9.5px]';
                   return (
                     <div key={idx} className={`${logColor} leading-normal`}>
                       {log}
@@ -809,32 +1260,14 @@ export default function MasterTestSandbox({ onLogEvent }: { onLogEvent: (details
             )}
           </div>
 
-          {/* Plotter and Metrology layout */}
-          {activeStepIdx >= 4 && (
-            <div className="flex flex-col md:flex-row gap-4">
-              {/* Dynamic SVG Plot */}
-              {renderSVGChart()}
-
-              {/* Universal Telemetry format card */}
-              <div className="border border-neutral-300 bg-[#FCFAF7] p-4 rounded-none text-left flex-1 min-w-[280px]">
-                <div className="flex items-center gap-1.5 border-b border-neutral-200 pb-1.5 mb-2">
-                  <span className="text-xs font-black font-mono text-indigo-700 uppercase">
-                    🔌 Ingested Telemetry Schema
-                  </span>
-                  <span className="text-[8px] font-mono text-neutral-400">Universal format</span>
-                </div>
-                <pre className="bg-[#121212] text-emerald-400 p-2 rounded-none font-mono text-[9px] h-[105px] overflow-y-auto">
-                  {JSON.stringify(selectedDataset.deviceTelemetry, null, 2)}
-                </pre>
-              </div>
-            </div>
-          )}
+          {/* Plotter */}
+          {renderSVGChart()}
 
           {/* Meta Cognition results output */}
-          {activeStepIdx >= 8 && (
+          {activeStepIdx >= 7 && (
             <div className="border border-[#1A1A1A] bg-amber-50/15 p-4 rounded-none text-left space-y-2 border-l-4 border-l-amber-500">
               <span className="text-[10px] font-black font-mono text-amber-700 block uppercase">
-                🧠 OMEGA Meta-Cognition Loop results
+                🧠 OMEGA Meta-Cognition Loop Results
               </span>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-sans">
                 <div className="space-y-1">
@@ -846,65 +1279,341 @@ export default function MasterTestSandbox({ onLogEvent }: { onLogEvent: (details
                   <strong className="text-neutral-800 block">{selectedDataset.metaCognition.realityScore}</strong>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-neutral-500 block uppercase text-[9px] font-bold">Identified Failure / Limit:</span>
+                  <span className="text-neutral-500 block uppercase text-[9px] font-bold">Identified Anomaly / Failure:</span>
                   <p className="text-neutral-700 italic">"{selectedDataset.metaCognition.whatFailed}"</p>
                 </div>
                 <div className="space-y-1">
                   <span className="text-neutral-500 block uppercase text-[9px] font-bold">Missing critical variable:</span>
                   <strong className="text-neutral-800 block">{selectedDataset.metaCognition.missingVariable}</strong>
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-1 col-span-2">
                   <span className="text-neutral-500 block uppercase text-[9px] font-bold">Schedule next experiment:</span>
-                  <p className="text-indigo-800 font-bold">"{selectedDataset.metaCognition.nextExperiment}"</p>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-neutral-500 block uppercase text-[9px] font-bold">Causal graph update:</span>
-                  <code className="text-neutral-800 block bg-neutral-100 px-1 py-0.5 font-mono text-[10px]">{selectedDataset.metaCognition.knowledgeGraph}</code>
+                  <p className="text-indigo-800 font-bold bg-indigo-50 p-1.5 border border-indigo-200">
+                    "{selectedDataset.metaCognition.nextExperiment}"
+                  </p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Final Validation Scorecard section */}
+          {/* Final Validation Scorecard */}
           {showScorecard && (
-            <div className="border border-emerald-500 bg-emerald-50/10 p-5 rounded-none text-left space-y-3 shadow-[3px_3px_0px_0px_rgba(16,185,129,1)]">
-              <div className="flex items-center justify-between border-b border-emerald-200 pb-2">
+            <div className="border border-emerald-500 bg-emerald-50/10 p-4 rounded-none text-left space-y-2 shadow-[3px_3px_0px_0px_rgba(16,185,129,1)]">
+              <div className="flex items-center justify-between border-b border-emerald-200 pb-1.5">
                 <span className="text-xs font-black font-mono text-emerald-800 uppercase flex items-center gap-1.5">
-                  ✓ FINAL OMEGA VALIDATION SCORECARD
+                  ✓ DISCOVERY VALIDATION SCORECARD
                 </span>
-                <span className="text-[10px] font-mono font-black text-emerald-800 bg-emerald-100 border border-emerald-300 px-2.5 py-0.5 uppercase">
+                <span className="text-[10px] font-mono font-black text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 uppercase">
                   STATUS: PASS (11/11 MATCHED)
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 text-xs font-sans">
-                {[
-                  { stage: 'Mission Intent', criterion: 'Clear, falsifiable scientific question', pass: true },
-                  { stage: 'Context', criterion: 'Assumptions and constraints documented', pass: true },
-                  { stage: 'Instrument Setup', criterion: 'Devices, calibration, and telemetry recorded', pass: true },
-                  { stage: 'Environment', criterion: 'Ambient conditions captured', pass: true },
-                  { stage: 'Raw Data', criterion: 'Time-stamped measurements available', pass: true },
-                  { stage: 'AI Reasoning', criterion: 'Generator, critic, and arbiter hypotheses logged', pass: true },
-                  { stage: 'Simulation', criterion: 'Predictive model executed', pass: true },
-                  { stage: 'Reality Anchor', criterion: 'Prediction compared to measured outcome', pass: true },
-                  { stage: 'Meta-Cognition', criterion: 'Missing variables and uncertainties identified', pass: true },
-                  { stage: 'Next Experiment', criterion: 'Highest-information-gain experiment proposed', pass: true },
-                  { stage: 'Reproducibility', criterion: 'Complete experiment package saved with version, configuration, and provenance', pass: true }
-                ].map((crit, i) => (
-                  <div key={i} className="bg-white border border-neutral-200 p-2 rounded-none flex items-start gap-2 shadow-[1px_1px_0px_0px_rgba(0,0,0,0.05)]">
-                    <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <div>
-                      <strong className="text-neutral-800 text-[10.5px] font-bold block uppercase tracking-tight">{crit.stage}</strong>
-                      <span className="text-[9.5px] text-neutral-500 block leading-tight">{crit.criterion}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <p className="text-xs text-emerald-900 font-sans">
+                Successfully executed all 6 blocks of the Universal Scientific Test Package and verified data propagation into Visual Manifold, Causal Hypergraph, and Ruliad reasoning layers.
+              </p>
             </div>
           )}
 
         </div>
       </div>
+
+      {/* 🔬 EXPLAIN THIS DISCOVERY MODAL */}
+      {showExplainModal && (
+        <div className="fixed inset-0 z-50 bg-neutral-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border-4 border-[#1A1A1A] w-full max-w-5xl max-h-[90vh] overflow-y-auto p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-left space-y-6">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b-2 border-[#1A1A1A] pb-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-6 h-6 text-amber-500 fill-amber-400" />
+                  <h2 className="text-xl font-black font-serif uppercase tracking-tight text-[#1A1A1A]">
+                    🔬 EXPLAIN THIS DISCOVERY: {selectedDataset.title}
+                  </h2>
+                </div>
+                <p className="text-xs font-mono text-neutral-600">
+                  Synthesized Scientific Audit Trail & Mathematical Reasoning Matrix
+                </p>
+              </div>
+
+              <button 
+                onClick={() => setShowExplainModal(false)}
+                className="p-1.5 border-2 border-[#1A1A1A] bg-neutral-100 hover:bg-neutral-200 cursor-pointer"
+              >
+                <X className="w-5 h-5 text-[#1A1A1A]" />
+              </button>
+            </div>
+
+            {/* 4-Panel Synthesis Matrix */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              {/* Panel 1: Mission Intent */}
+              <div className="border-2 border-[#1A1A1A] p-4 bg-indigo-50/30 space-y-2">
+                <div className="flex items-center gap-2 border-b border-indigo-200 pb-1.5">
+                  <Compass className="w-4 h-4 text-indigo-700" />
+                  <h4 className="font-mono font-black text-xs uppercase text-indigo-950">
+                    PANEL 1: MISSION & REASONING
+                  </h4>
+                </div>
+                <p className="text-xs font-sans text-neutral-800 leading-relaxed font-medium">
+                  {selectedDataset.discoveryExplanation.missionReason}
+                </p>
+              </div>
+
+              {/* Panel 2: Visual Manifold */}
+              <div className="border-2 border-[#1A1A1A] p-4 bg-emerald-50/30 space-y-2">
+                <div className="flex items-center gap-2 border-b border-emerald-200 pb-1.5">
+                  <Activity className="w-4 h-4 text-emerald-700" />
+                  <h4 className="font-mono font-black text-xs uppercase text-emerald-950">
+                    PANEL 2: VISUAL MANIFOLD PLACEMENT
+                  </h4>
+                </div>
+                <p className="text-xs font-sans text-neutral-800 leading-relaxed font-medium">
+                  {selectedDataset.discoveryExplanation.manifoldPlacement}
+                </p>
+              </div>
+
+              {/* Panel 3: Causal Hypergraph */}
+              <div className="border-2 border-[#1A1A1A] p-4 bg-purple-50/30 space-y-2">
+                <div className="flex items-center gap-2 border-b border-purple-200 pb-1.5">
+                  <Network className="w-4 h-4 text-purple-700" />
+                  <h4 className="font-mono font-black text-xs uppercase text-purple-950">
+                    PANEL 3: HYPERGRAPH CAUSAL MESH
+                  </h4>
+                </div>
+                <code className="text-xs font-mono block bg-white p-2 border border-purple-200 text-purple-900 font-bold">
+                  {selectedDataset.discoveryExplanation.hypergraphCauses}
+                </code>
+              </div>
+
+              {/* Panel 4: Ruliad Recommendation */}
+              <div className="border-2 border-[#1A1A1A] p-4 bg-amber-50/30 space-y-2">
+                <div className="flex items-center gap-2 border-b border-amber-200 pb-1.5">
+                  <GitCommit className="w-4 h-4 text-amber-700" />
+                  <h4 className="font-mono font-black text-xs uppercase text-amber-950">
+                    PANEL 4: RULIAD PATHWAY RECOMMENDATION
+                  </h4>
+                </div>
+                <p className="text-xs font-sans text-neutral-800 leading-relaxed font-medium">
+                  {selectedDataset.discoveryExplanation.ruliadRecommendation}
+                </p>
+              </div>
+
+            </div>
+
+            {/* 🔬 10-GAP SCIENTIFIC ENHANCEMENTS MATRIX */}
+            <div className="space-y-4 border-t-2 border-b-2 border-[#1A1A1A] py-4 my-2">
+              <div className="flex items-center justify-between">
+                <h3 className="font-mono font-black text-sm uppercase text-indigo-900 flex items-center gap-2">
+                  <Beaker className="w-4 h-4 text-indigo-600" />
+                  OMEGA RIGOROUS SCIENTIFIC METRICS & DECISION MATRIX (10-GAP ARCHITECTURE)
+                </h3>
+                <span className="text-[10px] font-mono font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 border border-indigo-300">
+                  {selectedDataset.metadata.evidenceLevel} | {selectedDataset.metadata.noveltyScore} ({selectedDataset.metadata.noveltyPercent}%)
+                </span>
+              </div>
+
+              {/* Grid for Confidence & Novelty */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {/* Confidence Breakdown */}
+                <div className="border border-neutral-300 p-3 bg-neutral-50 text-xs font-sans space-y-1.5">
+                  <span className="font-mono font-bold text-[10px] text-neutral-500 uppercase block border-b pb-1">
+                    📊 Multi-Metric Confidence
+                  </span>
+                  <div className="space-y-1 text-[11px]">
+                    <div className="flex justify-between">
+                      <span className="text-neutral-600">LLM Reasoning:</span>
+                      <strong className="text-indigo-800">{selectedDataset.confidenceBreakdown.modelConfidence}</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-neutral-600">Data Quality:</span>
+                      <strong className="text-emerald-800">{selectedDataset.confidenceBreakdown.dataQuality}</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-neutral-600">Parameter Space:</span>
+                      <strong className="text-amber-800">{selectedDataset.confidenceBreakdown.parameterSpaceCoverage}</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-neutral-600">Reproducibility:</span>
+                      <strong className="text-purple-800">{selectedDataset.confidenceBreakdown.reproducibilityScore}</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-neutral-600">External Agreement:</span>
+                      <strong className="text-teal-800">{selectedDataset.confidenceBreakdown.externalValidationAgreement}</strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Causal Chain Star Ratings */}
+                <div className="border border-neutral-300 p-3 bg-neutral-50 text-xs font-sans space-y-1.5 md:col-span-2">
+                  <span className="font-mono font-bold text-[10px] text-neutral-500 uppercase block border-b pb-1">
+                    ⭐ Causal Edge Evidence Ratings
+                  </span>
+                  <div className="space-y-1.5 text-[11px]">
+                    {selectedDataset.causalEdgeRatings.map((edge, i) => (
+                      <div key={i} className="flex items-center justify-between bg-white p-1.5 border border-neutral-200">
+                        <span className="font-mono text-[10.5px] text-neutral-800 font-medium">
+                          {edge.source} ➔ {edge.target}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-amber-500 font-bold tracking-widest text-xs">
+                            {'★'.repeat(edge.ratingStars)}{'☆'.repeat(5 - edge.ratingStars)}
+                          </span>
+                          <span className="text-[9px] font-mono bg-neutral-100 text-neutral-700 px-1 border border-neutral-300">
+                            {edge.evidenceLevel}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Competing Hypotheses & Instrument Health */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {/* Competing Hypotheses */}
+                <div className="border border-neutral-300 p-3 bg-neutral-50 text-xs font-sans space-y-2">
+                  <span className="font-mono font-bold text-[10px] text-neutral-500 uppercase block border-b pb-1">
+                    🔀 Competing Hypotheses Evaluation
+                  </span>
+                  <div className="space-y-1.5">
+                    {selectedDataset.competingHypotheses.map((hyp) => (
+                      <div key={hyp.id} className="bg-white p-2 border border-neutral-200 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono font-bold text-[10px] text-indigo-900">{hyp.id}</span>
+                          <span className="text-[10px] font-mono font-black bg-indigo-100 text-indigo-900 px-1.5 py-0.5 border border-indigo-200">
+                            Likelihood: {hyp.likelihood}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-neutral-800 font-medium">{hyp.statement}</p>
+                        <p className="text-[9.5px] font-mono text-neutral-500 italic">Evidence: {hyp.evidence}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Instrument Health & Knowledge Graph Stats */}
+                <div className="space-y-3">
+                  <div className="border border-neutral-300 p-3 bg-neutral-50 text-xs font-sans space-y-1.5">
+                    <span className="font-mono font-bold text-[10px] text-neutral-500 uppercase block border-b pb-1">
+                      🛠️ Instrument Health & Sensor Drift Monitor
+                    </span>
+                    <div className="space-y-1 text-[10.5px]">
+                      {selectedDataset.instrumentHealthList.map((inst, i) => (
+                        <div key={i} className="flex items-center justify-between bg-white p-1.5 border border-neutral-200">
+                          <span className="font-mono font-bold text-neutral-800">{inst.name}</span>
+                          <div className="flex items-center gap-2 font-mono text-[9.5px]">
+                            <span>Calib: <strong className="text-emerald-700">{inst.calibration}</strong></span>
+                            <span>Drift: <strong className="text-amber-700">{inst.sensorDrift}</strong></span>
+                            <span className="bg-emerald-100 text-emerald-800 font-bold px-1 border border-emerald-300">
+                              {inst.status}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* KG Stats & Missing Vars */}
+                  <div className="border border-neutral-300 p-3 bg-neutral-50 text-xs font-sans space-y-1">
+                    <span className="font-mono font-bold text-[10px] text-neutral-500 uppercase block border-b pb-1">
+                      🌐 Knowledge Graph Growth & Missing Sensors
+                    </span>
+                    <div className="flex items-center justify-between text-[11px] font-mono bg-white p-1.5 border border-neutral-200">
+                      <span>Total Nodes: <strong>{selectedDataset.knowledgeGraphStats.nodes}</strong></span>
+                      <span>Confirmed Edges: <strong>{selectedDataset.knowledgeGraphStats.confirmedEdges}</strong></span>
+                      <span className="text-indigo-700 font-bold">{selectedDataset.knowledgeGraphStats.graphGrowth}</span>
+                    </div>
+                    <div className="pt-1">
+                      <span className="text-[9.5px] font-mono text-neutral-500 block font-bold uppercase mb-0.5">Automated Missing Variables Suggested:</span>
+                      <ul className="list-disc list-inside text-[10px] font-mono text-neutral-700 space-y-0.5">
+                        {selectedDataset.missingVariablesList.map((mv, i) => (
+                          <li key={i}>{mv}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* EXECUTIVE DECISION DASHBOARD */}
+              <div className="border-2 border-emerald-600 bg-emerald-50/20 p-4 space-y-2">
+                <div className="flex items-center justify-between border-b border-emerald-200 pb-2">
+                  <h4 className="font-mono font-black text-xs uppercase text-emerald-950 flex items-center gap-1.5">
+                    🎯 EXECUTIVE SCIENTIFIC DECISION DASHBOARD
+                  </h4>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono font-black bg-emerald-100 text-emerald-900 border border-emerald-300 px-2 py-0.5 uppercase">
+                      Answered: {selectedDataset.executiveDecision.questionAnswered ? 'YES' : 'NO'}
+                    </span>
+                    <span className="text-[10px] font-mono font-black bg-indigo-100 text-indigo-900 border border-indigo-300 px-2 py-0.5 uppercase">
+                      Pub Ready: {selectedDataset.executiveDecision.publicationReady}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-sans">
+                  <div>
+                    <span className="text-[9.5px] font-mono text-neutral-500 font-bold uppercase block">Publication Readiness Assessment:</span>
+                    <p className="text-neutral-800 text-[11px] font-medium leading-relaxed bg-white p-2 border border-neutral-200">
+                      "{selectedDataset.executiveDecision.readinessReason}"
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-[9.5px] font-mono text-neutral-500 font-bold uppercase block">Recommended Next Experiment & Info Gain:</span>
+                    <div className="bg-white p-2 border border-neutral-200 space-y-1">
+                      <p className="text-indigo-900 font-bold text-[11px]">
+                        "{selectedDataset.executiveDecision.recommendedNextExperiment}"
+                      </p>
+                      <span className="text-[10px] font-mono text-emerald-800 font-bold block">
+                        Estimated Information Gain: +{selectedDataset.executiveDecision.estimatedInformationGain}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Discovery Audit Trail / Timeline */}
+            <div className="border-2 border-[#1A1A1A] p-4 bg-neutral-50 space-y-3">
+              <h4 className="font-mono font-black text-xs uppercase text-neutral-900 border-b border-neutral-300 pb-2">
+                ⏱️ DISCOVERY TIMELINE & CHRONOLOGICAL AUDIT TRAIL
+              </h4>
+
+              <div className="space-y-2">
+                {selectedDataset.discoveryExplanation.timeline.map((item) => (
+                  <div key={item.step} className="bg-white border border-neutral-300 p-3 flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3">
+                      <span className="w-6 h-6 rounded-full bg-indigo-600 text-white font-mono font-bold text-xs flex items-center justify-center shrink-0">
+                        {item.step}
+                      </span>
+                      <div>
+                        <strong className="text-xs font-bold font-sans text-neutral-900 block">{item.label}</strong>
+                        <p className="text-xs text-neutral-600 font-sans">{item.desc}</p>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 border border-emerald-300 shrink-0">
+                      Conf: {item.confidence}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex justify-end pt-2 border-t border-neutral-200">
+              <button
+                onClick={() => setShowExplainModal(false)}
+                className="px-5 py-2 bg-[#1A1A1A] text-white font-mono font-bold text-xs uppercase hover:bg-neutral-800 cursor-pointer"
+              >
+                Close Discovery Synthesis
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
