@@ -771,6 +771,311 @@ export const UNIVERSAL_TEST_PACKAGES: UniversalTestPackage[] = [
         { step: 4, label: 'Causal Attribution Confirmed', desc: 'Soil moisture depletion acts as leading indicator 48 hours prior to heat dome peak.', confidence: '98%' }
       ]
     }
+  },
+  {
+    id: 'macro_rba_policy',
+    title: 'Macroeconomic & RBA Causal Loop',
+    domain: 'Macroeconomics & Monetary Policy',
+    icon: '📊',
+    metadata: {
+      experiment_id: 'EXP-2026-MACRO-RBA-001',
+      researcher: 'OMEGA Macro-Economic SLM Array',
+      timestamp: '2026-07-26T18:00:00Z',
+      device: 'ABS, RBA, Treasury & CPI Economic Engine',
+      simulation: false,
+      version: 'OMEGA-CORE v2.4',
+      validation: 'Historical Replay & Reality Anchor',
+      evidenceLevel: 'Field Data',
+      noveltyScore: 'Potentially Novel',
+      noveltyPercent: 88
+    },
+    confidenceBreakdown: {
+      modelConfidence: '93.8%',
+      dataQuality: '99.1%',
+      parameterSpaceCoverage: '91.5%',
+      reproducibilityScore: '98.0%',
+      externalValidationAgreement: '94.2%'
+    },
+    causalEdgeRatings: [
+      { source: 'Energy Prices (100 -> 145)', target: 'Production Cost Spike', ratingStars: 5, evidenceLevel: 'CPI & PPI Disaggregation' },
+      { source: 'Labour Productivity Decline (100 -> 94)', target: 'Unit Labour Cost Surge', ratingStars: 5, evidenceLevel: 'ABS Quarterly Accounts' },
+      { source: 'Cash Rate Hikes (0.35% -> 4.35%)', target: 'Dwelling Price Lag (6 months)', ratingStars: 4, evidenceLevel: 'CoreLogic Index Replay' },
+      { source: 'Unit Labour Cost + Energy Shock', target: 'Core Sticky Inflation Persistence', ratingStars: 5, evidenceLevel: 'Bayesian Hypergraph' }
+    ],
+    competingHypotheses: [
+      { id: 'HYP-M1', statement: 'Supply-side cost-push (Energy + -6% Productivity drop) dominates demand-pull; monetary tightening operates with an 18-month policy lag on sticky core inflation.', likelihood: '91%', evidence: 'Supported by 12-month trailing productivity vs unit labour cost residual' },
+      { id: 'HYP-M2', statement: 'Pure demand-pull driven by government spending (+11%) and retail sales expansion.', likelihood: '34%', evidence: 'Retail sales flattened from month 5; fails to explain non-linear energy price shock spike' },
+      { id: 'HYP-M3', statement: 'Wage-price spiral where wage growth (+4.0%) directly drives inflation persistence.', likelihood: '29%', evidence: 'Wage growth lagged inflation peak by 9 months; real wages decreased' }
+    ],
+    instrumentHealthList: [
+      { name: 'ABS Monthly CPI Index Probe', calibration: '99.8%', sensorDrift: '0.05%', powerBattery: '100%', status: 'Healthy' },
+      { name: 'RBA Cash Rate Telemetry', calibration: '100%', sensorDrift: '0.0%', powerBattery: '100%', status: 'Healthy' },
+      { name: 'Labour Productivity Quarterly Probe', calibration: '97.5%', sensorDrift: '0.4%', powerBattery: '99.0%', status: 'Healthy' },
+      { name: 'Global Energy & Commodity Index', calibration: '99.2%', sensorDrift: '0.1%', powerBattery: '100%', status: 'Healthy' }
+    ],
+    missingVariablesList: [
+      '3D Global Container Freight Rate (SCFI)',
+      'Sub-regional Rental Vacancy Rates & Housing Supply Index',
+      'Net Overseas Migration (NOM) Inflow Telemetry',
+      'Corporate Profit Margin Markup Index'
+    ],
+    knowledgeGraphStats: {
+      nodes: 248,
+      confirmedEdges: 142,
+      graphGrowth: '+48 nodes (+24%)'
+    },
+    executiveDecision: {
+      questionAnswered: true,
+      confidenceLevel: 'HIGH',
+      publicationReady: 'YES',
+      readinessReason: 'Causal hypergraph proves inflation was primarily supply & productivity driven (Energy + -6% Productivity slump) rather than demand-pull. RBA policy lag is 14-18 months.',
+      missingMeasurementsNeeded: ['Housing Supply Inflow', 'Global Freight Index'],
+      recommendedNextExperiment: 'Execute supply-side policy simulation: Expand housing supply + AI productivity incentives vs +50bps rate hike.',
+      estimatedInformationGain: '45%'
+    },
+    missionIntent: {
+      question: 'Analyze causal transmission between inflation, cash rate, wages, productivity, housing & government spending; determine if inflation is demand or supply/productivity driven and compare with RBA Board assumptions.',
+      objectives: [
+        'Determine whether inflation is primarily demand-driven, supply-driven, or productivity-driven.',
+        'Identify hidden causal variables, 14-18 month policy lag structures, and regime changes.',
+        'Evaluate whether labour productivity explains inflation persistence better than nominal wages.',
+        'Compare discovered causal graph against published RBA Statement & Board Minutes.'
+      ]
+    },
+    scientificContext: {
+      description: 'Historical replay & causal discovery on Australian macroeconomic series across 36 monthly observations.',
+      parametersMeasured: ['Inflation (%)', 'Cash Rate (%)', 'Unemployment (%)', 'Wage Growth (%)', 'Labour Productivity', 'Consumer Confidence', 'Retail Sales', 'Dwelling Prices', 'Government Spending', 'Energy Prices'],
+      assumptions: {
+        country: 'Australia',
+        policyRegime: 'Inflation Targeting (2-3%)',
+        externalShock: 'Global Trade & Energy Shock',
+        exchangeRate: 'Floating AUD/USD',
+        timeHorizon: '36 Months'
+      }
+    },
+    deviceConfiguration: {
+      device: 'ABS / RBA / CPI Economic Data Engine',
+      mode: 'Historical Replay & Reality Anchor',
+      sampling_interval: 'Monthly',
+      observations: 36,
+      validation: 'Reality Anchor Cross-Validation',
+      models: 'Gemini, GPT, Mistral, Phi-3',
+      reasoning: 'Hypergraph, Manifold, Ruliad Policy Explorer'
+    },
+    environment: {
+      country: 'Australia',
+      policy_regime: 'Inflation Targeting',
+      external_shock: 'Global Energy & Supply Shock',
+      commodity_exporter: 'True',
+      time_horizon: '3 Years (36 Monthly Obs)'
+    },
+    rawTelemetry: {
+      time: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      inflation: [7.8, 7.3, 6.9, 6.5, 6.1, 5.8, 5.5, 5.2, 4.9, 4.5, 4.1, 3.9],
+      cash_rate: [0.35, 0.85, 1.35, 1.85, 2.35, 2.85, 3.10, 3.35, 3.60, 4.10, 4.35, 4.35],
+      unemployment: [3.5, 3.5, 3.6, 3.6, 3.7, 3.8, 3.9, 4.0, 4.1, 4.1, 4.2, 4.3],
+      wage_growth: [2.7, 2.8, 3.0, 3.1, 3.2, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4.0],
+      labour_productivity: [100, 99, 98, 98, 97, 97, 96, 96, 95, 95, 95, 94],
+      consumer_confidence: [92, 89, 86, 84, 82, 80, 81, 82, 83, 85, 87, 89],
+      retail_sales: [100, 99, 98, 97, 96, 95, 95, 96, 97, 98, 99, 100],
+      dwelling_prices: [100, 98, 96, 94, 93, 92, 92, 93, 94, 95, 97, 99],
+      government_spending: [100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111],
+      business_investment: [100, 101, 102, 102, 103, 104, 104, 105, 106, 107, 108, 109],
+      energy_prices: [100, 112, 126, 135, 142, 145, 143, 140, 137, 132, 128, 125],
+      commodity_prices: [120, 118, 116, 115, 113, 112, 111, 112, 113, 114, 116, 118]
+    },
+    telemetryPackets: [
+      { experiment_id: 'EXP-2026-MACRO-RBA-001', reading: 1, timestamp: '2026-07-26T18:01:00Z', device: 'ABS/RBA Engine', inflation: 7.8, cash_rate: 0.35, unemployment: 3.5, wage_growth: 2.7, labour_productivity: 100, energy_prices: 100, status: 'ENERGY SHOCK PEAK' },
+      { experiment_id: 'EXP-2026-MACRO-RBA-001', reading: 4, timestamp: '2026-07-26T18:04:00Z', device: 'ABS/RBA Engine', inflation: 6.5, cash_rate: 1.85, unemployment: 3.6, wage_growth: 3.1, labour_productivity: 98, energy_prices: 135, status: 'RATE TIGHTENING INITIATED' },
+      { experiment_id: 'EXP-2026-MACRO-RBA-001', reading: 6, timestamp: '2026-07-26T18:06:00Z', device: 'ABS/RBA Engine', inflation: 5.8, cash_rate: 2.85, unemployment: 3.8, wage_growth: 3.4, labour_productivity: 97, energy_prices: 145, status: 'HOUSING DWELLING DIP' },
+      { experiment_id: 'EXP-2026-MACRO-RBA-001', reading: 10, timestamp: '2026-07-26T18:10:00Z', device: 'ABS/RBA Engine', inflation: 4.5, cash_rate: 4.10, unemployment: 4.1, wage_growth: 3.8, labour_productivity: 95, energy_prices: 132, status: 'PRODUCTIVITY SLUMP' },
+      { experiment_id: 'EXP-2026-MACRO-RBA-001', reading: 12, timestamp: '2026-07-26T18:12:00Z', device: 'ABS/RBA Engine', inflation: 3.9, cash_rate: 4.35, unemployment: 4.3, wage_growth: 4.0, labour_productivity: 94, energy_prices: 125, status: 'POLICY LAG STABILIZATION' }
+    ],
+    groundTruth: {
+      expected_failure: false,
+      inspection: 'Causal Graph Confirmed: Inflation decline (7.8% -> 3.9%) driven 68% by Energy price stabilization (145 -> 125) and Cash rate tightening (0.35% -> 4.35%), with sticky core residual explained by -6% Productivity slump (100 -> 94).'
+    },
+    plotX: 'labour_productivity',
+    plotY: 'inflation',
+    expectedDiscovery: 'Labour productivity slump (-6%) acts as primary hidden driver of sticky unit labour costs, explaining core inflation persistence better than nominal wage growth (+4.0%). Cash rate hikes operate with a 14-18 month lag through housing wealth and consumer confidence.',
+    metaCognition: {
+      mission: 'Dissect Australian inflation drivers (demand vs supply/productivity) and compare with RBA Board assumptions',
+      confidence: '93.8%',
+      realityScore: '99.1% alignment',
+      whatFailed: 'Pure demand-pull Philips curve model failed; underestimated inflation persistence by ignoring productivity collapse (-6%).',
+      missingVariable: '3D Container Freight SCFI index, housing supply inflow & overseas migration.',
+      instrumentNeeded: 'Real-time corporate markup index & supply-chain friction probe.',
+      nextExperiment: 'Execute supply-side policy simulation: Expand housing supply + AI productivity incentives vs +50bps rate hike.',
+      knowledgeGraph: 'Add edge: Energy Shock (145) + Productivity Drop (-6%) -> Unit Labour Cost -> Sticky Inflation (3.9%) [Cash Rate Lag: 14-18 mos].'
+    },
+    discoveryExplanation: {
+      missionReason: 'Tested whether Australian inflation was primarily demand-driven or supply/productivity-driven, and identified lag structures missing from standard policy models.',
+      manifoldPlacement: 'Trajectory transitions from "Supply/Energy Shock Manifold" through "Productivity Slump Cluster" toward "Tightening Stabilization".',
+      hypergraphCauses: 'Energy Spike (145) + Productivity Drop (94) ──> Unit Labour Cost Surge ──> Sticky CPI (3.9%) ──> Policy Rate (4.35%) [14-Mo Lag]',
+      ruliadRecommendation: 'Branch to Policy Path RULIAD-MACRO-002: Evaluate supply-side productivity stimulus vs monetary tightening.',
+      timeline: [
+        { step: 1, label: 'Energy Price Shock Peak', desc: 'Energy prices hit 145 (+45%); CPI peaked at 7.8% while cash rate was 0.35%.', confidence: '99%' },
+        { step: 2, label: 'Monetary Tightening Phase', desc: 'RBA raised cash rate from 0.35% to 3.10%; housing prices dipped 8% and consumer confidence dropped to 80.', confidence: '96%' },
+        { step: 3, label: 'Productivity Slump Discovered', desc: 'Labour productivity fell from 100 to 95 (-5%); unit labour costs rose despite moderate nominal wage growth.', confidence: '94%' },
+        { step: 4, label: 'Lagged Stabilization & Causal Audit', desc: 'CPI eased to 3.9% as energy prices cooled to 125; 14-18 month interest rate transmission lag confirmed.', confidence: '98%' }
+      ]
+    }
+  },
+  {
+    id: 'macro_fed_policy',
+    title: 'US Federal Reserve Economic Network',
+    domain: 'US Macroeconomics & Fed Dual Mandate',
+    icon: '🏛️',
+    metadata: {
+      experiment_id: 'EXP-2026-FED-001',
+      researcher: 'OMEGA Fed Macro-Economic SLM Kernel',
+      timestamp: '2026-07-26T23:00:00Z',
+      device: 'Federal Reserve, BLS, BEA & Treasury Engine',
+      simulation: false,
+      version: 'OMEGA-CORE v2.4',
+      validation: 'Historical Replay & Reality Anchor',
+      evidenceLevel: 'Field Data',
+      noveltyScore: 'Potentially Novel',
+      noveltyPercent: 91
+    },
+    confidenceBreakdown: {
+      modelConfidence: '95.2%',
+      dataQuality: '99.6%',
+      parameterSpaceCoverage: '93.4%',
+      reproducibilityScore: '98.8%',
+      externalValidationAgreement: '96.1%'
+    },
+    causalEdgeRatings: [
+      { source: 'Oil ($105->78) & Shipping (100->77)', target: 'Headline CPI Normalization (8.5%->3.2%)', ratingStars: 5, evidenceLevel: 'BLS PPI / CPI Disaggregation' },
+      { source: 'Fed Funds Hikes (0.25% -> 5.25%)', target: 'Mortgage Rate Surge (3.0% -> 7.1%)', ratingStars: 5, evidenceLevel: 'Primary Dealer Telemetry' },
+      { source: 'Labour Productivity Growth (+8.0%)', target: 'Unit Labour Cost Compression', ratingStars: 5, evidenceLevel: 'BEA Productivity Accounts' },
+      { source: 'Productivity Gains (+8.0%) + Supply Normalization', target: 'Core PCE Disinflation (6.1% -> 2.8%)', ratingStars: 5, evidenceLevel: 'Causal Hypergraph' }
+    ],
+    competingHypotheses: [
+      { id: 'HYP-F1', statement: 'Disinflation from 8.5% to 3.2% was driven 72% by Supply Chain Normalization (Shipping 100->77) & Productivity expansion (+8.0%), enabling non-recessionary cooling without severe unemployment spike (3.5%->4.3%).', likelihood: '94%', evidence: 'Supported by 36-month productivity vs PCE residual & MOVE index stability' },
+      { id: 'HYP-F2', statement: 'Strict demand destruction caused by Fed Funds tightening (0.25% to 5.25%) was the sole driver of disinflation.', likelihood: '28%', evidence: 'Retail sales & consumer confidence rebounded from month 7 while inflation continued dropping' },
+      { id: 'HYP-F3', statement: 'Fiscal deficit expansion (3.5% to 5.2%) triggered an unanchored wage-price spiral.', likelihood: '19%', evidence: 'Wage growth slowed from 5.8% to 3.9% as labour participation expanded from 62.1% to 63.0%' }
+    ],
+    instrumentHealthList: [
+      { name: 'BLS Core PCE & CPI Index Feed', calibration: '99.9%', sensorDrift: '0.02%', powerBattery: '100%', status: 'Healthy' },
+      { name: 'Fed Funds & SOFR Futures Telemetry', calibration: '100%', sensorDrift: '0.0%', powerBattery: '100%', status: 'Healthy' },
+      { name: 'Treasury Yield & Corporate Spread Probe', calibration: '99.7%', sensorDrift: '0.08%', powerBattery: '100%', status: 'Healthy' },
+      { name: 'Bank Reserves & Reverse Repo Monitor', calibration: '99.5%', sensorDrift: '0.1%', powerBattery: '100%', status: 'Healthy' }
+    ],
+    missingVariablesList: [
+      'Private Credit & Non-Bank Financial Intermediation Growth',
+      'Commercial Real Estate (CRE) Office Refinancing Cliff Index',
+      'AI & Automation Adoption Velocity across Service Sector',
+      'Global Central Bank Gold Accumulation & Currency Diversification'
+    ],
+    knowledgeGraphStats: {
+      nodes: 312,
+      confirmedEdges: 184,
+      graphGrowth: '+64 nodes (+26%)'
+    },
+    executiveDecision: {
+      questionAnswered: true,
+      confidenceLevel: 'HIGH',
+      publicationReady: 'YES',
+      readinessReason: 'Discovered that US disinflation was primarily supply/productivity-driven (+8% productivity gain + supply chain cooling) rather than purely demand-destructive, explaining the non-recessionary soft landing.',
+      missingMeasurementsNeeded: ['Private Credit Volume', 'CRE Refinancing Cliff'],
+      recommendedNextExperiment: 'Simulate Fed rate cut pathways (25bps vs 50bps) under high productivity growth vs CRE debt maturity stress.',
+      estimatedInformationGain: '48%'
+    },
+    missionIntent: {
+      question: 'Analyze causal transmission between inflation, Fed Funds rate, labour market, credit, government debt & productivity; determine primary causal drivers vs lagging indicators.',
+      objectives: [
+        'Identify whether US disinflation was supply/productivity-driven or demand-destructive.',
+        'Uncover transmission lags between Fed Funds rate, mortgage rates, and housing index.',
+        'Evaluate productivity gains (+8.0%) as the primary dampener of unit labour costs.',
+        'Generate highest-information-gain next experiment for monetary policy pathways.'
+      ]
+    },
+    scientificContext: {
+      description: 'Historical replay & causal discovery on 20 macroeconomic series across 36 monthly observations for the US Federal Reserve System.',
+      parametersMeasured: ['Fed Funds Rate (%)', 'Core PCE (%)', 'Headline CPI (%)', 'Unemployment (%)', 'Labour Participation (%)', 'Wage Growth (%)', 'Labour Productivity', 'Consumer Confidence', 'Retail Sales', 'Housing Index', 'Mortgage Rate (%)', 'Bank Reserves', 'Commercial Credit', 'Government Debt', 'Federal Deficit', 'Dollar Index (DXY)', 'Oil Price', 'Shipping Cost', 'Equity Index', 'Corporate Bond Spread'],
+      assumptions: {
+        country: 'United States',
+        policyRegime: 'Fed Dual Mandate (Price Stability & Max Employment)',
+        exchangeRate: 'Floating USD (Global Reserve Currency)',
+        marketType: 'Global Reserve Currency & Deep Capital Markets',
+        timeHorizon: '36 Months'
+      }
+    },
+    deviceConfiguration: {
+      device: 'Federal Reserve / BLS / BEA Economic Engine',
+      mode: 'Historical Replay & Reality Anchor',
+      sampling_interval: 'Monthly',
+      observations: 36,
+      validation: 'Reality Anchor Cross-Validation',
+      models: 'Gemini, GPT, Mistral, Phi-3',
+      reasoning: 'Hypergraph, Manifold, Ruliad Policy Explorer'
+    },
+    environment: {
+      country: 'United States',
+      policy_regime: 'Fed Dual Mandate',
+      external_shock: 'Global Supply Normalization & Oil Shock',
+      commodity_exporter: 'False',
+      time_horizon: '3 Years (36 Monthly Obs)'
+    },
+    rawTelemetry: {
+      time: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      fed_funds_rate: [0.25, 0.50, 1.00, 1.75, 2.50, 3.25, 4.00, 4.75, 5.25, 5.25, 5.00, 4.75],
+      core_pce: [6.1, 5.8, 5.5, 5.2, 4.9, 4.5, 4.2, 3.9, 3.5, 3.2, 3.0, 2.8],
+      headline_cpi: [8.5, 8.2, 7.9, 7.3, 6.8, 6.2, 5.6, 5.1, 4.6, 4.1, 3.7, 3.2],
+      unemployment: [3.5, 3.5, 3.6, 3.6, 3.7, 3.8, 3.9, 4.0, 4.1, 4.2, 4.2, 4.3],
+      labour_participation: [62.1, 62.2, 62.3, 62.4, 62.5, 62.6, 62.7, 62.7, 62.8, 62.8, 62.9, 63.0],
+      wage_growth: [5.8, 5.6, 5.5, 5.3, 5.0, 4.8, 4.6, 4.5, 4.3, 4.2, 4.0, 3.9],
+      labour_productivity: [100, 100.5, 101.0, 101.8, 102.5, 103.2, 104.0, 104.8, 105.5, 106.2, 107.0, 108.0],
+      consumer_confidence: [96, 94, 91, 88, 86, 84, 85, 87, 89, 91, 93, 95],
+      retail_sales: [100, 99, 98, 97, 96, 95, 95, 96, 97, 98, 99, 100],
+      housing_index: [100, 98, 96, 94, 93, 92, 91, 92, 94, 96, 98, 101],
+      mortgage_rate: [3.0, 3.5, 4.1, 4.8, 5.5, 6.2, 6.8, 7.0, 7.1, 6.9, 6.7, 6.5],
+      bank_reserves: [100, 99, 98, 97, 96, 95, 94, 94, 95, 96, 97, 98],
+      commercial_credit: [100, 101, 101, 100, 99, 98, 97, 97, 98, 99, 100, 101],
+      government_debt: [100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111],
+      federal_deficit: [3.5, 3.8, 4.1, 4.4, 4.8, 5.0, 5.1, 5.2, 5.1, 5.0, 4.8, 4.6],
+      dollar_index: [100, 101, 102, 103, 104, 105, 106, 105, 104, 103, 102, 101],
+      oil_price: [75, 82, 90, 98, 105, 102, 96, 90, 85, 82, 80, 78],
+      shipping_cost: [100, 95, 90, 85, 80, 76, 74, 73, 74, 75, 76, 77],
+      equity_index: [100, 98, 96, 95, 96, 98, 100, 103, 106, 109, 112, 115],
+      corporate_bond_spread: [1.2, 1.4, 1.7, 2.0, 2.2, 2.4, 2.3, 2.2, 2.0, 1.8, 1.7, 1.6]
+    },
+    telemetryPackets: [
+      { experiment_id: 'EXP-2026-FED-001', reading: 1, timestamp: '2026-07-26T23:01:00Z', device: 'Fed/BLS Engine', core_pce: 6.1, headline_cpi: 8.5, fed_funds_rate: 0.25, mortgage_rate: 3.0, labour_productivity: 100, oil_price: 75, status: 'INFLATION PEAK INITIATED' },
+      { experiment_id: 'EXP-2026-FED-001', reading: 5, timestamp: '2026-07-26T23:05:00Z', device: 'Fed/BLS Engine', core_pce: 4.9, headline_cpi: 6.8, fed_funds_rate: 2.50, mortgage_rate: 5.5, labour_productivity: 102.5, oil_price: 105, status: 'AGGRESSIVE TIGHTENING & OIL SHOCK' },
+      { experiment_id: 'EXP-2026-FED-001', reading: 9, timestamp: '2026-07-26T23:09:00Z', device: 'Fed/BLS Engine', core_pce: 3.5, headline_cpi: 4.6, fed_funds_rate: 5.25, mortgage_rate: 7.1, labour_productivity: 105.5, oil_price: 85, status: 'TERMINAL RATE HELD & PRODUCTIVITY SURGE' },
+      { experiment_id: 'EXP-2026-FED-001', reading: 12, timestamp: '2026-07-26T23:12:00Z', device: 'Fed/BLS Engine', core_pce: 2.8, headline_cpi: 3.2, fed_funds_rate: 4.75, mortgage_rate: 6.5, labour_productivity: 108.0, oil_price: 78, status: 'DISINFLATION & NON-RECESSIONARY LANDING' }
+    ],
+    groundTruth: {
+      expected_failure: false,
+      inspection: 'Causal Graph Confirmed: US disinflation (Headline CPI 8.5% -> 3.2%, Core PCE 6.1% -> 2.8%) was driven 72% by Labour Productivity expansion (+8.0%) & Supply Chain cooling (Shipping 100->77, Oil $105->$78), while Fed Funds tightening (0.25% -> 5.25%) transmitted with a 12-16 month lag into housing (Mortgage 3% -> 7.1%).'
+    },
+    plotX: 'labour_productivity',
+    plotY: 'core_pce',
+    expectedDiscovery: 'US disinflation was enabled by an +8.0% gain in labour productivity and supply chain normalization rather than harsh demand destruction, preserving low unemployment (3.5% -> 4.3%). First-warning signals occur in SOFR futures, corporate bond spreads, and shipping cost indices.',
+    metaCognition: {
+      mission: 'Analyze causal transmission in US monetary system & evaluate primary drivers of non-recessionary disinflation',
+      confidence: '95.2%',
+      realityScore: '99.6% alignment',
+      whatFailed: 'Conventional Phillips Curve model failed; predicted high unemployment (&gt;6%) was required for disinflation, ignoring productivity gains (+8.0%).',
+      missingVariable: 'Private Credit growth & CRE Office Refinancing Cliff index.',
+      instrumentNeeded: 'Real-time SOFR/MOVE Volatility Probe & Private Credit Inflow Tracker.',
+      nextExperiment: 'Simulate Fed rate cut pathways (25bps vs 50bps) under high productivity growth vs CRE debt maturity stress.',
+      knowledgeGraph: 'Add edge: Productivity (+8%) + Supply Normalization -&gt; Unit Labour Cost Compression -&gt; Core PCE Disinflation (2.8%) [Fed Lag: 12-16 mos].'
+    },
+    discoveryExplanation: {
+      missionReason: 'Evaluated the US macroeconomic system to isolate primary drivers of disinflation, transmission lags, and early warning financial instruments.',
+      manifoldPlacement: 'Trajectory moves from "High CPI Supply Shock Manifold" through "Tightening & Productivity Expansion" to "Soft Landing Stabilization".',
+      hypergraphCauses: 'Oil/Shipping Normalization + Productivity (+8.0%) ──&gt; Unit Labour Cost Compression ──&gt; Disinflation (Core PCE 2.8%) [Fed Lag: 12-16 mos]',
+      ruliadRecommendation: 'Branch to Policy Path RULIAD-FED-002: Evaluate monetary easing speed under service sector productivity vs CRE refinancing stress.',
+      timeline: [
+        { step: 1, label: 'Inflation Peak & Oil Shock', desc: 'Headline CPI hit 8.5% and Core PCE 6.1%; Fed Funds rate was 0.25% while oil rose to $105.', confidence: '99%' },
+        { step: 2, label: 'Aggressive Rate Tightening', desc: 'Fed raised rates from 0.25% to 5.25%; mortgage rates jumped to 7.1% and corporate spreads widened to 2.4%.', confidence: '97%' },
+        { step: 3, label: 'Productivity Acceleration Discovered', desc: 'Labour productivity rose steadily from 100 to 108 (+8.0%); wage growth moderated without triggering a job market crash.', confidence: '95%' },
+        { step: 4, label: 'Disinflation & Soft Landing', desc: 'Core PCE fell to 2.8% and CPI to 3.2%; early Fed rate cuts initiated as shipping costs and oil price normalized.', confidence: '98%' }
+      ]
+    }
   }
 ];
 

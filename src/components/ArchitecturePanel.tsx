@@ -23,7 +23,7 @@ export default function ArchitecturePanel({
 }) {
   const [activeStepId, setActiveStepId] = useState<number>(1);
   const [loopIsRunning, setLoopIsRunning] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'loop' | 'system'>('loop');
+  const [activeTab, setActiveTab] = useState<'loop' | 'system' | 'sllm'>('sllm');
 
   // Animation cycle for the loop
   useEffect(() => {
@@ -180,8 +180,19 @@ export default function ArchitecturePanel({
           </p>
         </div>
         
-        {/* Toggle between Loop View and Structural Link View */}
+        {/* Toggle between SLLM Architecture, Loop View and Structural Link View */}
         <div className="flex bg-[#EBE8E3] border-2 border-[#1A1A1A] p-0.5">
+          <button
+            onClick={() => {
+              setActiveTab('sllm');
+              onLogEvent('Switched architecture console view to Scientific Language Model (SLLM) Architecture', 'interaction');
+            }}
+            className={`px-3 py-1.5 text-[10px] font-mono font-bold uppercase transition-all cursor-pointer ${
+              activeTab === 'sllm' ? 'bg-[#1A1A1A] text-white' : 'text-neutral-600 hover:text-black'
+            }`}
+          >
+            SLLM SLM ARCHITECTURE
+          </button>
           <button
             onClick={() => {
               setActiveTab('loop');
@@ -207,7 +218,400 @@ export default function ArchitecturePanel({
         </div>
       </div>
 
-      {activeTab === 'loop' ? (
+      {activeTab === 'sllm' ? (
+        <div className="flex flex-col gap-6" id="sllm-architecture-view">
+          {/* Header Banner */}
+          <div className="bg-[#1A1A1A] text-white p-5 border-2 border-[#1A1A1A] shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-indigo-400 bg-indigo-950 px-2.5 py-1 border border-indigo-800">
+                SCIENTIFIC LARGE LANGUAGE MODEL (SLLM / SLM) ARCHITECTURE
+              </span>
+              <span className="text-[10px] font-mono text-emerald-400 font-bold">
+                VERSION OMEGA-SLM v2.4 • CLOSED-LOOP DISCOVERY ENGINE
+              </span>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-black font-serif uppercase tracking-tight text-[#FCFAF7]">
+              Deterministic Tool-Driven Scientific Operating System
+            </h3>
+            <p className="text-xs text-neutral-300 font-serif leading-relaxed">
+              The LLM is not the sole scientist; it operates as the reasoning & coordination kernel inside a deterministic, multi-agent, tool-driven architecture. Science is executed via simulations (DFT, MD, CFD), laboratory physical instruments, RDFS/OWL knowledge graphs, and Reality Anchor validation loops.
+            </p>
+          </div>
+
+          {/* TABLE 1: 8-LAYER SLLM ARCHITECTURE TABLE */}
+          <div className="bg-white border-2 border-[#1A1A1A] p-5 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] space-y-3">
+            <div className="flex items-center justify-between border-b border-[#1A1A1A]/20 pb-2">
+              <h4 className="font-mono font-black text-sm uppercase text-indigo-950 flex items-center gap-2">
+                <Layers className="w-4 h-4 text-indigo-600" />
+                1. OMEGA SLLM / SLM 8-LAYER SYSTEM ARCHITECTURE MATRIX
+              </h4>
+              <span className="text-[10px] font-mono text-neutral-500 font-bold uppercase">8 Core Subsystems</span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse border border-neutral-300 font-sans text-xs">
+                <thead>
+                  <tr className="bg-[#1A1A1A] text-white font-mono text-[10.5px] uppercase">
+                    <th className="p-2.5 border border-neutral-700 w-16 text-center">Layer</th>
+                    <th className="p-2.5 border border-neutral-700 w-44">Component</th>
+                    <th className="p-2.5 border border-neutral-700">Purpose & Function</th>
+                    <th className="p-2.5 border border-neutral-700 w-56">Underlying Technologies</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-200 text-[11px]">
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-mono font-bold text-center bg-indigo-50 text-indigo-900">L1</td>
+                    <td className="p-2 border font-bold text-neutral-900">Scientific Intent Layer</td>
+                    <td className="p-2 border text-neutral-700">Translates free-form researcher questions into structured mission objectives, hypothesis constraints, and experimental bounds.</td>
+                    <td className="p-2 border font-mono text-[10px] text-neutral-600">LLM Prompts, Structured JSON Schemas, Task Decomposer</td>
+                  </tr>
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-mono font-bold text-center bg-indigo-50 text-indigo-900">L2</td>
+                    <td className="p-2 border font-bold text-neutral-900">Scientific Knowledge Layer</td>
+                    <td className="p-2 border text-neutral-700">Stores domain facts, semantic ontologies, and historical literature as machine-readable relationships for logical inference.</td>
+                    <td className="p-2 border font-mono text-[10px] text-neutral-600">RDFS, OWL, Neo4j, SPARQL Knowledge Graphs</td>
+                  </tr>
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-mono font-bold text-center bg-indigo-50 text-indigo-900">L3</td>
+                    <td className="p-2 border font-bold text-neutral-900">Scientific Reasoning Layer</td>
+                    <td className="p-2 border text-neutral-700">Executes multi-variable causal inference, evaluates interacting drivers, and performs symbolic validation against physical laws.</td>
+                    <td className="p-2 border font-mono text-[10px] text-neutral-600">Hypergraphs, Bayesian Networks, Neurosymbolic AI Engine</td>
+                  </tr>
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-mono font-bold text-center bg-indigo-50 text-indigo-900">L4</td>
+                    <td className="p-2 border font-bold text-neutral-900">Simulation Layer</td>
+                    <td className="p-2 border text-neutral-700">Predicts physical outcomes and materials/weather/biological behavior prior to physical instrument execution.</td>
+                    <td className="p-2 border font-mono text-[10px] text-neutral-600">DFT (Quantum Espresso), MD (LAMMPS), FEM, CFD, RK4 Integrators</td>
+                  </tr>
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-mono font-bold text-center bg-indigo-50 text-indigo-900">L5</td>
+                    <td className="p-2 border font-bold text-neutral-900">Physical Layer</td>
+                    <td className="p-2 border text-neutral-700">Connects to physical or simulated laboratory hardware, field sensors, and robotic actuators for real-time data acquisition.</td>
+                    <td className="p-2 border font-mono text-[10px] text-neutral-600">Robotic Arms, Spectrometers, Weather Stations, SCADA, Sensor Probes</td>
+                  </tr>
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-mono font-bold text-center bg-indigo-50 text-indigo-900">L6</td>
+                    <td className="p-2 border font-bold text-neutral-900">Reality Layer</td>
+                    <td className="p-2 border text-neutral-700">Compares simulated predictions against empirical physical observations to calculate residual error and recalibrate physics parameters.</td>
+                    <td className="p-2 border font-mono text-[10px] text-neutral-600">Reality Anchor Engine, L2 Residual Norm, Kalman Calibration</td>
+                  </tr>
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-mono font-bold text-center bg-indigo-50 text-indigo-900">L7</td>
+                    <td className="p-2 border font-bold text-neutral-900">Learning Layer</td>
+                    <td className="p-2 border text-neutral-700">Accumulates experimental outcomes, updates knowledge graph hyperedges, and updates long-term scientific memory buffers.</td>
+                    <td className="p-2 border font-mono text-[10px] text-neutral-600">AutoChain, Research Director Memory, Vector Databases</td>
+                  </tr>
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-mono font-bold text-center bg-indigo-50 text-indigo-900">L8</td>
+                    <td className="p-2 border font-bold text-neutral-900">Discovery Layer</td>
+                    <td className="p-2 border text-neutral-700">Generates novel hypotheses, orchestrates agent debates, and schedules the next highest-information-gain experiment.</td>
+                    <td className="p-2 border font-mono text-[10px] text-neutral-600">Agent Debate Engine, Ruliad Space Explorer, Discovery Planner</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* TABLE 2: DYNAMIC LLM PARAMETER CONTROLLER TABLE */}
+          <div className="bg-white border-2 border-[#1A1A1A] p-5 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] space-y-3">
+            <div className="flex items-center justify-between border-b border-[#1A1A1A]/20 pb-2">
+              <h4 className="font-mono font-black text-sm uppercase text-indigo-950 flex items-center gap-2">
+                <Sliders className="w-4 h-4 text-indigo-600" />
+                2. DYNAMIC SCIENTIFIC LLM (SLM) PARAMETER CONTROLLER MATRIX
+              </h4>
+              <span className="text-[10px] font-mono text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 border border-emerald-300">
+                Stage-Aware Auto Switching
+              </span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse border border-neutral-300 font-sans text-xs">
+                <thead>
+                  <tr className="bg-[#1A1A1A] text-white font-mono text-[10.5px] uppercase">
+                    <th className="p-2.5 border border-neutral-700 w-44">Discovery Stage</th>
+                    <th className="p-2.5 border border-neutral-700 w-24 text-center">Temp (T)</th>
+                    <th className="p-2.5 border border-neutral-700 w-24 text-center">Top-P</th>
+                    <th className="p-2.5 border border-neutral-700 w-28 text-center">Max Tokens</th>
+                    <th className="p-2.5 border border-neutral-700">Reasoning Goal & Behavior</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-200 text-[11px]">
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-bold text-neutral-900">Literature & Knowledge Retrieval</td>
+                    <td className="p-2 border font-mono font-bold text-center text-indigo-800">0.1</td>
+                    <td className="p-2 border font-mono text-center">0.90</td>
+                    <td className="p-2 border font-mono text-center">Medium</td>
+                    <td className="p-2 border text-neutral-700">Maximum precision, deterministic extraction of papers, facts, and baseline RDF triples without hallucination.</td>
+                  </tr>
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-bold text-neutral-900">Tool Planning & Task Decomposition</td>
+                    <td className="p-2 border font-mono font-bold text-center text-indigo-800">0.2</td>
+                    <td className="p-2 border font-mono text-center">0.90</td>
+                    <td className="p-2 border font-mono text-center">Medium</td>
+                    <td className="p-2 border text-neutral-700">Structured workflow sequencing; maps required calculation tools and ensures strict syntax formatting.</td>
+                  </tr>
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-bold text-neutral-900">Tool Selection Execution</td>
+                    <td className="p-2 border font-mono font-bold text-center text-emerald-800">0.0</td>
+                    <td className="p-2 border font-mono text-center">1.00</td>
+                    <td className="p-2 border font-mono text-center">Low</td>
+                    <td className="p-2 border text-neutral-700">Exact function signature invocation with 100% deterministic parameter passing for DFT/MD/Sensor tools.</td>
+                  </tr>
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-bold text-neutral-900">Causal & Bayesian Inference</td>
+                    <td className="p-2 border font-mono font-bold text-center text-amber-800">0.3 – 0.4</td>
+                    <td className="p-2 border font-mono text-center">0.95</td>
+                    <td className="p-2 border font-mono text-center">High</td>
+                    <td className="p-2 border text-neutral-700">Stable causal deduction, isolating true drivers from noise and evaluating multi-variable hyperedges.</td>
+                  </tr>
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-bold text-neutral-900">Hypothesis Generation</td>
+                    <td className="p-2 border font-mono font-bold text-center text-purple-800">0.7 – 0.8</td>
+                    <td className="p-2 border font-mono text-center">0.95</td>
+                    <td className="p-2 border font-mono text-center">High</td>
+                    <td className="p-2 border text-neutral-700">High creativity; explores novel parameter regimes, unconventional causal links, and out-of-distribution ideas.</td>
+                  </tr>
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-bold text-neutral-900">Challenger Agent Debate</td>
+                    <td className="p-2 border font-mono font-bold text-center text-rose-800">0.8 – 0.9</td>
+                    <td className="p-2 border font-mono text-center">0.98</td>
+                    <td className="p-2 border font-mono text-center">High</td>
+                    <td className="p-2 border text-neutral-700">Diverse adversarial probing; identifies missing variables, flaws in reasoning, and hidden physical assumptions.</td>
+                  </tr>
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-bold text-neutral-900">Scientific Arbiter Synthesis</td>
+                    <td className="p-2 border font-mono font-bold text-center text-indigo-800">0.1</td>
+                    <td className="p-2 border font-mono text-center">0.90</td>
+                    <td className="p-2 border font-mono text-center">Medium</td>
+                    <td className="p-2 border text-neutral-700">Conservative judgment; selects winning hypothesis based strictly on physical evidence, evidence levels, and likelihood scores.</td>
+                  </tr>
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-bold text-neutral-900">Final Publication Report</td>
+                    <td className="p-2 border font-mono font-bold text-center text-emerald-800">0.0</td>
+                    <td className="p-2 border font-mono text-center">1.00</td>
+                    <td className="p-2 border font-mono text-center">High</td>
+                    <td className="p-2 border text-neutral-700">100% reproducible, fully cited scientific synthesis ready for peer review and journal submission.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* TABLE 3: 10-STEP SCIENTIFIC AGENT LOOP & TOOL CALLING CYCLE */}
+          <div className="bg-white border-2 border-[#1A1A1A] p-5 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] space-y-3">
+            <div className="flex items-center justify-between border-b border-[#1A1A1A]/20 pb-2">
+              <h4 className="font-mono font-black text-sm uppercase text-indigo-950 flex items-center gap-2">
+                <RefreshCw className="w-4 h-4 text-indigo-600" />
+                3. SCIENTIFIC AGENT TOOL-CALLING & REASONING LOOP
+              </h4>
+              <span className="text-[10px] font-mono text-indigo-700 font-bold bg-indigo-50 px-2 py-0.5 border border-indigo-300">
+                Verification-Driven Termination
+              </span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse border border-neutral-300 font-sans text-xs">
+                <thead>
+                  <tr className="bg-[#1A1A1A] text-white font-mono text-[10.5px] uppercase">
+                    <th className="p-2.5 border border-neutral-700 w-12 text-center">Step</th>
+                    <th className="p-2.5 border border-neutral-700 w-40">Agent Role</th>
+                    <th className="p-2.5 border border-neutral-700 w-48">Action / Function</th>
+                    <th className="p-2.5 border border-neutral-700">Output Artifact & Verification</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-200 text-[11px]">
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-mono font-bold text-center">01</td>
+                    <td className="p-2 border font-bold text-neutral-900">Mission Agent</td>
+                    <td className="p-2 border text-neutral-700">Formalize scientific query</td>
+                    <td className="p-2 border font-mono text-[10px] text-neutral-700">Mission Intent Object (Question, Scope, Target Bounds)</td>
+                  </tr>
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-mono font-bold text-center">02</td>
+                    <td className="p-2 border font-bold text-neutral-900">Planner Agent</td>
+                    <td className="p-2 border text-neutral-700">Decompose into tool steps</td>
+                    <td className="p-2 border font-mono text-[10px] text-neutral-700">Experimental Workflow Graph (Tools Needed, Order)</td>
+                  </tr>
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-mono font-bold text-center">03</td>
+                    <td className="p-2 border font-bold text-neutral-900">Knowledge Agent</td>
+                    <td className="p-2 border text-neutral-700">Retrieve RDF triples & literature</td>
+                    <td className="p-2 border font-mono text-[10px] text-neutral-700">OWL Knowledge Subgraph + Known Boundary Constraints</td>
+                  </tr>
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-mono font-bold text-center">04</td>
+                    <td className="p-2 border font-bold text-neutral-900">Simulation Agent</td>
+                    <td className="p-2 border text-neutral-700">Call physics tools (DFT/MD/CFD)</td>
+                    <td className="p-2 border font-mono text-[10px] text-neutral-700">Simulated Telemetry Matrix & Predictive Curves</td>
+                  </tr>
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-mono font-bold text-center">05</td>
+                    <td className="p-2 border font-bold text-neutral-900">Causal Agent</td>
+                    <td className="p-2 border text-neutral-700">Infer hyperedge causal chains</td>
+                    <td className="p-2 border font-mono text-[10px] text-neutral-700">Multi-Cause Causal Hypergraph + Lead/Lag Structures</td>
+                  </tr>
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-mono font-bold text-center">06</td>
+                    <td className="p-2 border font-bold text-neutral-900">Challenger Agent</td>
+                    <td className="p-2 border text-neutral-700">Audit assumptions & find gaps</td>
+                    <td className="p-2 border font-mono text-[10px] text-neutral-700">Critique Matrix + Suggested Missing Variables List</td>
+                  </tr>
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-mono font-bold text-center">07</td>
+                    <td className="p-2 border font-bold text-neutral-900">Arbiter Agent</td>
+                    <td className="p-2 border text-neutral-700">Evaluate competing hypotheses</td>
+                    <td className="p-2 border font-mono text-[10px] text-neutral-700">Ranked Competing Hypotheses + Likelihood Scores</td>
+                  </tr>
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-mono font-bold text-center">08</td>
+                    <td className="p-2 border font-bold text-neutral-900">Reality Agent</td>
+                    <td className="p-2 border text-neutral-700">Validate against physical sensors</td>
+                    <td className="p-2 border font-mono text-[10px] text-neutral-700">Reality Anchor Score (Prediction vs Physical Error)</td>
+                  </tr>
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-mono font-bold text-center">09</td>
+                    <td className="p-2 border font-bold text-neutral-900">Reflection Agent</td>
+                    <td className="p-2 border text-neutral-700">Calibrate models & memory</td>
+                    <td className="p-2 border font-mono text-[10px] text-neutral-700">Recalibrated Physics Parameters + Updated Graph Edges</td>
+                  </tr>
+                  <tr className="hover:bg-neutral-50">
+                    <td className="p-2 border font-mono font-bold text-center">10</td>
+                    <td className="p-2 border font-bold text-neutral-900">Discovery Agent</td>
+                    <td className="p-2 border text-neutral-700">Formulate next experiment</td>
+                    <td className="p-2 border font-mono text-[10px] text-neutral-700">Recommended Next Experiment + Info Gain Estimate (+45%)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* TABLE 4 & 5: ONTOLOGY & ENTITY-RELATIONSHIP MODEL */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* RDF/OWL Ontology Layer */}
+            <div className="bg-white border-2 border-[#1A1A1A] p-4 shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] space-y-2">
+              <h4 className="font-mono font-black text-xs uppercase text-indigo-950 flex items-center gap-1.5 border-b border-neutral-200 pb-1.5">
+                <BookOpen className="w-3.5 h-3.5 text-indigo-600" />
+                ONTOLOGY & NEUROSYMBOLIC KNOWLEDGE LAYER
+              </h4>
+              <p className="text-[11px] text-neutral-600 font-serif leading-relaxed">
+                Represents scientific facts as machine-readable RDF triples and OWL ontologies, enabling deterministic logical inference alongside neural LLM reasoning.
+              </p>
+
+              <div className="bg-neutral-50 border border-neutral-300 p-2 font-mono text-[10px] text-neutral-800 space-y-1">
+                <span className="font-bold text-indigo-900 uppercase block border-b pb-0.5">Example RDF Triple Inference:</span>
+                <div>Subject: <strong className="text-indigo-800">Silicon Carbide (SiC)</strong></div>
+                <div>Predicate: <strong className="text-emerald-800">hasBandGap</strong></div>
+                <div>Object: <strong className="text-amber-800">3.2 eV (WideBandGap)</strong></div>
+                <div className="pt-1 text-[9.5px] text-neutral-500 italic border-t mt-1">
+                  OWL Rule: IF BandGap &gt; 3.0eV AND ThermalConductivity &gt; 400 W/mK THEN SuitableForHighTemp (TRUE).
+                </div>
+              </div>
+            </div>
+
+            {/* Entity & Relationship Table */}
+            <div className="bg-white border-2 border-[#1A1A1A] p-4 shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] space-y-2">
+              <h4 className="font-mono font-black text-xs uppercase text-indigo-950 flex items-center gap-1.5 border-b border-neutral-200 pb-1.5">
+                <Network className="w-3.5 h-3.5 text-indigo-600" />
+                ENTITY & RELATIONSHIP MODEL
+              </h4>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border border-neutral-300 text-[10.5px]">
+                  <thead>
+                    <tr className="bg-neutral-800 text-white font-mono uppercase text-[9.5px]">
+                      <th className="p-1.5 border border-neutral-700">Entity</th>
+                      <th className="p-1.5 border border-neutral-700">Supported Relationships</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-200 font-mono text-[10px]">
+                    <tr>
+                      <td className="p-1.5 border font-bold text-indigo-900">Material</td>
+                      <td className="p-1.5 border text-neutral-700">hasBandGap, hasThermalConductivity, manufacturedBy</td>
+                    </tr>
+                    <tr>
+                      <td className="p-1.5 border font-bold text-indigo-900">Weather Cell</td>
+                      <td className="p-1.5 border text-neutral-700">drivesSoilDrying, locksPressureDome, amplifiesFireIndex</td>
+                    </tr>
+                    <tr>
+                      <td className="p-1.5 border font-bold text-indigo-900">Protein / Gene</td>
+                      <td className="p-1.5 border text-neutral-700">bindsTo, activatesInflammasome, suppressesSynapse</td>
+                    </tr>
+                    <tr>
+                      <td className="p-1.5 border font-bold text-indigo-900">Instrument</td>
+                      <td className="p-1.5 border text-neutral-700">observes, monitorsSensorDrift, validatesReality</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {/* TABLE 6 & 7: SCIENTIFIC LOOPS & TERMINATION CHECKLIST */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* 3 Scientific Loops */}
+            <div className="bg-white border-2 border-[#1A1A1A] p-4 shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] space-y-2">
+              <h4 className="font-mono font-black text-xs uppercase text-indigo-950 flex items-center gap-1.5 border-b border-neutral-200 pb-1.5">
+                <RotateCw className="w-3.5 h-3.5 text-indigo-600" />
+                3-TIER SCIENTIFIC LOOPS ARCHITECTURE
+              </h4>
+              <div className="space-y-1.5 text-xs font-sans">
+                <div className="bg-neutral-50 p-2 border border-neutral-200">
+                  <strong className="font-mono text-[10.5px] text-indigo-900 block uppercase">1. Inner Loop (Calibration):</strong>
+                  <span className="text-[10.5px] text-neutral-700 font-mono">Predict ➔ Simulate ➔ Measure ➔ Compare ➔ Calibrate</span>
+                </div>
+                <div className="bg-neutral-50 p-2 border border-neutral-200">
+                  <strong className="font-mono text-[10.5px] text-emerald-900 block uppercase">2. Middle Loop (Experimentation):</strong>
+                  <span className="text-[10.5px] text-neutral-700 font-mono">Experiment ➔ Knowledge Graph ➔ Agent Debate ➔ Research Director</span>
+                </div>
+                <div className="bg-neutral-50 p-2 border border-neutral-200">
+                  <strong className="font-mono text-[10.5px] text-purple-900 block uppercase">3. Outer Loop (Theory Building):</strong>
+                  <span className="text-[10.5px] text-neutral-700 font-mono">Research Goal ➔ 100 Experiments ➔ Learn ➔ Generate Theory ➔ Publish</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Autonomous Termination Checklist Table */}
+            <div className="bg-white border-2 border-[#1A1A1A] p-4 shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] space-y-2">
+              <h4 className="font-mono font-black text-xs uppercase text-indigo-950 flex items-center gap-1.5 border-b border-neutral-200 pb-1.5">
+                <ShieldAlert className="w-3.5 h-3.5 text-emerald-600" />
+                AUTONOMOUS TERMINATION & QUALITY CRITERIA
+              </h4>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border border-neutral-300 text-[10.5px]">
+                  <thead>
+                    <tr className="bg-neutral-800 text-white font-mono uppercase text-[9.5px]">
+                      <th className="p-1.5 border border-neutral-700">Check</th>
+                      <th className="p-1.5 border border-neutral-700">Stop Condition</th>
+                      <th className="p-1.5 border border-neutral-700 text-center">Tolerance</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-200 font-sans text-[10px]">
+                    <tr>
+                      <td className="p-1.5 border font-mono font-bold text-neutral-900">Reality Anchor</td>
+                      <td className="p-1.5 border text-neutral-700">Prediction error drops below threshold</td>
+                      <td className="p-1.5 border font-mono font-bold text-center text-emerald-700">&lt; 2.5% Error</td>
+                    </tr>
+                    <tr>
+                      <td className="p-1.5 border font-mono font-bold text-neutral-900">Evidence Convergence</td>
+                      <td className="p-1.5 border text-neutral-700">Independent agents reach consistent conclusion</td>
+                      <td className="p-1.5 border font-mono font-bold text-center text-indigo-700">&ge; 92% Agreement</td>
+                    </tr>
+                    <tr>
+                      <td className="p-1.5 border font-mono font-bold text-neutral-900">Ontology Consistency</td>
+                      <td className="p-1.5 border text-neutral-700">No logical contradictions in RDF graph</td>
+                      <td className="p-1.5 border font-mono font-bold text-center text-emerald-700">0 Violations</td>
+                    </tr>
+                    <tr>
+                      <td className="p-1.5 border font-mono font-bold text-neutral-900">Confidence Threshold</td>
+                      <td className="p-1.5 border text-neutral-700">Overall discovery confidence achieved</td>
+                      <td className="p-1.5 border font-mono font-bold text-center text-purple-700">&ge; 95.0% Confidence</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : activeTab === 'loop' ? (
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6" id="active-discovery-loop-grid">
           
           {/* Left Column: Interactive 10-Step OODA Visual Diagram */}
