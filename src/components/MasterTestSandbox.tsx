@@ -135,6 +135,158 @@ export interface UniversalTestPackage {
 
 export const UNIVERSAL_TEST_PACKAGES: UniversalTestPackage[] = [
   {
+    id: 'physical_ai_dishwasher_001',
+    title: 'Physical-AI Dishwasher (DISHWASHER_TEST_001)',
+    domain: 'Physical-AI & World Models',
+    icon: '🦾',
+    metadata: {
+      experiment_id: 'DISHWASHER_TEST_001',
+      researcher: 'OMEGA Physical-AI & Robotics Lab',
+      timestamp: '2026-08-24T00:25:00Z',
+      device: '7-DOF Robotic Arm + Dual GelSight + 3D RGB-D Sensor',
+      simulation: true,
+      version: 'OMEGA-PHYSICAL-v2.6',
+      validation: 'MuJoCo + Symbolic VETO + Reality Anchor',
+      evidenceLevel: 'Laboratory',
+      noveltyScore: 'Potentially Novel',
+      noveltyPercent: 96
+    },
+    confidenceBreakdown: {
+      modelConfidence: '96.2%',
+      dataQuality: '98.5%',
+      parameterSpaceCoverage: '94.0%',
+      reproducibilityScore: '97.8%',
+      externalValidationAgreement: '96.0%'
+    },
+    causalEdgeRatings: [
+      { source: 'Grip Force N (3.8N)', target: 'Wine Glass Fragility Intact (<4.5N)', ratingStars: 5, evidenceLevel: 'Tactile GelSight Array' },
+      { source: 'Rack Linear Position (0.32m)', target: 'Spray Arm Sweep Clearance (>35mm)', ratingStars: 5, evidenceLevel: 'LiDAR CAD Metrology Scan' },
+      { source: 'Joint 7-DOF Kinematics', target: 'Slot 04 Plate Docking Stability', ratingStars: 5, evidenceLevel: 'MuJoCo Forward Dynamics' },
+      { source: 'Subconscious Trajectory Prior', target: 'Zero-Slip Contact Velocity (0.00 mm/s)', ratingStars: 5, evidenceLevel: '200 Hz Closed Loop' }
+    ],
+    competingHypotheses: [
+      { id: 'HYP-D1', statement: 'Plan B (Glass first -> Bowl -> Plate -> Cutlery) prevents fragile stemware collisions and minimizes rack vibration.', likelihood: '98%', evidence: 'MuJoCo 100-rollout physics sweep confirmed 97% fragility margin' },
+      { id: 'HYP-D2', statement: 'Plan C (Fastest simultaneous load) violates symbolic safety limits during high-velocity dual-reach.', likelihood: '14%', evidence: 'Symbolic VETO triggered on Joint Torque (>10Nm) and clearance (<30mm)' }
+    ],
+    instrumentHealthList: [
+      { name: '7-DOF Robotic Arm Optical Encoders', calibration: '99.8%', sensorDrift: '0.05%', powerBattery: '100%', status: 'Healthy' },
+      { name: 'Dual GelSight Tactile Shear Sensors', calibration: '99.1%', sensorDrift: '0.1%', powerBattery: '100%', status: 'Healthy' },
+      { name: 'Eye-in-Hand RGB-D LiDAR Camera', calibration: '98.6%', sensorDrift: '0.2%', powerBattery: '99.0%', status: 'Healthy' },
+      { name: 'Dishwasher Tub Metrology Rangefinder', calibration: '99.4%', sensorDrift: '0.08%', powerBattery: '100%', status: 'Healthy' }
+    ],
+    missingVariablesList: [
+      'Micro-acoustic resonance from rotating spray arm water jets',
+      'Surface detergent slip coefficient variance on wet ceramic glaze'
+    ],
+    knowledgeGraphStats: {
+      nodes: 340,
+      confirmedEdges: 215,
+      graphGrowth: '+72 nodes (+28%)'
+    },
+    executiveDecision: {
+      questionAnswered: true,
+      confidenceLevel: 'HIGH',
+      publicationReady: 'YES',
+      readinessReason: 'Complete 16-stage physical-AI loop confirmed in MuJoCo simulation with Symbolic VETO governance and 5.1mm Reality Anchor RMSE.',
+      missingMeasurementsNeeded: ['GelSight Micro-Vibration Hydrophone', 'Thermal Jet Profiler'],
+      recommendedNextExperiment: 'STACKED_BOWLS: Load multi-tier nested ceramic bowls with dynamic center-of-mass shift.',
+      estimatedInformationGain: '64%'
+    },
+    missionIntent: {
+      question: 'Load a dishwasher containing plates, bowls, glasses, and cutlery. Perceive the scene, construct 3D world state, plan collision-free sequence, verify safety, execute in simulation, compare predicted vs observed state, record result, and generate next improved policy.',
+      objectives: [
+        'Ingest raw 7-DOF encoders, RGB-D point cloud, and dual GelSight 200 Hz telemetry.',
+        'Reconstruct 3D physical world tensor (4 entities: Plate, Glass, Bowl, Lower Rack).',
+        'Infer 27 hypergraph relations and evaluate 3 competing SLLM action candidates (Plans A, B, C).',
+        'Enforce Symbolic VETO hard bounds (Torque < 10.0 Nm, Clearance > 30 mm, Glass Force <= 4.5 N).',
+        'Validate Reality Anchor (5.1 mm RMSE) and seed subconscious latent priors for next experiment (STACKED_BOWLS).'
+      ]
+    },
+    scientificContext: {
+      description: 'Master benchmark testing deterministic physical-AI closed-loop reasoning, sim-to-real transfer, MuJoCo contact dynamics, and hard symbolic safety veto gates.',
+      parametersMeasured: [
+        'Joint Angles 1-7 (°)', 'End Effector Pose (m)', 'Grip Force (N)', 
+        'Tactile Slip (%)', 'Collision Distance (mm)', 'Spray Clearance (mm)', 'Joint Torque (Nm)', 'PointCloud RMSE (mm)'
+      ],
+      assumptions: {
+        environment: 'Standard Domestic Kitchen Dishwasher Cell',
+        arm_dof: 7,
+        gripper_type: 'Dual-Finger Parallel Compliant with GelSight Elastomer',
+        rack_travel_max_m: 0.38,
+        spray_arm_clearance_min_mm: 35.0,
+        glass_clamp_max_n: 4.5
+      }
+    },
+    deviceConfiguration: {
+      experiment_id: 'DISHWASHER_TEST_001',
+      domain: 'Physical-AI & World Models',
+      sampling_rate_hz: 200,
+      kinematic_model: '7-DOF Articulated Manipulator',
+      vision_sensor: 'Wrist-Mounted Intel RealSense D435i RGB-D',
+      tactile_sensor: 'Dual GelSight Shear Elastomer Array',
+      safety_governor: 'Level D Human-in-the-Loop Token Required'
+    },
+    environment: {
+      temperature_c: 23.5,
+      humidity_pct: 45,
+      surface_friction_mu: 0.65,
+      tub_material: '304 Stainless Steel',
+      lighting: 'Chamber LED 4500K'
+    },
+    rawTelemetry: {
+      step: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      joint_1_deg: [12, 14, 16, 18, 21, 24, 27, 30, 32, 34, 35, 36],
+      joint_2_deg: [-18, -16, -14, -12, -10, -8, -6, -4, -2, 0, 2, 4],
+      joint_3_deg: [42, 40, 38, 36, 34, 32, 30, 28, 26, 24, 22, 20],
+      joint_4_deg: [15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48],
+      joint_5_deg: [-8, -6, -4, -2, 0, 2, 4, 6, 8, 10, 12, 14],
+      joint_6_deg: [22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44],
+      joint_7_deg: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22],
+      grip_force_n: [2.1, 2.4, 2.8, 3.1, 3.4, 3.8, 4.0, 3.9, 3.7, 3.5, 3.2, 2.9],
+      tactile_slip_pct: [1.2, 1.1, 0.9, 0.8, 0.7, 0.6, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3],
+      collision_distance_mm: [82, 76, 71, 66, 61, 57, 54, 58, 64, 72, 81, 90],
+      spray_clearance_mm: [120, 118, 116, 114, 112, 110, 108, 110, 114, 118, 122, 126],
+      joint_torque_nm: [3.2, 3.6, 4.1, 4.8, 5.4, 6.1, 6.8, 7.1, 6.5, 5.7, 4.8, 4.0],
+      pointcloud_rmse_mm: [4.8, 4.5, 4.2, 4.0, 3.8, 3.6, 3.9, 3.5, 3.2, 3.0, 2.8, 2.6]
+    },
+    telemetryPackets: [
+      { experiment_id: 'DISHWASHER_TEST_001', reading: 1, timestamp: '2026-08-24T00:25:01Z', device: 'ROBOT-7DOF-ARM', action_state: 'PERCEIVE', grip_force_n: 2.1, collision_distance_mm: 82, joint_torque_nm: 3.2, status: 'PERCEPTION_PASS' },
+      { experiment_id: 'DISHWASHER_TEST_001', reading: 3, timestamp: '2026-08-24T00:25:03Z', device: 'ROBOT-7DOF-ARM', action_state: 'GRASP', grip_force_n: 2.8, collision_distance_mm: 71, joint_torque_nm: 4.1, status: 'GRASP_ENGAGED' },
+      { experiment_id: 'DISHWASHER_TEST_001', reading: 6, timestamp: '2026-08-24T00:25:06Z', device: 'ROBOT-7DOF-ARM', action_state: 'ALIGN', grip_force_n: 3.8, collision_distance_mm: 57, joint_torque_nm: 6.1, status: 'SLOT_04_ALIGNED' },
+      { experiment_id: 'DISHWASHER_TEST_001', reading: 9, timestamp: '2026-08-24T00:25:09Z', device: 'ROBOT-7DOF-ARM', action_state: 'VERIFY', grip_force_n: 3.7, collision_distance_mm: 64, joint_torque_nm: 6.5, status: 'REALITY_ANCHOR_VALIDATED' },
+      { experiment_id: 'DISHWASHER_TEST_001', reading: 12, timestamp: '2026-08-24T00:25:12Z', device: 'ROBOT-7DOF-ARM', action_state: 'COMPLETE', grip_force_n: 2.9, collision_distance_mm: 90, joint_torque_nm: 4.0, status: 'SUCCESS' }
+    ],
+    groundTruth: {
+      expected_failure: false,
+      inspection: 'Deterministic 12-Step Master Test validated successfully. Selected Plan B (Safest) executed without collision, maintaining 5.1mm Reality Anchor RMSE and 0.00mm/s slip.'
+    },
+    plotX: 'grip_force_n',
+    plotY: 'joint_torque_nm',
+    expectedDiscovery: 'Deterministic physical loop proves that Plan B survives Symbolic VETO governance, while Plan C is vetoed for excessive speed-torque risk. Subconscious prior seeds STACKED_BOWLS exploration.',
+    metaCognition: {
+      mission: 'Execute and verify deterministic 12-state closed-loop Physical-AI test DISHWASHER_TEST_001',
+      confidence: '96.2%',
+      realityScore: '98.5% Sim-to-Real alignment',
+      whatFailed: 'Fastest trajectory policy (Plan C) breached joint torque limits and was blocked by Symbolic VETO.',
+      missingVariable: 'Water jet micro-vibrational resonance during active wash cycles.',
+      instrumentNeeded: 'GelSight Micro-Vibration Hydrophone & High-Speed Optical Flow Sensor.',
+      nextExperiment: 'STACKED_BOWLS: Load multi-tier nested ceramic bowls with dynamic center-of-mass shift.',
+      knowledgeGraph: 'Add edge: 7-DOF Kinematics -> Plan B Selection -> Symbolic VETO Approval -> 5.1mm Reality Anchor -> STACKED_BOWLS.'
+    },
+    discoveryExplanation: {
+      missionReason: 'Validates that OMEGA does not learn merely because an LLM generates a plausible plan, but because a proposed physical action produces a reproducible, verified improvement against reality.',
+      manifoldPlacement: 'Traverses from "Free Space Navigation" into "Constrained Contact Tines Manifold" with 0.00 mm/s slip.',
+      hypergraphCauses: 'Mission Intent ──> Perception ──> 3D World Tensor ──> Hypergraph (27 Edges) ──> Plan B ──> Symbolic VETO ──> Reality Anchor (5.1mm RMSE) ──> Subconscious Priors',
+      ruliadRecommendation: 'Branch to Experiment DISHWASHER_TEST_002: STACKED_BOWLS manipulation.',
+      timeline: [
+        { step: 1, label: '3D Perception & World State', desc: 'RGB-D and 7-DOF encoders localise plate, glass, bowl, and rack at [0.70, 0.23, 0.34].', confidence: '99%' },
+        { step: 2, label: 'SLLM Debate & Candidate Plans', desc: 'Plan B (Safest Glass-First) chosen; Plan C rejected by Symbolic VETO for high torque.', confidence: '98%' },
+        { step: 3, label: 'Physical Execution & Reality Anchor', desc: 'Arm docks plate and inverted glass; point cloud verification achieves 5.1mm RMSE.', confidence: '97%' },
+        { step: 4, label: 'Subconscious Prior Refinement', desc: 'Latent priors updated with preferred 4.1N grip force and +0.04 confidence update for STACKED_BOWLS.', confidence: '96%' }
+      ]
+    }
+  },
+  {
     id: 'robotics_pincherx',
     title: 'Robotics Fatigue Test (PincherX)',
     domain: 'Robotics & Mechanical Wear',
@@ -1096,8 +1248,30 @@ export default function MasterTestSandbox({ onLogEvent }: { onLogEvent: (details
   const [showGuide, setShowGuide] = useState<boolean>(true);
 
   const consoleEndRef = useRef<HTMLDivElement>(null);
+  const validationIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const selectedDataset = UNIVERSAL_TEST_PACKAGES.find(d => d.id === selectedDatasetId) || UNIVERSAL_TEST_PACKAGES[0];
+
+  // Cleanup running validation on unmount or dataset switch
+  useEffect(() => {
+    return () => {
+      if (validationIntervalRef.current) {
+        clearInterval(validationIntervalRef.current);
+        validationIntervalRef.current = null;
+      }
+    };
+  }, []);
+
+  const handleDatasetChange = (newDatasetId: string) => {
+    if (validationIntervalRef.current) {
+      clearInterval(validationIntervalRef.current);
+      validationIntervalRef.current = null;
+    }
+    setExecuting(false);
+    setActiveStepIdx(-1);
+    setShowScorecard(false);
+    setSelectedDatasetId(newDatasetId);
+  };
 
   useEffect(() => {
     if (consoleEndRef.current) {
@@ -1138,9 +1312,15 @@ export default function MasterTestSandbox({ onLogEvent }: { onLogEvent: (details
     ];
 
     let currentStep = 0;
-    const interval = setInterval(() => {
+    if (validationIntervalRef.current) {
+      clearInterval(validationIntervalRef.current);
+    }
+    validationIntervalRef.current = setInterval(() => {
       if (currentStep >= STEPS.length) {
-        clearInterval(interval);
+        if (validationIntervalRef.current) {
+          clearInterval(validationIntervalRef.current);
+          validationIntervalRef.current = null;
+        }
         setExecuting(false);
         setShowScorecard(true);
         setTerminalLogs(prev => [
@@ -1286,12 +1466,7 @@ export default function MasterTestSandbox({ onLogEvent }: { onLogEvent: (details
 
           <select 
             value={selectedDatasetId}
-            onChange={(e) => {
-              setSelectedDatasetId(e.target.value);
-              setActiveStepIdx(-1);
-              setTerminalLogs([]);
-              setShowScorecard(false);
-            }}
+            onChange={(e) => handleDatasetChange(e.target.value)}
             disabled={executing}
             className="border-2 border-[#1A1A1A] bg-white px-2.5 py-1.5 text-xs font-mono font-bold text-neutral-800 focus:outline-none cursor-pointer rounded-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50"
           >

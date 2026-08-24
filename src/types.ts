@@ -248,4 +248,154 @@ export const DEFAULT_FAILURE_THRESHOLDS: FailureThresholds = {
   default: { mae: 0.05, rSquared: 0.85 },
 };
 
+// --- Physical-AI Harness Types & Governance Schemas ---
+
+export enum RiskLevel {
+  LEVEL_A_MEMORY = "LOW",             // Dynamic retrieval/weight re-indexing
+  LEVEL_B_REASONING = "MODERATE",     // Prompt, routing, temperature, thresholds
+  LEVEL_C_WORKFLOW = "HIGH",          // Tool injection, DAG mutation, sensor sequence
+  LEVEL_D_CODE_DEVICE = "CRITICAL"    // Firmware, physical device actuation, robotic motion
+}
+
+export interface SensoryFrame {
+  timestamp: number;
+  frameId: string;
+  cameraRgbd?: {
+    resolution: [number, number];
+    depthRangeMeters: [number, number];
+    pointCloudSampleCount: number;
+  };
+  tactileGrid: {
+    leftFingerPressureN: number;
+    rightFingerPressureN: number;
+    shearFriction: number;
+    slipDetected: boolean;
+  };
+  jointEncodersRad: number[];        // 7-DOF arm joint angles [q0..q6]
+  jointTorquesNm: number[];          // 7-DOF joint torques [tau0..tau6]
+  endEffectorPose: {
+    x: number;
+    y: number;
+    z: number;
+    roll: number;
+    pitch: number;
+    yaw: number;
+    gripperOpeningM: number;
+  };
+  imu: {
+    accel: [number, number, number]; // m/s^2
+    gyro: [number, number, number];  // rad/s
+  };
+  ambientSensors: {
+    tempC: number;
+    humidityPct: number;
+    acousticNoiseDb: number;
+  };
+}
+
+export interface PhysicalNodeEntity {
+  id: string;
+  label: string;
+  category: 'dishware' | 'appliance' | 'obstacle' | 'rack' | 'tool';
+  pose: [number, number, number];           // x, y, z meters
+  orientation: [number, number, number];    // roll, pitch, yaw deg
+  boundingBox: [number, number, number];    // dx, dy, dz meters
+  massKg: number;
+  frictionCoeff: number;
+  fragilityIndex: number;                   // 0.0 (rugged) to 1.0 (ultra-delicate glass)
+  graspStatus: 'free' | 'grasped' | 'seated' | 'obstructed';
+  recommendedGripForceN: number;
+  targetRackSlot?: string;
+}
+
+export interface PhysicalWorldStateTensor {
+  entities: PhysicalNodeEntity[];
+  kinematicChains: {
+    jointIndex: number;
+    name: string;
+    angleRad: number;
+    velocityRadS: number;
+    torqueNm: number;
+    limitMinRad: number;
+    limitMaxRad: number;
+    tempC: number;
+  }[];
+  causalHypergraphEdges: {
+    id: string;
+    source: string;
+    target: string;
+    relation: 'supports' | 'contains' | 'grasped_by' | 'obstructs' | 'clears_with' | 'adjacent_to';
+    confidence: number;
+    stressThresholdN: number;
+  }[];
+  thermodynamicEnvelope: {
+    tempKelvin: number;
+    vibrationG: number;
+    pressureHpa: number;
+  };
+}
+
+export interface ActionCandidate {
+  actionId: string;
+  stepName: string;
+  type: 'trajectory' | 'grasp' | 'insert' | 'release' | 'scan' | 'emergency_stop';
+  targetEntityId: string;
+  riskLevel: RiskLevel;
+  waypoints: {
+    x: number;
+    y: number;
+    z: number;
+    speedMPerS: number;
+    maxTorqueNm: number;
+  }[];
+  gripperForceTargetN: number;
+  expectedDurationMs: number;
+  symbolicPreconditions: string[];
+  postConditions: string[];
+}
+
+export interface VerificationRecord {
+  actionId: string;
+  collisionFree: boolean;
+  torqueWithinLimits: boolean;
+  slipRiskIndex: number;
+  fragilityPreserved: boolean;
+  sprayArmClearanceM: number;
+  symbolicPass: boolean;
+  governanceApproved: boolean;
+  governanceTier: RiskLevel;
+  humanAuthorizationToken?: string;
+  vetoReason?: string;
+  subconsciousPriorScore: number;
+  discrepancyErrorPct: number;
+}
+
+export interface SubconsciousIntuition {
+  patternId: string;
+  domain: string;
+  historicalSampleCount: number;
+  priorConfidence: number;
+  latentTorqueCorrectionNm: number[];
+  recommendedMicroDamping: number;
+  anomalyWarning?: string;
+  timestamp: string;
+}
+
+export interface DishwasherScenarioStep {
+  stepNumber: number;
+  title: string;
+  subsystem: 'PERCEPTION' | 'DIGITAL_TWIN' | 'SIM_CHECK' | 'GOVERNANCE' | 'ROBOT_ACTUATION' | 'REALITY_ANCHOR' | 'SUBCONSCIOUS';
+  description: string;
+  hardwareCommand: string;
+  riskLevel: RiskLevel;
+  expectedTelemetry: {
+    gripperForceN?: number;
+    torquePeakNm?: number;
+    sprayArmClearanceMm?: number;
+    tactileSlipIndex?: number;
+    errorDeviationPct?: number;
+  };
+}
+
+
 
