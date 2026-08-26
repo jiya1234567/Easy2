@@ -211,13 +211,13 @@ export default function App() {
     | 'neuroscience'
     | 'mental'
     | 'logs'
-  >('world');
+  >('harness');
   const [showStackMap, setShowStackMap] = useState<boolean>(false);
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
   const [harnessPreloadedPrompt, setHarnessPreloadedPrompt] = useState<string>('');
   const [harnessPreloadedContext, setHarnessPreloadedContext] = useState<string>('');
   const [harnessInitialTab, setHarnessInitialTab] = useState<'console' | 'memory' | 'architecture' | 'reality' | 'roadtests' | 'scientist_interface' | 'deepmind_synthesis' | 'hypergraph' | 'manifold' | 'ruliad' | 'protein' | 'docking'>('console');
-  const [showCommandDeck, setShowCommandDeck] = useState<boolean>(true);
+  const [showCommandDeck, setShowCommandDeck] = useState<boolean>(false);
   const [labUrls, setLabUrls] = useState<{ [key: string]: string }>({
     world: 'https://ai.studio/apps/08c79c7e-4cbb-4a89-9a63-6d177ea6775c',
     colony: '',
@@ -533,6 +533,7 @@ export default function App() {
             <div className="flex flex-wrap items-center gap-1 bg-[#F5F2ED] px-3 py-1.5 border border-[#1A1A1A] rounded-none">
               <span className="font-bold text-[#1A1A1A] mr-1">PORTAL: [</span>
               {[
+                { id: 'harness', label: 'PHYSICAL AI HARNESS' },
                 { id: 'world', label: 'WORLD' },
                 { id: 'quantum', label: 'QUANTUM' },
                 { id: 'finance', label: 'FINANCE' },
@@ -1116,103 +1117,105 @@ export default function App() {
         )}
 
         {/* BOTTOM LAYERS: HARNESS CHAT & ARCHITECTURE VIEW */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-          {/* HARNESS CHAT CONSOLE */}
-          <div className="lg:col-span-5 relative pt-4">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-emerald-600 bg-[#F5F2ED] px-2.5 py-1 absolute -top-1.5 left-3 z-10 border-2 border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(26,26,26,1)] flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse border border-black" />
-              <span>HARNESS CHAT CONSOLE</span>
-            </span>
-            <div className="bg-white border-2 border-[#1A1A1A] p-4 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] h-[540px] flex flex-col">
-              <div className="flex-1 overflow-y-auto pr-1">
-                <HarnessConsole
-                  onLogEvent={addTemporalEvent}
-                  worldState={worldState}
-                  preloadedPrompt={harnessPreloadedPrompt}
-                  onClearPreloadedPrompt={() => setHarnessPreloadedPrompt('')}
-                  preloadedContextData={harnessPreloadedContext}
-                  onClearPreloadedContextData={() => setHarnessPreloadedContext('')}
-                  hardwareState={hardwareState}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* ARCHITECTURE VIEW */}
-          <div className="lg:col-span-7 relative pt-4">
-            <div className="absolute -top-1.5 left-3 right-3 z-10 flex justify-between items-center">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-amber-600 bg-[#F5F2ED] px-2.5 py-1 border-2 border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(26,26,26,1)] flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse border border-black" />
-                <span>ARCHITECTURE VIEW (TOGGLEABLE)</span>
+        {activeLab !== 'harness' && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            {/* HARNESS CHAT CONSOLE */}
+            <div className="lg:col-span-5 relative pt-4">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-emerald-600 bg-[#F5F2ED] px-2.5 py-1 absolute -top-1.5 left-3 z-10 border-2 border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(26,26,26,1)] flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse border border-black" />
+                <span>HARNESS CHAT CONSOLE</span>
               </span>
-              <button
-                onClick={() => setShowStackMap(!showStackMap)}
-                className="text-[9px] font-mono font-bold uppercase tracking-wider bg-[#1A1A1A] hover:bg-neutral-800 text-white px-3 py-1 border-2 border-[#1A1A1A] shadow-[1.5px_1.5px_0px_0px_rgba(0,0,0,1)] cursor-pointer transition-all"
-              >
-                {showStackMap ? 'COLLAPSE LAYER' : 'EXPAND FULL'}
-              </button>
+              <div className="bg-white border-2 border-[#1A1A1A] p-4 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] h-[540px] flex flex-col">
+                <div className="flex-1 overflow-y-auto pr-1">
+                  <HarnessConsole
+                    onLogEvent={addTemporalEvent}
+                    worldState={worldState}
+                    preloadedPrompt={harnessPreloadedPrompt}
+                    onClearPreloadedPrompt={() => setHarnessPreloadedPrompt('')}
+                    preloadedContextData={harnessPreloadedContext}
+                    onClearPreloadedContextData={() => setHarnessPreloadedContext('')}
+                    hardwareState={hardwareState}
+                  />
+                </div>
+              </div>
             </div>
-            <div className="bg-white border-2 border-[#1A1A1A] p-6 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] h-[540px] flex flex-col justify-start">
-              <div className="flex-1 overflow-y-auto mt-2">
-                {showStackMap ? (
-                  <div className="animate-fade-in space-y-4 font-mono text-[11px] h-full">
-                    <div className="border-2 border-[#1A1A1A] p-4 bg-[#F5F2ED] relative">
-                      <div className="text-amber-600 font-bold tracking-wider text-xs uppercase flex items-center gap-1.5 border-b border-[#1A1A1A] pb-1.5 mb-2">
-                        <Cpu className="w-4 h-4" />
-                        <span>01. BIT-LEVEL OBSERVABILITY (HardwareState)</span>
-                      </div>
-                      <p className="text-neutral-700 text-[11px] font-serif italic leading-relaxed">
-                        Tracks hardware performance, processor clock-ticks, random cosmic bit-flips, thermal constraints, and memory state changes dynamically.
-                      </p>
-                      <div className="mt-3 bg-white p-2 border border-[#1A1A1A]/30 text-[10px] grid grid-cols-2 gap-2">
-                        <div>CPU Temp: {hardwareState.cpu.temp.toFixed(1)}°C</div>
-                        <div>GPU Temp: {hardwareState.gpu.temp.toFixed(1)}°C</div>
-                        <div>Total Bit Errors: {hardwareState.bitErrors}</div>
-                        <div>Observability Level: 100% (Real-time)</div>
-                      </div>
-                    </div>
 
-                    <div className="border-2 border-[#1A1A1A] p-4 bg-[#F5F2ED] relative">
-                      <div className="text-blue-600 font-bold tracking-wider text-xs uppercase flex items-center gap-1.5 border-b border-[#1A1A1A] pb-1.5 mb-2">
-                        <Network className="w-4 h-4" />
-                        <span>02. CAUSAL INTERVENTION ENGINE (Autonomous)</span>
+            {/* ARCHITECTURE VIEW */}
+            <div className="lg:col-span-7 relative pt-4">
+              <div className="absolute -top-1.5 left-3 right-3 z-10 flex justify-between items-center">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-amber-600 bg-[#F5F2ED] px-2.5 py-1 border-2 border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(26,26,26,1)] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse border border-black" />
+                  <span>ARCHITECTURE VIEW (TOGGLEABLE)</span>
+                </span>
+                <button
+                  onClick={() => setShowStackMap(!showStackMap)}
+                  className="text-[9px] font-mono font-bold uppercase tracking-wider bg-[#1A1A1A] hover:bg-neutral-800 text-white px-3 py-1 border-2 border-[#1A1A1A] shadow-[1.5px_1.5px_0px_0px_rgba(0,0,0,1)] cursor-pointer transition-all"
+                >
+                  {showStackMap ? 'COLLAPSE LAYER' : 'EXPAND FULL'}
+                </button>
+              </div>
+              <div className="bg-white border-2 border-[#1A1A1A] p-6 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] h-[540px] flex flex-col justify-start">
+                <div className="flex-1 overflow-y-auto mt-2">
+                  {showStackMap ? (
+                    <div className="animate-fade-in space-y-4 font-mono text-[11px] h-full">
+                      <div className="border-2 border-[#1A1A1A] p-4 bg-[#F5F2ED] relative">
+                        <div className="text-amber-600 font-bold tracking-wider text-xs uppercase flex items-center gap-1.5 border-b border-[#1A1A1A] pb-1.5 mb-2">
+                          <Cpu className="w-4 h-4" />
+                          <span>01. BIT-LEVEL OBSERVABILITY (HardwareState)</span>
+                        </div>
+                        <p className="text-neutral-700 text-[11px] font-serif italic leading-relaxed">
+                          Tracks hardware performance, processor clock-ticks, random cosmic bit-flips, thermal constraints, and memory state changes dynamically.
+                        </p>
+                        <div className="mt-3 bg-white p-2 border border-[#1A1A1A]/30 text-[10px] grid grid-cols-2 gap-2">
+                          <div>CPU Temp: {hardwareState.cpu.temp.toFixed(1)}°C</div>
+                          <div>GPU Temp: {hardwareState.gpu.temp.toFixed(1)}°C</div>
+                          <div>Total Bit Errors: {hardwareState.bitErrors}</div>
+                          <div>Observability Level: 100% (Real-time)</div>
+                        </div>
                       </div>
-                      <p className="text-neutral-700 text-[11px] font-serif italic leading-relaxed">
-                        Autonomously triggers state actions or parameter sweeps when microstructural bounds are violated, executing counterfactual simulations to optimize system states.
-                      </p>
-                      <div className="mt-3 bg-white p-2 border border-[#1A1A1A]/30 text-[10px]">
-                        Active Controller: Autonomous Policy Optimizer (RL-based)
-                      </div>
-                    </div>
 
-                    <div className="border-2 border-[#1A1A1A] p-4 bg-[#F5F2ED] relative">
-                      <div className="text-emerald-600 font-bold tracking-wider text-xs uppercase flex items-center gap-1.5 border-b border-[#1A1A1A] pb-1.5 mb-2">
-                        <Server className="w-4 h-4" />
-                        <span>03. STATE TENSOR & BENCHMARKING (Cross-Domain)</span>
+                      <div className="border-2 border-[#1A1A1A] p-4 bg-[#F5F2ED] relative">
+                        <div className="text-blue-600 font-bold tracking-wider text-xs uppercase flex items-center gap-1.5 border-b border-[#1A1A1A] pb-1.5 mb-2">
+                          <Network className="w-4 h-4" />
+                          <span>02. CAUSAL INTERVENTION ENGINE (Autonomous)</span>
+                        </div>
+                        <p className="text-neutral-700 text-[11px] font-serif italic leading-relaxed">
+                          Autonomously triggers state actions or parameter sweeps when microstructural bounds are violated, executing counterfactual simulations to optimize system states.
+                        </p>
+                        <div className="mt-3 bg-white p-2 border border-[#1A1A1A]/30 text-[10px]">
+                          Active Controller: Autonomous Policy Optimizer (RL-based)
+                        </div>
                       </div>
-                      <p className="text-neutral-700 text-[11px] font-serif italic leading-relaxed">
-                        Compiles environment variables into standard mathematical tensors, establishing comparative testing benchmarks against baseline XGBoost models and pure physics calculations.
+
+                      <div className="border-2 border-[#1A1A1A] p-4 bg-[#F5F2ED] relative">
+                        <div className="text-emerald-600 font-bold tracking-wider text-xs uppercase flex items-center gap-1.5 border-b border-[#1A1A1A] pb-1.5 mb-2">
+                          <Server className="w-4 h-4" />
+                          <span>03. STATE TENSOR & BENCHMARKING (Cross-Domain)</span>
+                        </div>
+                        <p className="text-neutral-700 text-[11px] font-serif italic leading-relaxed">
+                          Compiles environment variables into standard mathematical tensors, establishing comparative testing benchmarks against baseline XGBoost models and pure physics calculations.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="h-full flex flex-col justify-center items-center text-center p-6 border-2 border-dashed border-[#1A1A1A] bg-[#FCFAF7]">
+                      <Layers className="w-12 h-12 text-[#1A1A1A] mb-3 animate-pulse" />
+                      <p className="font-bold text-[#1A1A1A] uppercase tracking-wider text-xs mb-1.5 font-mono">SINGULARITY FULL-STACK INTERACTION LAYERS</p>
+                      <div className="text-left font-mono text-[10px] space-y-2 text-neutral-600 border border-[#1A1A1A] p-4 bg-white shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] max-w-md w-full">
+                        <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-[#1A1A1A] rounded-full" /> <span>01. BIT-LEVEL OBSERVABILITY (HardwareState)</span></div>
+                        <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-[#1A1A1A] rounded-full" /> <span>02. CAUSAL INTERVENTION ENGINE (Autonomous)</span></div>
+                        <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-[#1A1A1A] rounded-full" /> <span>03. STATE TENSOR & BENCHMARKING (Cross-Domain)</span></div>
+                      </div>
+                      <p className="text-neutral-500 text-[11px] font-serif italic mt-3 max-w-sm">
+                        Click "EXPAND FULL" to audit precise diagnostic registries and review active telemetry states.
                       </p>
                     </div>
-                  </div>
-                ) : (
-                  <div className="h-full flex flex-col justify-center items-center text-center p-6 border-2 border-dashed border-[#1A1A1A] bg-[#FCFAF7]">
-                    <Layers className="w-12 h-12 text-[#1A1A1A] mb-3 animate-pulse" />
-                    <p className="font-bold text-[#1A1A1A] uppercase tracking-wider text-xs mb-1.5 font-mono">SINGULARITY FULL-STACK INTERACTION LAYERS</p>
-                    <div className="text-left font-mono text-[10px] space-y-2 text-neutral-600 border border-[#1A1A1A] p-4 bg-white shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] max-w-md w-full">
-                      <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-[#1A1A1A] rounded-full" /> <span>01. BIT-LEVEL OBSERVABILITY (HardwareState)</span></div>
-                      <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-[#1A1A1A] rounded-full" /> <span>02. CAUSAL INTERVENTION ENGINE (Autonomous)</span></div>
-                      <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-[#1A1A1A] rounded-full" /> <span>03. STATE TENSOR & BENCHMARKING (Cross-Domain)</span></div>
-                    </div>
-                    <p className="text-neutral-500 text-[11px] font-serif italic mt-3 max-w-sm">
-                      Click "EXPAND FULL" to audit precise diagnostic registries and review active telemetry states.
-                    </p>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* BOTTOM WIREFRAME FOOTER STATUS */}
         <div className="bg-[#1A1A1A] text-[#F5F2ED] font-mono text-[10px] py-3.5 px-4 border-2 border-[#1A1A1A] flex flex-col md:flex-row justify-between items-center gap-3 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)]">

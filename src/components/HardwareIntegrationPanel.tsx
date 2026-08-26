@@ -4,12 +4,16 @@ import {
   CheckCircle, AlertTriangle, Compass, Database, Network, 
   Eye, Thermometer, Binary, Radio, Zap, ArrowRight, CornerDownRight, Info,
   Shield, ShieldAlert, ShieldCheck, Lock, Unlock, Play, Square, SkipForward,
-  Sparkles, ChevronRight, ChevronDown, Check, X, Flame, Droplets, Wind,
-  Box, GitBranch, FileText, ListOrdered, Settings, Terminal, Award
+  Sparkles, ChevronRight, ChevronDown, ChevronLeft, Check, X, Flame, Droplets, Wind,
+  Box, GitBranch, FileText, ListOrdered, Settings, Terminal, Award, Upload,
+  Table, FileSpreadsheet, HardDrive, Filter, SlidersHorizontal, Sliders as SliderIcon
 } from 'lucide-react';
 import MasterTestSandbox from './MasterTestSandbox';
 import Spatial3DProgressionViewer from './Spatial3DProgressionViewer';
 import PhysicalAiStressBenchmark from './PhysicalAiStressBenchmark';
+import PhysicalAiWorldStatePipeline from './PhysicalAiWorldStatePipeline';
+import QuantumPhotonicWorkbench from './QuantumPhotonicWorkbench';
+import CsvDataInspectorModal from './CsvDataInspectorModal';
 import {
   RiskLevel,
   SensoryFrame,
@@ -256,10 +260,148 @@ const DOMAIN_SCENARIOS: DomainScenario[] = [
   }
 ];
 
+// Forecast Vector Table Schema (Matching Screenshot 1 Layout)
+interface RobotForecastItem {
+  id: number;
+  instrument: string;
+  current: string;
+  omega_range_low: string;
+  omega_range_high: string;
+  confidence: number;
+  veto: 'PASS' | 'WARN' | 'VETO';
+  direction: string;
+  causalDriver: string;
+}
+
+const ROBOT_FORECAST_VECTORS: RobotForecastItem[] = [
+  {
+    id: 0,
+    instrument: '7-DOF Joint #04 Pitch (rad)',
+    current: '0.5830 rad (33.4°)',
+    omega_range_low: '0.4886 rad (28.0°)',
+    omega_range_high: '0.6632 rad (38.0°)',
+    confidence: 0.98,
+    veto: 'PASS',
+    direction: 'Docking Trajectory',
+    causalDriver: 'IK Slot #04 Solution + Impedance Control'
+  },
+  {
+    id: 1,
+    instrument: 'GelSight Grip Normal Force',
+    current: '3.8000 N',
+    omega_range_low: '2.5000 N',
+    omega_range_high: '4.4000 N',
+    confidence: 0.96,
+    veto: 'PASS',
+    direction: 'Compliant Clamp',
+    causalDriver: 'Tactile Shear Zero-Slip + Fragility Bound (<4.5N)'
+  },
+  {
+    id: 2,
+    instrument: 'Lower Spray Arm Jet Clearance',
+    current: '52.0000 mm',
+    omega_range_low: '35.0000 mm',
+    omega_range_high: '65.0000 mm',
+    confidence: 0.99,
+    veto: 'PASS',
+    direction: 'Free Sweep Arc',
+    causalDriver: 'LiDAR Height Profiler (Minimum >35mm)'
+  },
+  {
+    id: 3,
+    instrument: 'Dish Tine Collision Buffer',
+    current: '57.0000 mm',
+    omega_range_low: '30.0000 mm',
+    omega_range_high: '90.0000 mm',
+    confidence: 0.97,
+    veto: 'PASS',
+    direction: 'Insertion Path',
+    causalDriver: 'MuJoCo Convex Hull Distance Matrix'
+  },
+  {
+    id: 4,
+    instrument: '7-DOF Joint #03 Torque Load',
+    current: '6.1000 Nm',
+    omega_range_low: '3.0000 Nm',
+    omega_range_high: '9.5000 Nm',
+    confidence: 0.95,
+    veto: 'PASS',
+    direction: 'Dynamic Motion',
+    causalDriver: 'Dynamic Inertia Matrix (Max Limit: 10.0Nm)'
+  },
+  {
+    id: 5,
+    instrument: 'Eye-in-Hand LiDAR Sim2Real Error',
+    current: '5.1000 mm',
+    omega_range_low: '0.0000 mm',
+    omega_range_high: '9.8000 mm',
+    confidence: 0.96,
+    veto: 'PASS',
+    direction: 'Reality Anchor Alignment',
+    causalDriver: 'ICP Point Cloud to Dish CAD Alignment (<10mm)'
+  },
+  {
+    id: 6,
+    instrument: 'GelSight Micro-Slip Velocity',
+    current: '0.0000 mm/s',
+    omega_range_low: '0.0000 mm/s',
+    omega_range_high: '0.2500 mm/s',
+    confidence: 0.99,
+    veto: 'PASS',
+    direction: 'Zero Slip Lock',
+    causalDriver: 'Optical Flow Elastomer Surface Tracking'
+  },
+  {
+    id: 7,
+    instrument: 'Dishwasher Tub Linear Slide Rail',
+    current: '0.3200 m',
+    omega_range_low: '0.0000 m',
+    omega_range_high: '0.3800 m',
+    confidence: 0.99,
+    veto: 'PASS',
+    direction: 'Rack Extraction',
+    causalDriver: 'Linear Slide Limit Switch (Stroke: 0.38m)'
+  }
+];
+
 export default function HardwareIntegrationPanel({ onLogEvent }: HardwareIntegrationPanelProps) {
   // Navigation Sub-tab within Hardware panel
-  const [hardwareSubTab, setHardwareSubTab] = useState<'physical_ai_harness' | 'spatial_3d_progression' | 'stress_benchmark' | 'operator_guide' | 'instruments' | 'workflows' | 'sandbox'>('physical_ai_harness');
+  const [hardwareSubTab, setHardwareSubTab] = useState<'world_state_pipeline' | 'stress_benchmark' | 'physical_ai_harness' | 'spatial_3d_progression' | 'robot_forecast_vector' | 'operator_guide' | 'instruments' | 'workflows' | 'sandbox'>('world_state_pipeline');
   const [showEmbedded3dViewer, setShowEmbedded3dViewer] = useState<boolean>(true);
+  const [showCommandDeckModal, setShowCommandDeckModal] = useState<boolean>(false);
+  const [isCsvInspectorOpen, setIsCsvInspectorOpen] = useState<boolean>(false);
+  const [csvInspectorTab, setCsvInspectorTab] = useState<'telemetry' | 'pointcloud' | 'gelsight' | 'manifest' | 'fused'>('telemetry');
+
+  // File Upload states for Left Panel
+  const [uploadedFiles, setUploadedFiles] = useState<{ [filename: string]: boolean }>({
+    'robot_telemetry.csv': true,
+    'pointcloud_spatial.csv': true,
+    'gelsight_tactile.csv': true,
+  });
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, filename: string) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      setUploadedFiles(prev => ({ ...prev, [filename]: true }));
+      onLogEvent(`[DATA INGESTION] Uploaded ${file.name} (${(file.size / 1024).toFixed(1)} KB). Stream synchronized with 7-DOF MuJoCo model.`, 'physics');
+    }
+  };
+
+  const handleClearAndReloadData = () => {
+    setUploadedFiles({
+      'robot_telemetry.csv': true,
+      'pointcloud_spatial.csv': true,
+      'gelsight_tactile.csv': true,
+    });
+    setRealityErrorHistory([
+      { step: 1, errorPct: 0.8 },
+      { step: 5, errorPct: 1.2 },
+      { step: 10, errorPct: 1.4 },
+      { step: 15, errorPct: 0.9 },
+      { step: 20, errorPct: 1.85 }
+    ]);
+    onLogEvent(`[DATA RESET] Telemetry cleared and reloaded with deterministic DISHWASHER_TEST_001 baseline vectors.`, 'info');
+  };
 
   // Physical Harness Core Instance
   const harness = useMemo(() => new OmegaPhysicalHarness(), []);
@@ -566,32 +708,40 @@ export default function HardwareIntegrationPanel({ onLogEvent }: HardwareIntegra
   const selectedLayer = ARCHITECTURE_LAYERS.find(l => l.id === selectedLayerId) || ARCHITECTURE_LAYERS[4];
   const activeStepObj = DISHWASHER_22_STEPS[activeStepIndex] || DISHWASHER_22_STEPS[0];
 
-  return (
-    <div className="space-y-6 text-left">
-      
-      {/* HEADER BANNER WITH PHYSICAL-AI STATUS */}
-      <div className="bg-white border-2 border-[#1A1A1A] p-5 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono font-black text-indigo-700 uppercase tracking-widest bg-indigo-50 border border-indigo-200 px-2 py-0.5">
-              OMEGA HARDWARE & DEVICE LAYERS • PHYSICAL-AI HARNESS v2.6
-            </span>
-            <span className="text-[9px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-              200Hz FEEDBACK LOOP ACTIVE
-            </span>
-          </div>
-          <h3 className="text-xl font-serif font-black uppercase text-neutral-900 flex items-center gap-2">
-            <Zap className="w-5 h-5 text-indigo-600 animate-pulse" />
-            Physical-AI Autonomous Manipulation & Robotic Dishwasher Suite
-          </h3>
-          <p className="text-xs text-neutral-600 max-w-3xl font-sans leading-relaxed">
-            Synchronizes real-time sensory matrices, 3D Digital Twin hypergraphs, MuJoCo forward-dynamics verification, Level A–D Governance Gates, and Subconscious trajectory priors for contact-rich robotic tasks.
-          </p>
-        </div>
+  const HARDWARE_TABS = [
+    { id: 'world_state_pipeline', label: '⚡ INGEST → 3D World State (0-50ms)', desc: 'Fused Sensor Streams, Uncertainty & Slip Predictor' },
+    { id: 'quantum_photonics', label: '🔮 Quantum-Photonic Closed Loop (QFC)', desc: 'Single-Photon Frequency Conversion & ORCA Actuators' },
+    { id: 'stress_benchmark', label: '⚡ Stress Benchmark (DISHWASHER_TEST_001)', desc: 'Deterministic 12-Step Closed Loop' },
+    { id: 'physical_ai_harness', label: '🦾 Physical-AI Harness (4-Section)', desc: 'Telemetry, Twin & Governance' },
+    { id: 'spatial_3d_progression', label: '🎥 3D Spatial Video Progression', desc: 'Kinematic 3D Video Scrubber' },
+    { id: 'robot_forecast_vector', label: '📊 Robot State & Forecast Vector', desc: 'Forecast Vector & VETO Status' },
+    { id: 'instruments', label: '🔬 Hardware Registry & Sensors', desc: '10 Physical Instruments' },
+    { id: 'operator_guide', label: '📖 SOP Operator Guide', desc: 'Robotic Dishwasher Protocols' },
+    { id: 'workflows', label: '🧬 Multi-Domain Closed Loops', desc: 'Materials, Aero & Bio Workflows' },
+    { id: 'sandbox', label: '🧪 Master Test Sandbox', desc: 'Continuous Verification & USDI' }
+  ];
 
-        {/* Action Controls & Emergency Stop */}
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
+  return (
+    <div className="space-y-4 text-left font-sans">
+      
+      {/* TOP META STATUS BAR (Screenshot 1 Style) */}
+      <div className="bg-[#1A1A1A] text-white px-4 py-2 flex flex-wrap items-center justify-between gap-3 border-2 border-[#1A1A1A] text-[11px] font-mono shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+        <div className="flex items-center gap-2">
+          <span className="bg-emerald-500 text-black px-1.5 py-0.5 font-bold uppercase text-[9.5px]">ALL GAPS CLOSED</span>
+          <span className="text-neutral-300 font-bold hidden sm:inline">| 7-DOF Robotic Cell | MuJoCo & GelSight | SYNTHETIC & DETERMINISTIC HARNESS</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-neutral-400 hidden md:inline">STREAM:</span>
+          <span className="text-emerald-400 font-bold flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block" />
+            200 Hz TELEMETRY ACTIVE
+          </span>
+          <button 
+            onClick={() => setShowCommandDeckModal(true)}
+            className="bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white px-2.5 py-1 border border-neutral-600 rounded-none text-[9.5px] font-bold cursor-pointer flex items-center gap-1 transition"
+          >
+            <span>COMMAND DECK [39 LABS]</span>
+          </button>
           <button
             onClick={() => {
               setVetoTriggered(true);
@@ -600,41 +750,322 @@ export default function HardwareIntegrationPanel({ onLogEvent }: HardwareIntegra
               setIs22StepRunning(false);
               onLogEvent('[E-STOP] Emergency stop triggered on robotic manipulators.', 'info');
             }}
-            className="bg-red-600 hover:bg-red-700 text-white font-mono text-xs font-black uppercase px-3 py-2 border-2 border-[#1A1A1A] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer flex items-center gap-1.5"
+            className="bg-red-600 hover:bg-red-700 text-white font-mono text-[9.5px] font-black uppercase px-2.5 py-1 border border-red-800 cursor-pointer flex items-center gap-1"
           >
-            <ShieldAlert className="w-4 h-4" />
-            E-STOP LOCK
+            <ShieldAlert className="w-3.5 h-3.5" />
+            E-STOP
           </button>
         </div>
       </div>
 
-      {/* TOP SUB-TAB NAVIGATOR */}
-      <div className="flex gap-1.5 border-b-2 border-[#1A1A1A] pb-2 overflow-x-auto">
-        {[
-          { id: 'physical_ai_harness', label: '🦾 4-SECTION PHYSICAL-AI HARNESS', desc: 'Telemetry, Digital Twin, Governance & Subconscious Feed' },
-          { id: 'spatial_3d_progression', label: '🎥 3D SPATIAL VIDEO PROGRESSION', desc: 'Kinematic 3D Video Scrubbing, Point Clouds & Trajectories' },
-          { id: 'stress_benchmark', label: '⚡ DISHWASHER_TEST_001 STRESS BENCHMARK', desc: 'Deterministic 12-Step Closed Loop, Fault Injection & Scorecard' },
-          { id: 'operator_guide', label: '📖 DISHWASHER OPERATOR STEPS GUIDE', desc: 'Standard Operating Procedures & Safety Protocols' },
-          { id: 'instruments', label: '🔬 HARDWARE REGISTRIES & SENSORS', desc: '10 Physical Instruments & Ambient Sliders' },
-          { id: 'workflows', label: '🧬 MULTI-DOMAIN CLOSED LOOPS', desc: 'Materials, Semiconductor, Aero & Bio Workflows' },
-          { id: 'sandbox', label: '🧪 MASTER VALIDATION SANDBOX', desc: 'Continuous Verification & USDI Benchmarks' }
-        ].map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setHardwareSubTab(tab.id as any)}
-            className={`px-4 py-2.5 text-[10px] font-mono font-bold tracking-tight cursor-pointer flex flex-col items-start gap-0.5 border-2 transition rounded-none text-left shrink-0 ${
-              hardwareSubTab === tab.id
-                ? 'bg-[#1A1A1A] text-white border-[#1A1A1A] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
-                : 'bg-white text-neutral-700 border-neutral-200 hover:border-neutral-800'
-            }`}
-          >
-            <span>{tab.label}</span>
-            <span className={`text-[8.5px] font-normal leading-none font-sans ${hardwareSubTab === tab.id ? 'text-neutral-400' : 'text-neutral-500'}`}>
-              {tab.desc}
-            </span>
-          </button>
-        ))}
-      </div>
+      {/* DUAL PANEL WRAPPER */}
+      <div className="flex flex-col lg:flex-row gap-5 items-start">
+        
+        {/* LEFT PANEL: DATA INGESTION & HARDWARE TELEMETRY SIDEBAR */}
+        <div className="w-full lg:w-72 xl:w-80 shrink-0 space-y-4 font-sans">
+          
+          {/* 1. DATA UPLOAD SECTION */}
+          <div className="bg-white border-2 border-[#1A1A1A] p-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] space-y-3.5">
+            <div className="flex items-center justify-between border-b border-[#1A1A1A] pb-2">
+              <h4 className="font-serif font-black uppercase text-sm text-[#1A1A1A] flex items-center gap-1.5">
+                <Upload className="w-4 h-4 text-indigo-600" />
+                Data Upload & Ingest
+              </h4>
+              <span className="text-[9px] font-mono bg-emerald-100 text-emerald-900 px-1.5 py-0.5 border border-emerald-300 font-bold">200 Hz SYNCED</span>
+            </div>
+
+            {/* Quick Inspect All Button */}
+            <button
+              onClick={() => {
+                setCsvInspectorTab('telemetry');
+                setIsCsvInspectorOpen(true);
+                onLogEvent("[INSPECTOR] Opened CSV Data Table & Multi-Sensor Inspector from Hardware Studio.", "interaction");
+              }}
+              className="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-900 font-mono text-[10px] font-bold uppercase py-1.5 px-2 border border-indigo-300 shadow-sm cursor-pointer flex items-center justify-center gap-1.5 transition"
+            >
+              <Eye className="w-3.5 h-3.5 text-indigo-700" />
+              <span>📊 Inspect All CSV Datasets</span>
+            </button>
+
+            {/* Upload 1: robot_telemetry.csv */}
+            <div className="space-y-1 bg-[#FAF9F6] p-2 border border-neutral-300">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-mono font-bold text-neutral-900">robot_telemetry.csv</span>
+                <span className="text-[8.5px] font-mono text-emerald-700 font-bold">✓ Synced</span>
+              </div>
+              <div className="grid grid-cols-2 gap-1 mt-1">
+                <button
+                  onClick={() => {
+                    setCsvInspectorTab('telemetry');
+                    setIsCsvInspectorOpen(true);
+                  }}
+                  className="bg-white hover:bg-neutral-100 text-neutral-800 border border-neutral-300 p-1 text-[9px] font-mono font-bold uppercase flex items-center justify-center gap-1 cursor-pointer"
+                >
+                  <Eye className="w-2.5 h-2.5 text-indigo-600" />
+                  Inspect
+                </button>
+                <label className="border border-[#1A1A1A] bg-[#1A1A1A] hover:bg-neutral-800 text-white p-1 flex items-center justify-center gap-1 cursor-pointer text-[9px] font-mono font-bold uppercase transition">
+                  <input type="file" accept=".csv,.json" className="hidden" onChange={(e) => handleFileUpload(e, 'robot_telemetry.csv')} />
+                  <Upload className="w-2.5 h-2.5 text-emerald-400" />
+                  <span>Upload</span>
+                </label>
+              </div>
+              <span className="text-[8.5px] text-neutral-500 font-mono block">11 rows • 7-DOF Kinematics @ 200Hz</span>
+            </div>
+
+            {/* Upload 2: pointcloud_spatial.csv */}
+            <div className="space-y-1 bg-[#FAF9F6] p-2 border border-neutral-300">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-mono font-bold text-neutral-900">pointcloud_spatial.csv</span>
+                <span className="text-[8.5px] font-mono text-emerald-700 font-bold">✓ Synced</span>
+              </div>
+              <div className="grid grid-cols-2 gap-1 mt-1">
+                <button
+                  onClick={() => {
+                    setCsvInspectorTab('pointcloud');
+                    setIsCsvInspectorOpen(true);
+                  }}
+                  className="bg-white hover:bg-neutral-100 text-neutral-800 border border-neutral-300 p-1 text-[9px] font-mono font-bold uppercase flex items-center justify-center gap-1 cursor-pointer"
+                >
+                  <Eye className="w-2.5 h-2.5 text-indigo-600" />
+                  Inspect
+                </button>
+                <label className="border border-[#1A1A1A] bg-[#1A1A1A] hover:bg-neutral-800 text-white p-1 flex items-center justify-center gap-1 cursor-pointer text-[9px] font-mono font-bold uppercase transition">
+                  <input type="file" accept=".csv,.ply,.json" className="hidden" onChange={(e) => handleFileUpload(e, 'pointcloud_spatial.csv')} />
+                  <Upload className="w-2.5 h-2.5 text-emerald-400" />
+                  <span>Upload</span>
+                </label>
+              </div>
+              <span className="text-[8.5px] text-neutral-500 font-mono block">15 3D points • LiDAR metrology</span>
+            </div>
+
+            {/* Upload 3: gelsight_tactile.csv */}
+            <div className="space-y-1 bg-[#FAF9F6] p-2 border border-neutral-300">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-mono font-bold text-neutral-900">gelsight_tactile.csv</span>
+                <span className="text-[8.5px] font-mono text-emerald-700 font-bold">✓ Synced</span>
+              </div>
+              <div className="grid grid-cols-2 gap-1 mt-1">
+                <button
+                  onClick={() => {
+                    setCsvInspectorTab('gelsight');
+                    setIsCsvInspectorOpen(true);
+                  }}
+                  className="bg-white hover:bg-neutral-100 text-neutral-800 border border-neutral-300 p-1 text-[9px] font-mono font-bold uppercase flex items-center justify-center gap-1 cursor-pointer"
+                >
+                  <Eye className="w-2.5 h-2.5 text-indigo-600" />
+                  Inspect
+                </button>
+                <label className="border border-[#1A1A1A] bg-[#1A1A1A] hover:bg-neutral-800 text-white p-1 flex items-center justify-center gap-1 cursor-pointer text-[9px] font-mono font-bold uppercase transition">
+                  <input type="file" accept=".csv,.json" className="hidden" onChange={(e) => handleFileUpload(e, 'gelsight_tactile.csv')} />
+                  <Upload className="w-2.5 h-2.5 text-emerald-400" />
+                  <span>Upload</span>
+                </label>
+              </div>
+              <span className="text-[8.5px] text-neutral-500 font-mono block">11 rows • Tactile Shear & Slip</span>
+            </div>
+
+            <button 
+              onClick={() => {
+                setHardwareSubTab('world_state_pipeline');
+                onLogEvent("[PIPELINE] Initialized 3D World State Ingestion (0-50ms synchronized).", "physics");
+              }}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-mono text-[10px] font-black uppercase py-2 px-3 border border-emerald-800 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer flex items-center justify-center gap-1.5 transition"
+            >
+              <Zap className="w-3.5 h-3.5 fill-white text-white" />
+              ⚡ INGEST → BUILD WORLD STATE
+            </button>
+
+            <button 
+              onClick={handleClearAndReloadData}
+              className="w-full bg-[#1A1A1A] hover:bg-neutral-800 text-white font-mono text-[10px] font-bold uppercase py-2 px-3 border border-[#1A1A1A] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer flex items-center justify-center gap-1.5 transition"
+            >
+              <RefreshCw className="w-3 h-3 text-emerald-400" />
+              Clear Session / Reload Data
+            </button>
+          </div>
+
+          {/* 2. ROBOTICS HARDWARE HEALTH & TELEMETRY */}
+          <div className="bg-white border-2 border-[#1A1A1A] p-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] space-y-3">
+            <div className="flex items-center justify-between border-b border-[#1A1A1A] pb-2">
+              <h4 className="font-serif font-black uppercase text-xs text-[#1A1A1A] flex items-center gap-1.5">
+                <Cpu className="w-3.5 h-3.5 text-indigo-600" />
+                Robotic Cell Hardware
+              </h4>
+              <span className="text-[8.5px] font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.5 border border-emerald-300 font-bold">100% ONLINE</span>
+            </div>
+
+            <div className="space-y-2 text-[10.5px] font-mono">
+              <div className="bg-neutral-50 p-2 border border-neutral-200 flex justify-between items-center">
+                <span className="text-neutral-600">7-DOF Manipulator:</span>
+                <span className="font-bold text-neutral-900">38.2°C • Cal 99.8%</span>
+              </div>
+              <div className="bg-neutral-50 p-2 border border-neutral-200 flex justify-between items-center">
+                <span className="text-neutral-600">GelSight Tactile:</span>
+                <span className="font-bold text-emerald-700">200Hz • Slip 0.04%</span>
+              </div>
+              <div className="bg-neutral-50 p-2 border border-neutral-200 flex justify-between items-center">
+                <span className="text-neutral-600">RealSense LiDAR:</span>
+                <span className="font-bold text-neutral-900">0.15mm precision</span>
+              </div>
+              <div className="bg-neutral-50 p-2 border border-neutral-200 flex justify-between items-center">
+                <span className="text-neutral-600">Tub Metrology Jet:</span>
+                <span className="font-bold text-indigo-700">Clearance 52.0mm</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. SAFETY GOVERNOR & HARD VETO */}
+          <div className="bg-white border-2 border-[#1A1A1A] p-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] space-y-3">
+            <div className="flex items-center justify-between border-b border-[#1A1A1A] pb-2">
+              <h4 className="font-serif font-black uppercase text-xs text-[#1A1A1A] flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                Safety Governor (VETO)
+              </h4>
+              <span className={`text-[8.5px] font-mono px-1.5 py-0.5 border font-bold ${
+                vetoTriggered ? 'bg-rose-100 text-rose-800 border-rose-300' : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+              }`}>
+                {vetoTriggered ? 'VETO ACTIVE' : 'ALL CLEAR'}
+              </span>
+            </div>
+
+            <div className="space-y-2 text-[10.5px] font-mono">
+              <div className="flex justify-between items-center">
+                <span className="text-neutral-500">HITL Auth Token:</span>
+                <span className="font-bold text-neutral-800 bg-neutral-100 px-1 py-0.5 border border-neutral-300 text-[9.5px]">
+                  [{hitlAuthToken}]
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-neutral-500">Fragility Limit:</span>
+                <span className="font-bold text-emerald-700">&lt; 4.5 N</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-neutral-500">Obstacle Buffer:</span>
+                <span className="font-bold text-neutral-800">&gt; 30.0 mm</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* RIGHT PANEL: EXECUTIVE SUMMARY & TAB WORKSPACE */}
+        <div className="flex-1 min-w-0 space-y-4">
+          
+          {/* EXECUTIVE SUMMARY CALLOUT BOX (Screenshot 1 Matching) */}
+          <div className="bg-[#EBF5FB] border-2 border-[#1A1A1A] p-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] space-y-2">
+            <div className="flex items-center justify-between border-b border-indigo-200 pb-1.5">
+              <span className="text-[11px] font-serif font-black uppercase text-indigo-950 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                Executive Summary
+              </span>
+              <span className="text-[9px] font-mono font-bold bg-indigo-100 text-indigo-900 px-2 py-0.5">
+                DISHWASHER CELL VETO: ACTIVE
+              </span>
+            </div>
+            <p className="text-xs text-indigo-950 font-sans leading-relaxed font-normal">
+              <strong>OMEGA v5.0 Active Regime: [NORMAL / DETERMINISTIC].</strong> Autonomous 16-stage physical closed-loop active. 7-DOF robotic arm state tensor synchronized with MuJoCo contact dynamics. Symbolic verification has screened 3 candidate policies with deterministic VETO rules active to prevent rack collisions and wine glass fracture (&lt;4.5N). Next EIG benchmark: STACKED_BOWLS.
+            </p>
+          </div>
+
+          {/* HORIZONTAL SCROLLING TAB BAR (Screenshot 1 Matching with Green Pill) */}
+          <div className="flex items-center gap-1 border-b-2 border-[#1A1A1A] pb-2 overflow-x-auto">
+            <div className="flex items-center gap-1.5 overflow-x-auto py-0.5 flex-1">
+              {HARDWARE_TABS.map((tab) => {
+                const isActive = hardwareSubTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setHardwareSubTab(tab.id as any)}
+                    className={`px-3 py-2 text-[10.5px] font-mono font-bold tracking-tight cursor-pointer whitespace-nowrap border-2 transition rounded-none shrink-0 flex items-center gap-1.5 ${
+                      isActive
+                        ? 'bg-[#10B981] text-[#0A2E1C] border-[#10B981] font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
+                        : 'bg-white text-neutral-700 border-neutral-300 hover:border-[#1A1A1A]'
+                    }`}
+                  >
+                    {isActive && <span className="w-1.5 h-1.5 rounded-full bg-[#0A2E1C] inline-block animate-pulse" />}
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* SUB-VIEW: 3D WORLD STATE INGESTION & PIPELINE */}
+          {hardwareSubTab === 'world_state_pipeline' && (
+            <div className="space-y-4 font-sans animate-fadeIn">
+              <PhysicalAiWorldStatePipeline onLogEvent={onLogEvent} />
+            </div>
+          )}
+
+          {/* SUB-VIEW: QUANTUM-PHOTONIC CLOSED LOOP (QFC) */}
+          {hardwareSubTab === 'quantum_photonics' && (
+            <div className="space-y-4 font-sans animate-fadeIn">
+              <QuantumPhotonicWorkbench onLogEvent={onLogEvent} />
+            </div>
+          )}
+
+          {/* SUB-VIEW: ROBOT STATE & FORECAST VECTOR TABLE (Screenshot 1 matching) */}
+          {hardwareSubTab === 'robot_forecast_vector' && (
+            <div className="space-y-4 font-sans animate-fadeIn">
+              <div className="bg-white border-2 border-[#1A1A1A] p-4 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] space-y-2">
+                <div className="flex items-center justify-between border-b border-[#1A1A1A] pb-2">
+                  <h4 className="font-serif font-black uppercase text-base text-[#1A1A1A] flex items-center gap-2">
+                    <Table className="w-4 h-4 text-indigo-600" />
+                    OMEGA Robot State & Forecast Vector
+                  </h4>
+                  <span className="text-[10px] font-mono bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 font-bold">
+                    8/8 TELEMETRY NODES PASS
+                  </span>
+                </div>
+                <p className="text-xs text-neutral-600 font-sans leading-relaxed">
+                  Live probabilistic state vectors, symbolic VETO bounds, inverse kinematics trajectories, and GelSight contact force constraints mapped in real time.
+                </p>
+              </div>
+
+              <div className="bg-white border-2 border-[#1A1A1A] shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] overflow-x-auto">
+                <table className="w-full text-left font-mono text-[11px] border-collapse">
+                  <thead>
+                    <tr className="bg-neutral-100 border-b-2 border-[#1A1A1A] text-neutral-800 uppercase font-black text-[10px] tracking-wider">
+                      <th className="p-3 border-r border-neutral-200">#</th>
+                      <th className="p-3 border-r border-neutral-200">Instrument / Joint</th>
+                      <th className="p-3 border-r border-neutral-200">Current</th>
+                      <th className="p-3 border-r border-neutral-200">omega_range_low</th>
+                      <th className="p-3 border-r border-neutral-200">omega_range_high</th>
+                      <th className="p-3 border-r border-neutral-200 text-center">confidence</th>
+                      <th className="p-3 border-r border-neutral-200 text-center">VETO</th>
+                      <th className="p-3 border-r border-neutral-200">Direction</th>
+                      <th className="p-3">Causal Driver / Constraint</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-200">
+                    {ROBOT_FORECAST_VECTORS.map((row) => (
+                      <tr key={row.id} className="hover:bg-indigo-50/50 transition">
+                        <td className="p-3 font-bold text-neutral-400 border-r border-neutral-200">{row.id}</td>
+                        <td className="p-3 font-bold text-neutral-900 border-r border-neutral-200 flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                          <span>{row.instrument}</span>
+                        </td>
+                        <td className="p-3 font-bold text-neutral-900 border-r border-neutral-200 font-mono">{row.current}</td>
+                        <td className="p-3 text-neutral-600 border-r border-neutral-200 font-mono">{row.omega_range_low}</td>
+                        <td className="p-3 text-neutral-600 border-r border-neutral-200 font-mono">{row.omega_range_high}</td>
+                        <td className="p-3 text-center border-r border-neutral-200 font-mono font-bold text-neutral-800">
+                          {(row.confidence * 100).toFixed(0)}%
+                        </td>
+                        <td className="p-3 text-center border-r border-neutral-200">
+                          <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 font-black px-2 py-0.5 text-[9.5px] rounded-none">
+                            {row.veto}
+                          </span>
+                        </td>
+                        <td className="p-3 font-bold text-indigo-700 border-r border-neutral-200">{row.direction}</td>
+                        <td className="p-3 text-neutral-600 font-sans text-[10.5px]">{row.causalDriver}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
       {/* SUB-VIEW: 3D SPATIAL VIDEO PROGRESSION */}
       {hardwareSubTab === 'spatial_3d_progression' && (
@@ -1965,6 +2396,85 @@ export default function HardwareIntegrationPanel({ onLogEvent }: HardwareIntegra
       {hardwareSubTab === 'sandbox' && (
         <MasterTestSandbox onLogEvent={onLogEvent} />
       )}
+
+        </div>
+        {/* END OF RIGHT PANEL */}
+
+      </div>
+      {/* END OF DUAL PANEL WRAPPER */}
+
+      {/* COMMAND DECK MODAL / DRAWER (Screenshot 2 Matching) */}
+      {showCommandDeckModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#1A1A1A] border-2 border-neutral-700 text-white w-full max-w-5xl max-h-[85vh] overflow-y-auto p-5 space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse" />
+                <h3 className="font-serif font-black uppercase text-sm tracking-wider">
+                  OMEGA-CORE SYSTEM COMMAND DECK [39 LABS CONNECTED]
+                </h3>
+              </div>
+              <button 
+                onClick={() => setShowCommandDeckModal(false)}
+                className="text-neutral-400 hover:text-white p-1 hover:bg-neutral-800 cursor-pointer font-mono text-xs font-bold"
+              >
+                [ESC / CLOSE ✕]
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-xs font-mono">
+              {[
+                { id: 'physical_ai', label: '01. PHYSICAL-AI HARNESS', status: 'ACTIVE', color: 'text-emerald-400' },
+                { id: 'spatial_3d', label: '02. 3D SPATIAL KINEMATICS', status: 'ACTIVE', color: 'text-emerald-400' },
+                { id: 'stress_bench', label: '03. DISHWASHER_TEST_001', status: 'PASS', color: 'text-emerald-400' },
+                { id: 'forecast_vec', label: '04. ROBOT FORECAST VECTOR', status: 'ONLINE', color: 'text-indigo-400' },
+                { id: 'gelsight', label: '05. GELSIGHT TACTILE ARRAY', status: '200Hz', color: 'text-emerald-400' },
+                { id: 'mujoco', label: '06. MUJOCO PHYSICS ENGINE', status: 'CALIBRATED', color: 'text-emerald-400' },
+                { id: 'realsense', label: '07. REALSENSE RGB-D LIDAR', status: '0.15mm', color: 'text-cyan-400' },
+                { id: 'metrology', label: '08. TUB METROLOGY SCANNER', status: 'ONLINE', color: 'text-amber-400' },
+                { id: 'governance', label: '09. LEVEL A-D GOVERNANCE', status: 'ARMED', color: 'text-emerald-400' },
+                { id: 'hitl_auth', label: '10. HITL TOKEN OVERRIDE', status: 'SIGNED', color: 'text-emerald-400' },
+                { id: 'subconscious', label: '11. SUBCONSCIOUS PRIORS', status: 'STREAMING', color: 'text-purple-400' },
+                { id: 'colony', label: '12. COLONY.AI AGENT DECK', status: 'ONLINE', color: 'text-neutral-300' },
+                { id: 'radiant', label: '13. RADIANT PHYSICS LAB', status: 'ONLINE', color: 'text-neutral-300' },
+                { id: 'aromea', label: '14. AROMEA SENSORY LAB', status: 'ONLINE', color: 'text-neutral-300' },
+                { id: 'stoned', label: '15. STONED TELEMETRY LAB', status: 'ONLINE', color: 'text-neutral-300' },
+                { id: 'quantum', label: '16. QUANTUM COMPUTER LAB', status: 'ONLINE', color: 'text-neutral-300' },
+                { id: 'finance', label: '17. QUANT FINANCE ENGINE', status: 'ONLINE', color: 'text-neutral-300' },
+                { id: 'materials', label: '18. ADVANCED MATERIALS LAB', status: 'ONLINE', color: 'text-neutral-300' },
+                { id: 'drugs', label: '19. DRUG THERAPY DISCOVERY', status: 'ONLINE', color: 'text-neutral-300' },
+                { id: 'neuro', label: '20. NEUROSCIENCE SYNAPSE', status: 'ONLINE', color: 'text-neutral-300' },
+                { id: 'weather', label: '21. METEOROLOGY ATMOSPHERE', status: 'ONLINE', color: 'text-neutral-300' },
+                { id: 'hypergraph', label: '22. CAUSAL HYPERGRAPH LAB', status: 'ONLINE', color: 'text-neutral-300' },
+                { id: 'manifold', label: '23. TOPOLOGICAL MANIFOLD', status: 'ONLINE', color: 'text-neutral-300' },
+                { id: 'ruliad', label: '24. RULIAD MULTICOMPUTATION', status: 'ONLINE', color: 'text-neutral-300' },
+              ].map((btn) => (
+                <div 
+                  key={btn.id} 
+                  onClick={() => setShowCommandDeckModal(false)}
+                  className="bg-neutral-900 border border-neutral-800 p-2.5 flex items-center justify-between hover:border-neutral-500 cursor-pointer transition"
+                >
+                  <span className="font-bold text-[10.5px] truncate">{btn.label}</span>
+                  <span className={`text-[9px] font-bold ${btn.color}`}>{btn.status}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CSV DATA INSPECTOR & MULTI-SENSOR ROW VIEWER MODAL */}
+      <CsvDataInspectorModal
+        isOpen={isCsvInspectorOpen}
+        onClose={() => setIsCsvInspectorOpen(false)}
+        initialTab={csvInspectorTab}
+        onLogEvent={onLogEvent}
+        onOpenPipeline={() => {
+          setIsCsvInspectorOpen(false);
+          setHardwareSubTab('world_state_pipeline');
+          onLogEvent("[PIPELINE] Opened 3D World State Pipeline from Data Inspector.", "physics");
+        }}
+      />
 
     </div>
   );

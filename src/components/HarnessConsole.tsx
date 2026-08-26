@@ -3,7 +3,8 @@ import {
   Terminal, Play, Cpu, Database, HelpCircle, ChevronRight, AlertCircle, 
   Sparkles, BookOpen, Layers, Settings, ChevronDown, ChevronUp, RefreshCw, 
   Lightbulb, Radio, CheckCircle, Flame, Eye, Save, Trash2, Globe, Activity,
-  Image, Video, Music, Volume2, Gamepad2, Sliders, Mic, Compass, Network, Beaker
+  Image, Video, Music, Volume2, Gamepad2, Sliders, Mic, Compass, Network, Beaker,
+  UploadCloud, FileSpreadsheet, Check, RotateCcw, Upload, ShieldCheck, Zap
 } from 'lucide-react';
 import { HardwareState, CausalGraph } from '../types';
 import { OpenClawAdapter } from '../utils/openClawAdapter';
@@ -30,6 +31,7 @@ import { RuliadTab } from './RuliadTab';
 import { ProteinFoldingTab } from './ProteinFoldingTab';
 import { MolecularDockingTab } from './MolecularDockingTab';
 import HardwareIntegrationPanel from './HardwareIntegrationPanel';
+import CsvDataInspectorModal from './CsvDataInspectorModal';
 
 const CAMPAIGN_RECURSIVE_LEDGERS: Record<string, Array<{
   round: string;
@@ -444,10 +446,22 @@ export default function HarnessConsole({
   const [harnessLogs, setHarnessLogs] = useState<string[]>([]);
   const [memories, setMemories] = useState<HarnessMemory[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'scientific_discovery' | 'console' | 'memory' | 'architecture' | 'reality' | 'roadtests' | 'scientist_interface' | 'deepmind_synthesis' | 'hypergraph' | 'manifold' | 'ruliad' | 'protein' | 'docking'>(initialTab || 'scientific_discovery');
+  const [activeTab, setActiveTab] = useState<'physical_ai' | 'scientific_discovery' | 'console' | 'memory' | 'architecture' | 'reality' | 'roadtests' | 'scientist_interface' | 'deepmind_synthesis' | 'hypergraph' | 'manifold' | 'ruliad' | 'protein' | 'docking'>(
+    initialTab === 'console' ? 'scientific_discovery' : ((initialTab as any) || 'physical_ai')
+  );
 
   const [scientificSubTab, setScientificSubTab] = useState<'global' | 'manifold' | 'hypergraph' | 'ruliad' | 'planner' | 'autochain' | 'hardware'>('global');
   const [isAutoChainRunning, setIsAutoChainRunning] = useState<boolean>(false);
+
+  // Physical AI Data Upload Box State in Console
+  const [isUploadBoxOpen, setIsUploadBoxOpen] = useState<boolean>(true);
+  const [isCsvInspectorOpen, setIsCsvInspectorOpen] = useState<boolean>(false);
+  const [csvInspectorTab, setCsvInspectorTab] = useState<'telemetry' | 'pointcloud' | 'gelsight' | 'manifest' | 'fused'>('telemetry');
+  const [consoleUploadedFiles, setConsoleUploadedFiles] = useState<{ [key: string]: { name: string; size: string; status: 'ready' | 'uploading' | 'uploaded' } }>({
+    'robot_telemetry': { name: 'robot_telemetry.csv', size: '14.2 MB', status: 'uploaded' },
+    'pointcloud': { name: 'pointcloud_spatial.csv', size: '48.6 MB', status: 'uploaded' },
+    'gelsight': { name: 'gelsight_tactile.csv', size: '8.4 MB', status: 'uploaded' },
+  });
   
   // Custom states for Discovery Planner sub-tab
   const [plannerActiveTabId, setPlannerActiveTabId] = useState<string>('weather');
@@ -1899,7 +1913,8 @@ Instead of a random sweep, the **Curiosity Engine** evaluated entropy and inform
         {/* Tab Controls */}
         <div className="flex gap-1 bg-neutral-100 border border-[#1A1A1A] p-1 self-start md:self-center overflow-x-auto max-w-full shrink-0">
           {[
-            { id: 'scientific_discovery', label: '🌌 SCIENTIFIC DISCOVERY (UNIFIED)', icon: Compass },
+            { id: 'physical_ai', label: '🦾 PHYSICAL AI & HARDWARE', icon: Cpu },
+            { id: 'scientific_discovery', label: '🌌 SCIENTIFIC CONSOLE', icon: Compass },
             { id: 'deepmind_synthesis', label: '🌀 DEEPMIND SUITE', icon: Sparkles },
             { id: 'reality', label: '🌎 REALITY ANCHOR', icon: Globe },
             { id: 'protein', label: '🧬 PROTEIN FOLDING', icon: Beaker },
@@ -1916,7 +1931,7 @@ Instead of a random sweep, the **Curiosity Engine** evaluated entropy and inform
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`px-3 py-1.5 text-[9px] font-mono font-bold tracking-tight cursor-pointer flex items-center gap-1.5 transition ${
                   activeTab === tab.id
-                    ? 'bg-[#1A1A1A] text-white'
+                    ? 'bg-[#1A1A1A] text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
                     : 'bg-transparent text-neutral-600 hover:text-black hover:bg-neutral-200/50'
                 }`}
               >
@@ -1927,6 +1942,12 @@ Instead of a random sweep, the **Curiosity Engine** evaluated entropy and inform
           })}
         </div>
       </div>
+
+      {activeTab === 'physical_ai' && (
+        <div className="mb-6">
+          <HardwareIntegrationPanel onLogEvent={onLogEvent} />
+        </div>
+      )}
 
       {activeTab === 'scientific_discovery' && (
         <div className="space-y-6 mb-6">
@@ -2444,6 +2465,189 @@ Instead of a random sweep, the **Curiosity Engine** evaluated entropy and inform
                   className="bg-indigo-600 h-full transition-all duration-1000"
                   style={{ width: `${(pollCountdown / 12) * 100}%` }}
                 />
+              </div>
+            )}
+          </div>
+
+          {/* PHYSICAL AI DATA UPLOAD & TELEMETRY SECTION */}
+          <div className="bg-white border-2 border-[#1A1A1A] shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] overflow-hidden">
+            <div className="flex items-center justify-between p-3.5 bg-[#F5F2ED] border-b border-[#1A1A1A]">
+              <div className="flex items-center gap-2 text-[#1A1A1A]">
+                <UploadCloud className="w-4 h-4 text-emerald-600" />
+                <span className="font-mono text-xs font-black uppercase tracking-wider">
+                  📂 Physical AI Data Ingestion & Sensor Uploads (CSV / PointCloud / GelSight)
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setActiveTab('physical_ai')}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 text-[9px] font-mono font-bold uppercase tracking-wider border border-emerald-800 transition cursor-pointer flex items-center gap-1 shadow-sm"
+                >
+                  <Cpu className="w-3 h-3" />
+                  <span>Open 2-Panel Hardware Studio</span>
+                </button>
+                <button
+                  onClick={() => setIsUploadBoxOpen(!isUploadBoxOpen)}
+                  className="text-neutral-700 hover:text-black p-1 transition cursor-pointer"
+                >
+                  {isUploadBoxOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {isUploadBoxOpen && (
+              <div className="p-4 space-y-4 bg-[#FAF9F6]">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-[#1A1A1A]/20 pb-3">
+                  <div>
+                    <p className="text-[11px] text-neutral-800 font-serif italic font-medium">
+                      Time-Synchronized multi-sensor streams (0ms to 50ms @ 200 Hz). Click any stream to inspect rows, verify noise bounds, or fuse into the 3D World Model.
+                    </p>
+                    <span className="text-[9px] font-mono text-emerald-800 bg-emerald-50 px-1.5 py-0.5 border border-emerald-300 inline-block mt-1">
+                      ✓ Deterministic Datasets Loaded • 200 Hz Sampling Ready
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => {
+                        setCsvInspectorTab('telemetry');
+                        setIsCsvInspectorOpen(true);
+                        onLogEvent("[INSPECTOR] Opened CSV Data Table & Multi-Sensor Inspector.", "interaction");
+                      }}
+                      className="text-[9px] font-mono font-bold uppercase bg-indigo-50 hover:bg-indigo-100 text-indigo-900 px-3 py-1.5 border border-indigo-300 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-indigo-700" />
+                      <span>Inspect All CSV Tables</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setConsoleUploadedFiles({
+                          'robot_telemetry': { name: 'robot_telemetry.csv', size: '14.2 MB', status: 'uploaded' },
+                          'pointcloud': { name: 'pointcloud_spatial.csv', size: '48.6 MB', status: 'uploaded' },
+                          'gelsight': { name: 'gelsight_tactile.csv', size: '8.4 MB', status: 'uploaded' },
+                        });
+                        onLogEvent("[UPLOAD] Telemetry dataset restored to deterministic baseline (200MB limit).", "physics");
+                      }}
+                      className="shrink-0 text-[9px] font-mono font-bold uppercase bg-white hover:bg-neutral-100 text-neutral-800 px-2.5 py-1.5 border border-[#1A1A1A] transition cursor-pointer flex items-center gap-1 shadow-sm"
+                    >
+                      <RotateCcw className="w-3 h-3 text-neutral-600" />
+                      <span>Reload Baseline</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 3 Upload Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {[
+                    { key: 'robot_telemetry', tabKey: 'telemetry' as const, title: 'Robot Joint Telemetry', desc: '7-DOF joints, velocities, motor torques, thermals (200Hz)', file: 'robot_telemetry.csv', details: '11 rows (0-50ms)' },
+                    { key: 'pointcloud', tabKey: 'pointcloud' as const, title: '3D Spatial Point Cloud', desc: 'RealSense LiDAR tub scan & dish metrology coordinates', file: 'pointcloud_spatial.csv', details: '15 point clouds' },
+                    { key: 'gelsight', tabKey: 'gelsight' as const, title: 'Tactile GelSight Matrices', desc: '200Hz normal/shear tactile arrays & slip detection vectors', file: 'gelsight_tactile.csv', details: 'Developing slip @ 50ms' },
+                  ].map((item) => {
+                    const statusObj = consoleUploadedFiles[item.key] || { name: item.file, size: 'Ready', status: 'ready' };
+                    return (
+                      <div key={item.key} className="border-2 border-[#1A1A1A] bg-white p-3.5 flex flex-col justify-between gap-3 shadow-[3px_3px_0px_0px_rgba(26,26,26,1)] hover:border-indigo-600 transition">
+                        <div>
+                          <div className="flex items-center justify-between gap-2 mb-1.5">
+                            <span className="text-[11px] font-mono font-black uppercase text-[#1A1A1A] flex items-center gap-1.5">
+                              <FileSpreadsheet className="w-4 h-4 text-indigo-600" />
+                              {item.title}
+                            </span>
+                            <span className="text-[9px] font-mono font-bold bg-emerald-100 text-emerald-900 border border-emerald-400 px-1.5 py-0.5 flex items-center gap-1">
+                              <Check className="w-3 h-3 text-emerald-700" />
+                              {statusObj.status === 'uploaded' ? 'Synced' : 'Ready'}
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-neutral-600 font-sans leading-tight">
+                            {item.desc}
+                          </p>
+                          <div className="mt-2 text-[9px] font-mono text-neutral-700 bg-neutral-50 p-1.5 border border-neutral-300 flex justify-between items-center">
+                            <span>File: <strong className="text-black">{statusObj.name}</strong></span>
+                            <span className="text-indigo-700 font-bold">{item.details}</span>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5 pt-1 border-t border-neutral-200">
+                          <button
+                            onClick={() => {
+                              setCsvInspectorTab(item.tabKey);
+                              setIsCsvInspectorOpen(true);
+                              onLogEvent(`[INSPECTOR] Opening table viewer for ${item.file}`, 'interaction');
+                            }}
+                            className="w-full bg-[#FAF9F6] hover:bg-neutral-200 text-[#1A1A1A] px-2.5 py-1.5 text-[9px] font-mono font-black uppercase tracking-wider border border-[#1A1A1A] shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center gap-1.5 transition cursor-pointer"
+                          >
+                            <Eye className="w-3 h-3 text-indigo-600" />
+                            <span>👁️ View & Inspect Data Table</span>
+                          </button>
+
+                          <div className="grid grid-cols-2 gap-1.5">
+                            <button
+                              onClick={() => {
+                                setConsoleUploadedFiles(prev => ({
+                                  ...prev,
+                                  [item.key]: { name: item.file, size: 'Synchronized', status: 'uploaded' }
+                                }));
+                                onLogEvent(`[DATA INGESTION] Re-ingested & parsed ${item.file} across 200 Hz clock.`, 'physics');
+                              }}
+                              className="bg-emerald-50 hover:bg-emerald-100 text-emerald-900 px-2 py-1 text-[9px] font-mono font-bold uppercase border border-emerald-300 transition cursor-pointer flex items-center justify-center gap-1"
+                            >
+                              <Zap className="w-2.5 h-2.5 text-emerald-700" />
+                              <span>Re-Ingest</span>
+                            </button>
+
+                            <label className="bg-[#1A1A1A] hover:bg-neutral-800 text-white px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-wider flex items-center justify-center gap-1 transition cursor-pointer text-center">
+                              <Upload className="w-2.5 h-2.5 text-emerald-400" />
+                              <span>Upload CSV</span>
+                              <input
+                                type="file"
+                                accept=".csv,.json,.ply,.pcd"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const f = e.target.files?.[0];
+                                  if (f) {
+                                    const sizeMB = (f.size / (1024 * 1024)).toFixed(1) + ' MB';
+                                    setConsoleUploadedFiles(prev => ({
+                                      ...prev,
+                                      [item.key]: { name: f.name, size: sizeMB, status: 'uploaded' }
+                                    }));
+                                    onLogEvent(`[DATA INGESTION] Successfully ingested custom file: ${f.name} (${sizeMB}). Recalibrating safety bounds...`, 'physics');
+                                  }
+                                }}
+                              />
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* LAUNCH FUSED WORLD-STATE PIPELINE */}
+                <div className="pt-3 border-t border-[#1A1A1A]/20 flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <div className="text-[10px] font-mono text-neutral-700">
+                    Streams Ready: <strong className="text-black">3/3 Synchronized (0 - 50ms)</strong> | Multi-Modal Fusion: <strong className="text-emerald-700">100% READY</strong>
+                  </div>
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <button
+                      onClick={() => {
+                        setCsvInspectorTab('fused');
+                        setIsCsvInspectorOpen(true);
+                      }}
+                      className="bg-white hover:bg-neutral-100 text-neutral-900 px-3 py-2 text-xs font-mono font-bold uppercase border border-[#1A1A1A] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer flex items-center gap-1.5 transition"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>Inspect Unified Tensor</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setActiveTab('physical_ai');
+                        onLogEvent("[OMEGA] Fusing Robot Telemetry + LiDAR Point Cloud + GelSight matrices into 3D World State.", "physics");
+                      }}
+                      className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-xs font-mono font-black uppercase tracking-wider border-2 border-emerald-900 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer flex items-center justify-center gap-2 transition"
+                    >
+                      <Zap className="w-4 h-4 fill-white text-white" />
+                      <span>⚡ FUSE SENSOR STREAMS → BUILD 3D WORLD STATE</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -4599,6 +4803,19 @@ Instead of a random sweep, the **Curiosity Engine** evaluated entropy and inform
           </div>
         </div>
       )}
+
+      {/* CSV DATA INSPECTOR & MULTI-SENSOR ROW VIEWER MODAL */}
+      <CsvDataInspectorModal
+        isOpen={isCsvInspectorOpen}
+        onClose={() => setIsCsvInspectorOpen(false)}
+        initialTab={csvInspectorTab}
+        onLogEvent={onLogEvent}
+        onOpenPipeline={() => {
+          setIsCsvInspectorOpen(false);
+          setActiveTab('physical_ai');
+          onLogEvent("[OMEGA] Switching to 3D World State Pipeline from Data Inspector.", "physics");
+        }}
+      />
 
     </div>
   );

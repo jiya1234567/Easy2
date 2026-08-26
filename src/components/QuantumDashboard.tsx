@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Atom, Play, Pause, RefreshCw, BarChart3, HelpCircle, FileText, Sparkles, Send, ShieldAlert, Thermometer, Database, Lightbulb } from 'lucide-react';
+import { Atom, Play, Pause, RefreshCw, BarChart3, HelpCircle, FileText, Sparkles, Send, ShieldAlert, Thermometer, Database, Lightbulb, Zap, Radio } from 'lucide-react';
 import { generateSpinLattice, calculateEnergy, calculateMagnetization, runMonteCarloSweep, spinLatticeToStateTensor, SpinState } from '../utils/quantumSpinGenerator';
 import { StateTensor, HardwareState, PolicyProposal } from '../types';
+import QuantumPhotonicWorkbench from './QuantumPhotonicWorkbench';
 
 interface QuantumDashboardProps {
   onLogEvent: (details: string, type: 'info' | 'physics' | 'interaction') => void;
@@ -29,7 +30,7 @@ export default function QuantumDashboard({
   const [magHistory, setMagHistory] = useState<number[]>([]);
 
   // Research & Meta-Cognition States
-  const [activeTab, setActiveTab] = useState<'simulation' | 'research' | 'tensor'>('simulation');
+  const [activeTab, setActiveTab] = useState<'qphoton' | 'simulation' | 'research' | 'tensor'>('qphoton');
   const [researchTitle, setResearchTitle] = useState<string>("Autonomous Estimation of 2D Ising Ground States");
   const [researchPaper, setResearchPaper] = useState<string>("");
   const [isGeneratingPaper, setIsGeneratingPaper] = useState<boolean>(false);
@@ -233,24 +234,29 @@ We suggest deploying a counterfactual policy to stabilize spin domains at lower 
         </div>
         
         {/* Lab Navigation Tab */}
-        <div className="flex bg-[#EBE8E3] border border-[#1A1A1A] p-1 gap-1">
-          {(['simulation', 'research', 'tensor'] as const).map(tab => (
+        <div className="flex flex-wrap bg-[#EBE8E3] border border-[#1A1A1A] p-1 gap-1">
+          {(['qphoton', 'simulation', 'research', 'tensor'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-3 py-1.5 text-[10px] font-mono font-bold uppercase transition cursor-pointer ${
                 activeTab === tab 
-                  ? 'bg-[#1A1A1A] text-white' 
-                  : 'text-neutral-700 hover:bg-[#1A1A1A]/5'
+                  ? 'bg-[#1A1A1A] text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' 
+                  : 'text-neutral-700 hover:bg-[#1A1A1A]/10'
               }`}
             >
-              {tab === 'simulation' && <span className="flex items-center gap-1"><Play className="w-3 h-3" /> SIMULATION</span>}
+              {tab === 'qphoton' && <span className="flex items-center gap-1.5 text-purple-300"><Atom className="w-3.5 h-3.5 text-purple-400" /> Q-PHOTONIC CLOSED LOOP</span>}
+              {tab === 'simulation' && <span className="flex items-center gap-1"><Play className="w-3 h-3" /> 2D ISING LATTICE</span>}
               {tab === 'research' && <span className="flex items-center gap-1"><FileText className="w-3 h-3" /> RESEARCH OUT</span>}
               {tab === 'tensor' && <span className="flex items-center gap-1"><Database className="w-3 h-3" /> STATE TENSOR</span>}
             </button>
           ))}
         </div>
       </div>
+
+      {activeTab === 'qphoton' && (
+        <QuantumPhotonicWorkbench onLogEvent={onLogEvent} />
+      )}
 
       {activeTab === 'simulation' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
