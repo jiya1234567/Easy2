@@ -13,6 +13,7 @@ import Spatial3DProgressionViewer from './Spatial3DProgressionViewer';
 import PhysicalAiStressBenchmark from './PhysicalAiStressBenchmark';
 import PhysicalAiWorldStatePipeline from './PhysicalAiWorldStatePipeline';
 import QuantumPhotonicWorkbench from './QuantumPhotonicWorkbench';
+import NeuromorphicCimWorkbench from './NeuromorphicCimWorkbench';
 import CsvDataInspectorModal from './CsvDataInspectorModal';
 import {
   RiskLevel,
@@ -366,7 +367,7 @@ const ROBOT_FORECAST_VECTORS: RobotForecastItem[] = [
 
 export default function HardwareIntegrationPanel({ onLogEvent }: HardwareIntegrationPanelProps) {
   // Navigation Sub-tab within Hardware panel
-  const [hardwareSubTab, setHardwareSubTab] = useState<'world_state_pipeline' | 'stress_benchmark' | 'physical_ai_harness' | 'spatial_3d_progression' | 'robot_forecast_vector' | 'operator_guide' | 'instruments' | 'workflows' | 'sandbox'>('world_state_pipeline');
+  const [hardwareSubTab, setHardwareSubTab] = useState<'world_state_pipeline' | 'neuromorphic_cim' | 'quantum_photonics' | 'stress_benchmark' | 'physical_ai_harness' | 'spatial_3d_progression' | 'robot_forecast_vector' | 'operator_guide' | 'instruments' | 'workflows' | 'sandbox'>('neuromorphic_cim');
   const [showEmbedded3dViewer, setShowEmbedded3dViewer] = useState<boolean>(true);
   const [showCommandDeckModal, setShowCommandDeckModal] = useState<boolean>(false);
   const [isCsvInspectorOpen, setIsCsvInspectorOpen] = useState<boolean>(false);
@@ -709,6 +710,7 @@ export default function HardwareIntegrationPanel({ onLogEvent }: HardwareIntegra
   const activeStepObj = DISHWASHER_22_STEPS[activeStepIndex] || DISHWASHER_22_STEPS[0];
 
   const HARDWARE_TABS = [
+    { id: 'neuromorphic_cim', label: '🧠 Neuromorphic + CIM + NAND Fabric', desc: 'Hierarchical Memory, Data Temperature & Co-Design' },
     { id: 'world_state_pipeline', label: '⚡ INGEST → 3D World State (0-50ms)', desc: 'Fused Sensor Streams, Uncertainty & Slip Predictor' },
     { id: 'quantum_photonics', label: '🔮 Quantum-Photonic Closed Loop (QFC)', desc: 'Single-Photon Frequency Conversion & ORCA Actuators' },
     { id: 'stress_benchmark', label: '⚡ Stress Benchmark (DISHWASHER_TEST_001)', desc: 'Deterministic 12-Step Closed Loop' },
@@ -990,6 +992,13 @@ export default function HardwareIntegrationPanel({ onLogEvent }: HardwareIntegra
               })}
             </div>
           </div>
+
+          {/* SUB-VIEW: NEUROMORPHIC + CIM + NAND FABRIC CO-DESIGN WORKBENCH */}
+          {hardwareSubTab === 'neuromorphic_cim' && (
+            <div className="space-y-4 font-sans animate-fadeIn">
+              <NeuromorphicCimWorkbench onLogEvent={onLogEvent} />
+            </div>
+          )}
 
           {/* SUB-VIEW: 3D WORLD STATE INGESTION & PIPELINE */}
           {hardwareSubTab === 'world_state_pipeline' && (
